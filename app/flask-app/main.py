@@ -25,4 +25,4 @@ def test():
 #     app.run(host='localhost', port=8888, debug=True) # You can change port, host..
 
 if __name__ == '__main__':
-   app.run(host="0.0.0.0", debug=True, port=5000)
+   app.run(host="0.0.0.0", debug=True, port=80)
