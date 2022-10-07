@@ -31,7 +31,7 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       # 현재 상태의 소스코드를 가상의 컨테이너로 checkout
       - name: Check out source code
-      - uses: actions/checkout@v2
+        uses: actions/checkout@v2
       
       # 가상의 컨테이너에 docker가 실행될 수 있는 환경을 설치
       - name: Set up docker buildx
