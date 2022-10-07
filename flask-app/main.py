@@ -21,5 +21,8 @@ def serve(path):
 def test():
     return "Test endpoint return"
 
+# if __name__ == '__main__':
+#     app.run(host='localhost', port=8888, debug=True) # You can change port, host..
+
 if __name__ == '__main__':
-    app.run(host='localhost', port=8888, debug=True) # You can change port, host..
+   app.run(host="0.0.0.0", debug=True, port=80)
