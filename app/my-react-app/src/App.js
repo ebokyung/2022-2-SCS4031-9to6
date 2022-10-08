@@ -10,7 +10,8 @@ function App() {
   useEffect(() => {
     const testFetch = async() => {
       try {
-        const response = await axios.get('http://localhost:8888/test-endpoint');
+        // const response = await axios.get('http://localhost:8888/test-endpoint');
+        const response = await axios.get('http://3.39.231.167/test-endpoint');
         setTestData(response.data);
         console.log(response.data)
       } catch (e) {
@@ -24,7 +25,7 @@ function App() {
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
         <p>
-          Edit <code>src/App.js</code> and save to reload.
+          Edit <code>src/App.js</code> and save to reload. :D
         </p>
         <a
           className="App-link"
