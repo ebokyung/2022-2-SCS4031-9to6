@@ -1,0 +1,97 @@
+# This is a basic workflow to help you get started with Actions
+
+name: Docker CI/CD
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  push: # 메인 레포에서는 merge?
+    branches: [ "main" ]
+#   pull_request:
+#     branches: [ "main" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  # workflow_dispatch:
+  
+env:
+  DOCKER_IMAGE: ghcr.io/${{ github.actor }}/9to6_flaskapp
+  VERSION: ${{ github.sha }}
+  NAME: 9to6_container
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    name: Build
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      # 현재 상태의 소스코드를 가상의 컨테이너로 checkout
+      - name: Check out source code
+        uses: actions/checkout@v2
+      
+      # 가상의 컨테이너에 docker가 실행될 수 있는 환경을 설치
+      - name: Set up docker buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v1
+        
+      # docker layer를 캐싱하여 이미지를 빌드
+      - name: Cache docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ env.VERSION }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+            
+      # secret으로 등록한 토큰을 이용해 GHCR에 로그인      
+      - name: Login to ghcr
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_TOKEN }}
+          
+      # 해당 GHCR(Github Container Registry)로 Docker image를 만들고 push
+      - name: Build and push
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          builder: ${{ steps.buildx.outputs.name }}
+          push: true
+          tags: ${{ env.DOCKER_IMAGE }}:latest
+          
+          
+  deploy: # GHCR에 로그인한 뒤 저장되어 있는 Docker image를 이용해 컨테이너를 실행
+    needs: build
+    name: Deploy
+    runs-on: [ self-hosted, label-go ]
+    steps:
+      # secret으로 등록한 토큰을 이용해 GHCR에 로그인
+      - name: Login to ghcr
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_TOKEN }} # secrets에 등록한 토큰 이름
+          
+      # 실행중인 docker 컨테이너를 중지하고 이전 버전의 컨테이너와 이미지를 삭제한 뒤,
+      # 새로운 이미지로 컨테이너를 run하는 과정
+      - name: Docker run
+        run: |
+          docker stop ${{ env.NAME }} && docker rm ${{ env.NAME }} && docker rmi ${{ env.DOCKER_IMAGE }}:latest
+          docker run -d -p 80:80 --name 9to6_container --restart always ${{ env.DOCKER_IMAGE }}:latest
+          
+        
+      # Runs a single command using the runners shell
+#       - name: Run a one-line script
+#         run: echo Hello, world!
+
+      # Runs a set of commands using the runners shell
+#       - name: Run a multi-line script
+#         run: |
+#           echo Add other actions to build,
+#           echo test, and deploy your project.
