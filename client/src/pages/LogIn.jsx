@@ -5,6 +5,7 @@ const Wrapper = styled.body`
     width: 100vw;
     display: flex;
     justify-content: center;
+    margin-top: ${props => props.theme.navmarginTop};
 `
 
 const Container = styled.section`
