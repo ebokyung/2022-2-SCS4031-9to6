@@ -1,4 +1,25 @@
+import styled from 'styled-components';
+import PageHeader from '../components/PageHeader';
+
+const Wrapper = styled.body`
+    width: 100vw;
+    display: flex;
+    justify-content: center;
+`
+
+const Container = styled.section`
+    width : ${props => props.theme.width};
+    max-width: ${props => props.theme.maxWidth};
+    min-height: ${props => props.theme.minHeight};
+`
+
+
 function ServiceInfo () {
-    return(<div>서비스 소개 페이지</div>)
+    return(
+    <Wrapper>
+        <Container>
+            <PageHeader title={'서비스 소개 페이지'} />
+        </Container>
+    </Wrapper>)
 }
 export default ServiceInfo;
