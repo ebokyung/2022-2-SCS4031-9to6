@@ -15,12 +15,12 @@ const Container = styled.section`
 `
 
 
-function LogIn () {
+function Service () {
     return(
     <Wrapper>
         <Container>
-            <PageHeader title={'로그인'} />
+            <PageHeader title={'서비스 소개 페이지'} />
         </Container>
     </Wrapper>)
 }
-export default LogIn;
+export default Service;

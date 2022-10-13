@@ -1,4 +1,6 @@
 import styled, { css } from 'styled-components';
+import { useMatch } from "react-router";
+import { useNavigate } from 'react-router-dom';
 
 const Wrapper = styled.body`
     width: 100vw;
@@ -84,7 +86,7 @@ const DropDown = styled.ul`
     text-align: center;
 `
 
-const DropDownList = styled.li`
+const DropDownItem = styled.li`
     padding: 12px 16px;
     font-size: 13px;
     &:hover {
@@ -104,6 +106,26 @@ const Member = styled.div`
 `
 
 function Navbar () {
+    const navigate = useNavigate()
+    const mainMatch = useMatch("/")
+    const reportMatch = useMatch("/report");
+    const safetyMatch = useMatch("/safety/*");
+    // const cocMatch = useMatch("/safety/coc");
+    // const shelterMatch = useMatch("/safety/shelter");
+    const statisticsMatch = useMatch("/statistics");
+    const serviceMatch = useMatch("/service/*");
+    const mapMatch = useMatch("/service/map");
+    // 로그인 했는지 안했는지
+    const logCheck = localStorage.getItem("token") || sessionStorage.getItem("token")
+
+    const logIn = () => {
+        navigate("/login")
+    }
+
+    const myPage = () => {
+        navigate("/mypage")
+    }
+
     return(
     <Wrapper>
         <Container>
@@ -112,25 +134,32 @@ function Navbar () {
                 <LogoTitle>침수24</LogoTitle>
             </Logo>
             <Menu>
-                <Item>침수지도</Item>
-                <Item drop={true}>안전정보
+                <Item isActive={mainMatch !== null} onClick={() => navigate("/")}>침수지도</Item>
+                <Item drop={true} isActive={safetyMatch !== null} onClick={() => navigate("/safety")}>안전정보
                     <DropDown>
-                            <DropDownList>행동지침</DropDownList>
-                            <DropDownList>대피소</DropDownList>
+                            <DropDownItem isActive={safetyMatch !== null} onClick={() => navigate("/safety")}>행동지침</DropDownItem>
+                            <DropDownItem isActive={safetyMatch !== null} onClick={() => navigate("/safety")}>대피소</DropDownItem>
                     </DropDown>
                 </Item>
-                <Item>제보보기</Item>
-                <Item>데이터분석</Item>
-                <Item drop={true}>서비스소개
+                <Item isActive={reportMatch !== null} onClick={() => navigate("/report")}>제보보기</Item>
+                <Item isActive={statisticsMatch !== null} onClick={() => navigate("/statistics")}>데이터분석</Item>
+                <Item drop={true} isActive={serviceMatch !== null}>서비스소개
                     <DropDown>
-                            <DropDownList>서비스 소개</DropDownList>
-                            <DropDownList>지도 이용안내</DropDownList>
+                            <DropDownItem isActive={serviceMatch !== null} onClick={() => navigate("/service")}>서비스 소개</DropDownItem>
+                            <DropDownItem isActive={mapMatch !== null} onClick={() => navigate("/service/map")}>지도 이용안내</DropDownItem>
                     </DropDown>
                 </Item>
             </Menu>
-            <Member>
-                로그인
-            </Member>
+            {
+                logCheck === null ? 
+                <Member onClick={logIn}>
+                    로그인
+                </Member>
+                :
+                <Member onClick={myPage}>
+                    myPage
+                </Member>
+            }
         </Container>
     </Wrapper>)
 }

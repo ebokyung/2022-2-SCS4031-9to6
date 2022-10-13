@@ -15,12 +15,12 @@ const Container = styled.section`
 `
 
 
-function ServiceInfo () {
+function MapInfo () {
     return(
     <Wrapper>
         <Container>
-            <PageHeader title={'서비스 소개 페이지'} />
+            <PageHeader title={'지도 이용방법 안내 페이지'} />
         </Container>
     </Wrapper>)
 }
-export default ServiceInfo;
+export default MapInfo;
