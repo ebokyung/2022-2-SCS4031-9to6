@@ -2,7 +2,7 @@ import styled from 'styled-components';
 
 const Container = styled.section`
     width: 50%;
-    height: 400px;
+    height: 450px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -13,12 +13,7 @@ const Container = styled.section`
 const Title = styled.h2`
     font-size: 2rem;
     color: ${props => props.theme.logColor};
-`
-
-const Alert = styled.p`
-    margin: 30px 0;
-    font-size: 0.5rem;
-    color: red;
+    margin-bottom: 40px;
 `
 
 const FieldSet = styled.div`
@@ -29,6 +24,11 @@ const Label = styled.div`
     font-size: 0.7rem;
     margin-bottom: 5px;
     color: ${props => props.theme.logColor};
+`
+const Alert = styled.span`
+    float: right;
+    font-size: 0.5rem;
+    color: red;
 `
 
 const Input = styled.input`
@@ -54,30 +54,36 @@ const Btn = styled.button`
     background-color: ${props => props.theme.logBtnBackColor};
 `
 
-const Link = styled.a`
-    margin: 10px 0;
-    font-size: 0.7rem;
-`
-
-function LogBox () {
+function SignUpBox () {
     return(
     <Container>
-        <Title>로그인</Title>
-        <Alert>* 아이디 또는 비밀번호가 올바르지 않습니다.</Alert>
+        <Title>회원가입</Title>
         <FieldSet>
-            <Label>아이디</Label>
+            <Label>이메일</Label>
+            <Input></Input>
+        </FieldSet>
+        <FieldSet>
+            <Label>
+                아이디
+                <Alert>* 사용 가능한 아이디입니다.</Alert>
+            </Label>
             <Input></Input>
         </FieldSet>
         <FieldSet>
             <Label>비밀번호</Label>
             <Input></Input>
         </FieldSet>
+        <FieldSet>
+            <Label>
+                비밀번호 확인
+                <Alert>* 비밀번호가 일치하지 않습니다.</Alert>
+            </Label>
+            <Input></Input>
+        </FieldSet>
         <Btn>
-            로그인
+            회원가입
         </Btn>
-        <Link href='/signup'>회원가입</Link>
-        <Link>아이디/비밀번호 찾기</Link>
     </Container>
     )
 }
-export default LogBox;
+export default SignUpBox;
