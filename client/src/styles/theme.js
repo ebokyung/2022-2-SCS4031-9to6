@@ -11,4 +11,13 @@ export const mainTheme ={
     navColor2 : "#C77800",      // 네브바 해당 페이지
     navMarginTop : "80px",
 
+
+    // 로그인 페이지
+    logBoxWidth : "700px",
+    logBoxColor : "white",
+    logBackColor : "#FFA000",
+    logColor : "#FFA000",
+    logInputBorderColor : "#FFA000",
+    logBtnBackColor : "#FFD95B",
+
 }
