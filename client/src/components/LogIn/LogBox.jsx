@@ -1,4 +1,7 @@
 import styled from 'styled-components';
+import { useNavigate } from "react-router-dom";
+import { useForm } from 'react-hook-form';
+
 
 const Container = styled.section`
     width: 50%;
@@ -15,9 +18,14 @@ const Title = styled.h2`
     color: ${props => props.theme.logColor};
 `
 
+const Form = styled.form`
+    width: 100%;
+`
+
 const Alert = styled.p`
-    margin: 30px 0;
+    margin: 30px auto;
     font-size: 0.5rem;
+    text-align: center;
     color: red;
 `
 
@@ -60,21 +68,40 @@ const Link = styled.a`
 `
 
 function LogBox () {
+    const navigate = useNavigate();
+
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+    } = useForm();
+
+    const onValid = (data) => {
+        //api 작성 ...
+        navigate("/")
+    };
+    
     return(
     <Container>
         <Title>로그인</Title>
-        <Alert>* 아이디 또는 비밀번호가 올바르지 않습니다.</Alert>
-        <FieldSet>
-            <Label>아이디</Label>
-            <Input></Input>
-        </FieldSet>
-        <FieldSet>
-            <Label>비밀번호</Label>
-            <Input></Input>
-        </FieldSet>
-        <Btn>
-            로그인
-        </Btn>
+        <Form onSubmit={handleSubmit(onValid)}>
+            <Alert>{errors?.id?.message || errors?.pw?.message}</Alert>
+            <FieldSet>
+                <Label>아이디</Label>
+                <Input {...register("id", { 
+                    required: "* 아이디를 입력해주세요.", })}
+                placeholder="id"></Input>
+            </FieldSet>
+            <FieldSet>
+                <Label>비밀번호</Label>
+                <Input {...register("pw", { 
+                    required: "* 비밀번호를 입력해주세요.", })}
+                placeholder="password"></Input>
+            </FieldSet>
+            <Btn>
+                로그인
+            </Btn>
+        </Form>
         <Link href='/signup'>회원가입</Link>
         <Link>아이디/비밀번호 찾기</Link>
     </Container>
