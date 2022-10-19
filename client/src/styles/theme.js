@@ -20,4 +20,7 @@ export const mainTheme ={
     logInputBorderColor : "#FFA000",
     logBtnBackColor : "#FFD95B",
 
+    // 푸터
+    footerBackColor : "#D9D9D9",
+    footerColor: "#FFFFFF",
 }
