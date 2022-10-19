@@ -46,7 +46,7 @@ const Input = styled.input`
     border: 1px solid ${props => props.theme.logInputBorderColor};
     border-radius: 3px;
     ::placeholder {
-        color: #A2A2A6;
+        color: #dadada;
     }
     :focus {
         outline-color: ${props => props.theme.logInputBorderColor};
@@ -90,13 +90,15 @@ function LogBox () {
                 <Label>아이디</Label>
                 <Input {...register("id", { 
                     required: "* 아이디를 입력해주세요.", })}
-                placeholder="id"></Input>
+                    placeholder="id">
+                </Input>
             </FieldSet>
             <FieldSet>
                 <Label>비밀번호</Label>
                 <Input {...register("pw", { 
                     required: "* 비밀번호를 입력해주세요.", })}
-                placeholder="password"></Input>
+                    placeholder="password">
+                </Input>
             </FieldSet>
             <Btn>
                 로그인
