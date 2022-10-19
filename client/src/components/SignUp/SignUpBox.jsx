@@ -2,6 +2,7 @@ import styled from 'styled-components';
 import { useNavigate } from "react-router-dom";
 import { useForm } from 'react-hook-form';
 import { useState } from 'react';
+// import { API } from '../../axios';
 
 const Container = styled.section`
     width: 50%;
@@ -73,6 +74,22 @@ function SignUpBox () {
     // 비밀번호 입력 형식
     var regExp = /^(?!((?:[A-Za-z]+)|(?:[~!@#$%^&*()_+=]+)|(?=[0-9]+))$)[A-Za-z\d~!@#$%^&*()_+=]{8,}$/;
 
+    // submit 했을때 유효하면
+    const onSubmit = async(result) => {
+        console.log(result);
+        // try{
+        //     await API.post('/api/...', result).then(
+        //         response => {
+        //             console.log(response);
+        //         }
+        //     )
+        window.alert("회원가입이 완료되었습니다. 🙌🏻");
+        navigate("/login");
+        // } catch(error){
+        //     console.log(error)
+        // }
+    }
+
     // submit 했을때 각 입력창 유효성 확인하기
     const {
         register,
@@ -87,9 +104,17 @@ function SignUpBox () {
             setError("pw1", {shouldFocus : true})
             return
         }
-        // api 작성 ...
-        navigate("/login")
+        // 에러없으면 
+        const result = {
+            'ID': data.id,
+		    'e-mail': data.email,
+		    'password': data.pw,
+        }
+        onSubmit(result);
     };
+
+    // 아이디 입력할때마다 중복 확인하기
+    // ...
 
     // 비밀번호 입력할때마다 조건에 맞는지 검사하기
     const [inputPw, setInputPw] = useState();

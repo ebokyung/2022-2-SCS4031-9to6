@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import { useNavigate } from "react-router-dom";
 import { useForm } from 'react-hook-form';
-
+// import { API } from '../../axios';
 
 const Container = styled.section`
     width: 50%;
@@ -77,8 +77,21 @@ function LogBox () {
     } = useForm();
 
     const onValid = (data) => {
-        //api 작성 ...
-        navigate("/")
+        const result = {
+            "ID": data.id,
+            "password": data.pw,
+        };
+        console.log(result);
+        // try{
+        //     await API.post('/api/...', result).then(
+        //         response => {
+        //             console.log(response);
+        //         }
+        //     )
+            navigate("/")
+        // } catch(error){
+        //     window.alert(error.response.data.message)
+        // }
     };
     
     return(
@@ -97,6 +110,7 @@ function LogBox () {
                 <Label>비밀번호</Label>
                 <Input {...register("pw", { 
                     required: "* 비밀번호를 입력해주세요.", })}
+                    type='password'
                     placeholder="password">
                 </Input>
             </FieldSet>
