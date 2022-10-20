@@ -107,7 +107,9 @@ const Member = styled.div`
 
 function Navbar () {
     const navigate = useNavigate()
-    const mainMatch = useMatch("/")
+    const mainMatch = useMatch("/");
+    const noticeMatch = useMatch("/notice");
+    const chatMatch = useMatch("/chat");
     const reportMatch = useMatch("/report");
     const safetyMatch = useMatch("/safety/*");
     // const cocMatch = useMatch("/safety/coc");
@@ -134,7 +136,8 @@ function Navbar () {
                 <LogoTitle>침수24</LogoTitle>
             </Logo>
             <Menu>
-                <Item isActive={mainMatch !== null} onClick={() => navigate("/")}>침수지도</Item>
+                <Item isActive={mainMatch !== null || noticeMatch !== null || chatMatch !== null} 
+                    onClick={() => navigate("/")}>침수지도</Item>
                 <Item drop={true} isActive={safetyMatch !== null} onClick={() => navigate("/safety")}>안전정보
                     <DropDown>
                             <DropDownItem isActive={safetyMatch !== null} onClick={() => navigate("/safety")}>행동지침</DropDownItem>
