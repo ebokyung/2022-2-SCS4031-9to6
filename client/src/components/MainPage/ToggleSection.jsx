@@ -8,7 +8,7 @@ import Chat from './Chat';
 const Container = styled.section`
     min-width: 460px;
     min-height: ${props => props.theme.minHeight};
-    background-color: #404040;
+    background-color: ${props => props.theme.sideBackColor};
     transition: all .5s;
     position: absolute;
     left: 0;
@@ -25,7 +25,7 @@ const VisibilityToggle = styled.button`
     transition: all .5s;
     z-index: 11;
     border-style: none;
-    background-color: #404040;
+    background-color: ${props => props.theme.sideBackColor};
 `
 
 const Tabs = styled.div`
@@ -40,12 +40,10 @@ const Tab = styled.span`
   text-transform: uppercase;
   font-size: 12px;
   font-weight: 400;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: ${props => props.theme.tabBackColor};
   padding: 7px 0px;
   border-radius: 10px;
   color: ${props => props.isActive ? props.theme.navBackColor : 'white'};
-  /* color: ${(props) =>
-    props.isActive ? props.theme.accentColor : props.theme.textColor}; */
   a {
     display: block;
   }
