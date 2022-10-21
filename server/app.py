@@ -1,5 +1,6 @@
 from flask import Flask, abort, jsonify
 from models.member import Member
+from models.cctv import CCTV
 from flask_migrate import Migrate
 from models import db
 import config
