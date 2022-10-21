@@ -11,9 +11,11 @@ const Container = styled.section`
     background-color: ${props => props.theme.sideBackColor};
     transition: all .5s;
     position: absolute;
+    z-index: 11;
     left: 0;
     &.hide {
         left: -440px;
+        background-color: ${props => props.theme.sideBackColor};
     }
 `
 
