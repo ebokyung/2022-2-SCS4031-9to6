@@ -3,10 +3,9 @@ import styled from 'styled-components';
 import { useRecoilValue } from 'recoil';
 import { showSideBar } from '../../atoms';
 import { useEffect, useState } from 'react';
-// import markerImage from '../../imgs/markerSprite.png';
+import markerImage from '../../imgs/markerSprites_64.png';
 import style from './map.module.css';
-
-const { kakao } = window;
+import {Map, MapMarker} from 'react-kakao-maps-sdk';
 
 const Container = styled.section`
     width: 100%;
@@ -19,29 +18,13 @@ const Container = styled.section`
     }
 `
 
-const Map = styled.div`
-    width: 100%;
-    height: 100%;
-`
-
 function MapSection () {
     const visibility = useRecoilValue(showSideBar);
 
-    var map;
+    // const markerImage = 'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/category.png';
 
-    useEffect(()=>{
-        var container = document.getElementById('map');
-        var options = {
-          center: new kakao.maps.LatLng(37.498004414546934, 127.02770621963765),
-          level: 3
-        };
-        map = new kakao.maps.Map(container, options);
-    }, []);
-
-    const markerImage = 'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/category.png';
-
-    const imageSize = { width: 22, height: 26 }
-    const spriteSize = { width: 36, height: 98 }
+    const imageSize = { width: 64, height: 64 }
+    const spriteSize = { width: 430, height: 64 }
 
     // 커피숍 마커가 표시될 좌표 배열입니다
   const coffeePositions = [
@@ -53,7 +36,7 @@ function MapSection () {
     { lat: 37.49629291770947, lng: 127.02587362608637 },
     { lat: 37.49754540521486, lng: 127.02546694890695 },
   ]
-  const coffeeOrigin = { x: 10, y: 0 }
+  const coffeeOrigin = { x: 0, y: 0 }
 
   // 편의점 마커가 표시될 좌표 배열입니다
   const storePositions = [
@@ -65,7 +48,7 @@ function MapSection () {
     { lat: 37.49932849491523, lng: 127.02935780247945 },
     { lat: 37.49996818951873, lng: 127.02943721562295 },
   ]
-  const storeOrigin = { x: 10, y: 36 }
+  const storeOrigin = { x: 290, y: 0 }
 
   // 주차장 마커가 표시될 좌표 배열입니다
   const carparkPositions = [
@@ -77,26 +60,37 @@ function MapSection () {
     { lat: 37.49813096097184, lng: 127.02591949495914 },
     { lat: 37.497680616783086, lng: 127.02518427952202 },
   ]
-  const carparkOrigin = { x: 10, y: 72 }
+  const carparkOrigin = { x: 360, y: 0 }
 
     const [selectedCategory, setSelectedCategory] = useState("coffee")
 
   useEffect(() => {
+    const allMenu = document.getElementById("allMenu")
     const coffeeMenu = document.getElementById("coffeeMenu")
     const storeMenu = document.getElementById("storeMenu")
     const carparkMenu = document.getElementById("carparkMenu")
 
-    if (selectedCategory === "coffee") {
+    if (selectedCategory === "all") {
+      // 커피숍 카테고리를 선택된 스타일로 변경하고
+      allMenu.className = `${style.menu_selected}`
+
+      // 편의점과 주차장 카테고리는 선택되지 않은 스타일로 바꿉니다
+      coffeeMenu.className = ""
+      storeMenu.className = ""
+      carparkMenu.className = ""
+    } else if (selectedCategory === "coffee") {
       // 커피숍 카테고리를 선택된 스타일로 변경하고
       coffeeMenu.className = `${style.menu_selected}`
 
       // 편의점과 주차장 카테고리는 선택되지 않은 스타일로 바꿉니다
+      allMenu.className = ""
       storeMenu.className = ""
       carparkMenu.className = ""
-    } else if (selectedCategory === "store") {
+    }else if (selectedCategory === "store") {
       // 편의점 카테고리가 클릭됐을 때
 
       // 편의점 카테고리를 선택된 스타일로 변경하고
+      allMenu.className = ""
       coffeeMenu.className = ""
       storeMenu.className = `${style.menu_selected}`
       carparkMenu.className = ""
@@ -104,6 +98,7 @@ function MapSection () {
       // 주차장 카테고리가 클릭됐을 때
 
       // 주차장 카테고리를 선택된 스타일로 변경하고
+      allMenu.className = ""
       coffeeMenu.className = ""
       storeMenu.className = ""
       carparkMenu.className = `${style.menu_selected}`
@@ -112,10 +107,68 @@ function MapSection () {
 
     return(
     <Container id={style.mapwrap} className={visibility ? '' : 'hide'}>
-        <Map id='map'>
+        <Map id='map'
+            center={{
+              // 지도의 중심좌표
+              lat: 37.498004414546934,
+              lng: 127.02770621963765,
+            }}
+            style={{
+              // 지도의 크기
+              width: "100%",
+              height: "100%",
+            }}
+            level={3}
+          >
+          {selectedCategory === "all" &&
+          storePositions.map((position) => (
+            <MapMarker
+              key={`store-${position.lat},${position.lng}`}
+              position={position}
+              image={{
+                src: markerImage,
+                size: imageSize,
+                options: {
+                  spriteSize: spriteSize,
+                  spriteOrigin: storeOrigin,
+                },
+              }}
+            />
+          ))}
+          {selectedCategory === "all" &&
+          carparkPositions.map((position) => (
+            <MapMarker
+              key={`carpark-${position.lat},${position.lng}`}
+              position={position}
+              image={{
+                src: markerImage,
+                size: imageSize,
+                options: {
+                  spriteSize: spriteSize,
+                  spriteOrigin: carparkOrigin,
+                },
+              }}
+            />
+          ))
+        }
+        {selectedCategory === "all" &&
+            coffeePositions.map((position) => (
+              <MapMarker
+                key={`coffee-${position.lat},${position.lng}`}
+                position={position}
+                image={{
+                  src: markerImage,
+                  size: imageSize,
+                  options: {
+                    spriteSize: spriteSize,
+                    spriteOrigin: coffeeOrigin,
+                  },
+                }}
+              />
+            ))}
         {selectedCategory === "coffee" &&
             coffeePositions.map((position) => (
-              <div
+              <MapMarker
                 key={`coffee-${position.lat},${position.lng}`}
                 position={position}
                 image={{
@@ -130,7 +183,7 @@ function MapSection () {
             ))}
           {selectedCategory === "store" &&
             storePositions.map((position) => (
-              <div
+              <MapMarker
                 key={`store-${position.lat},${position.lng}`}
                 position={position}
                 image={{
@@ -145,7 +198,7 @@ function MapSection () {
             ))}
           {selectedCategory === "carpark" &&
             carparkPositions.map((position) => (
-              <div
+              <MapMarker
                 key={`carpark-${position.lat},${position.lng}`}
                 position={position}
                 image={{
@@ -161,6 +214,10 @@ function MapSection () {
         </Map>
         <div className={`${style.category}`}>
           <ul>
+            <li id="allMenu" onClick={() => setSelectedCategory("all")}>
+              <span className={`${style.ico_comm} ${style.ico_coffee}`}></span>
+              모두
+            </li>
             <li id="coffeeMenu" onClick={() => setSelectedCategory("coffee")}>
               <span className={`${style.ico_comm} ${style.ico_coffee}`}></span>
               커피숍
