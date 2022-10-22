@@ -1,5 +1,6 @@
 .idea/
 Model/data/
+Model/image_classification/wandb/*
 
 .DS_Store
 */.DS_Store/*
