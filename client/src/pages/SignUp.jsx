@@ -1,17 +1,24 @@
 import styled from 'styled-components';
-import PageHeader from '../components/PageHeader';
+import SignUpBox from '../components/SignUp/SignUpBox';
 
 const Wrapper = styled.body`
     width: 100vw;
     display: flex;
-    justify-content: center;
-    margin-top: ${props => props.theme.navMarginTop};
+    justify-content: flex-end;
+    background-color: ${props => props.theme.logBackColor};
+    min-height: ${props => props.theme.minHeight};
 `
 
 const Container = styled.section`
-    width : ${props => props.theme.width};
-    max-width: ${props => props.theme.maxWidth};
-    min-height: ${props => props.theme.minHeight};
+    margin-top: ${props => props.theme.navMarginTop};
+`
+
+const SignUpDiv = styled.div`
+    width: ${props => props.theme.logBoxWidth};
+    height: 100%;
+    background-color: ${props => props.theme.logBoxColor};
+    display: flex;
+    align-items: center;
 `
 
 
@@ -19,7 +26,9 @@ function SignUp () {
     return(
     <Wrapper>
         <Container>
-            <PageHeader title={'회원가입'} />
+            <SignUpDiv>
+                <SignUpBox />
+            </SignUpDiv>
         </Container>
     </Wrapper>)
 }
