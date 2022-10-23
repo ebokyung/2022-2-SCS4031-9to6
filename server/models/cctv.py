@@ -1,6 +1,6 @@
 # CCTV class
 
-from models import db
+from models import db, ma
 
 class CCTV(db.Model):
 
@@ -16,3 +16,8 @@ class CCTV(db.Model):
     Latitude = db.Column(db.Float, nullable=False)
     # CCTV Streaming URL
     URL = db.Column(db.Text)
+
+class CCTVSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = CCTV
+        load_instance = True
