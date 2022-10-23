@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { useRecoilValue } from 'recoil';
 import { showSideBar } from '../../atoms';
 import { useEffect, useState } from 'react';
-import markerImage from '../../imgs/markerSprites_64.png';
+import markerImage from '../../imgs/markerSprites.png';
 import style from './map.module.css';
 import {Map, MapMarker} from 'react-kakao-maps-sdk';
 
@@ -21,13 +21,10 @@ const Container = styled.section`
 function MapSection () {
     const visibility = useRecoilValue(showSideBar);
 
-    // const markerImage = 'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/category.png';
+    const spriteSize = { width: 392, height: 64 }
 
-    const imageSize = { width: 64, height: 64 }
-    const spriteSize = { width: 430, height: 64 }
-
-    // 커피숍 마커가 표시될 좌표 배열입니다
-  const coffeePositions = [
+    // cctv 마커가 표시될 좌표 배열입니다
+  const cctvPositions = [
     { lat: 37.499590490909185, lng: 127.0263723554437 },
     { lat: 37.499427948430814, lng: 127.02794423197847 },
     { lat: 37.498553760499505, lng: 127.02882598822454 },
@@ -36,10 +33,10 @@ function MapSection () {
     { lat: 37.49629291770947, lng: 127.02587362608637 },
     { lat: 37.49754540521486, lng: 127.02546694890695 },
   ]
-  const coffeeOrigin = { x: 0, y: 0 }
+  const cctvOrigin = { x: 110, y: 0 }
 
-  // 편의점 마커가 표시될 좌표 배열입니다
-  const storePositions = [
+  // 대피소 마커가 표시될 좌표 배열입니다
+  const safetyPositions = [
     { lat: 37.497535461505684, lng: 127.02948149502778 },
     { lat: 37.49671536281186, lng: 127.03020491448352 },
     { lat: 37.496201943633714, lng: 127.02959405469642 },
@@ -48,10 +45,10 @@ function MapSection () {
     { lat: 37.49932849491523, lng: 127.02935780247945 },
     { lat: 37.49996818951873, lng: 127.02943721562295 },
   ]
-  const storeOrigin = { x: 290, y: 0 }
+  const safetyOrigin = { x: 60, y: 0 }
 
-  // 주차장 마커가 표시될 좌표 배열입니다
-  const carparkPositions = [
+  // 제보 마커가 표시될 좌표 배열입니다
+  const reportPositions = [
     { lat: 37.49966168796031, lng: 127.03007039430118 },
     { lat: 37.499463762912974, lng: 127.0288828824399 },
     { lat: 37.49896834100913, lng: 127.02833986892401 },
@@ -60,48 +57,48 @@ function MapSection () {
     { lat: 37.49813096097184, lng: 127.02591949495914 },
     { lat: 37.497680616783086, lng: 127.02518427952202 },
   ]
-  const carparkOrigin = { x: 360, y: 0 }
+  const reportOrigin = { x: 10, y: 10 }
 
-    const [selectedCategory, setSelectedCategory] = useState("coffee")
+    const [selectedCategory, setSelectedCategory] = useState("all")
 
   useEffect(() => {
     const allMenu = document.getElementById("allMenu")
-    const coffeeMenu = document.getElementById("coffeeMenu")
-    const storeMenu = document.getElementById("storeMenu")
-    const carparkMenu = document.getElementById("carparkMenu")
+    const cctvMenu = document.getElementById("cctvMenu")
+    const safetyMenu = document.getElementById("safetyMenu")
+    const reportMenu = document.getElementById("reportMenu")
 
     if (selectedCategory === "all") {
-      // 커피숍 카테고리를 선택된 스타일로 변경하고
+      // 모두 카테고리를 선택된 스타일로 변경하고
       allMenu.className = `${style.menu_selected}`
 
-      // 편의점과 주차장 카테고리는 선택되지 않은 스타일로 바꿉니다
-      coffeeMenu.className = ""
-      storeMenu.className = ""
-      carparkMenu.className = ""
-    } else if (selectedCategory === "coffee") {
-      // 커피숍 카테고리를 선택된 스타일로 변경하고
-      coffeeMenu.className = `${style.menu_selected}`
+      // cctv, 대피소와 제보 카테고리는 선택되지 않은 스타일로 바꿉니다
+      cctvMenu.className = ""
+      safetyMenu.className = ""
+      reportMenu.className = ""
+    } else if (selectedCategory === "cctv") {
+      // cctv 카테고리를 선택된 스타일로 변경하고
+      cctvMenu.className = `${style.menu_selected}`
 
-      // 편의점과 주차장 카테고리는 선택되지 않은 스타일로 바꿉니다
+      // 모두, 대피소와 제보 카테고리는 선택되지 않은 스타일로 바꿉니다
       allMenu.className = ""
-      storeMenu.className = ""
-      carparkMenu.className = ""
-    }else if (selectedCategory === "store") {
-      // 편의점 카테고리가 클릭됐을 때
+      safetyMenu.className = ""
+      reportMenu.className = ""
+    }else if (selectedCategory === "safety") {
+      // 대피소 카테고리가 클릭됐을 때
 
-      // 편의점 카테고리를 선택된 스타일로 변경하고
+      // 대피소 카테고리를 선택된 스타일로 변경하고
       allMenu.className = ""
-      coffeeMenu.className = ""
-      storeMenu.className = `${style.menu_selected}`
-      carparkMenu.className = ""
-    } else if (selectedCategory === "carpark") {
-      // 주차장 카테고리가 클릭됐을 때
+      cctvMenu.className = ""
+      safetyMenu.className = `${style.menu_selected}`
+      reportMenu.className = ""
+    } else if (selectedCategory === "report") {
+      // 제보 카테고리가 클릭됐을 때
 
-      // 주차장 카테고리를 선택된 스타일로 변경하고
+      // 제보 카테고리를 선택된 스타일로 변경하고
       allMenu.className = ""
-      coffeeMenu.className = ""
-      storeMenu.className = ""
-      carparkMenu.className = `${style.menu_selected}`
+      cctvMenu.className = ""
+      safetyMenu.className = ""
+      reportMenu.className = `${style.menu_selected}`
     }
   }, [selectedCategory])
 
@@ -118,95 +115,49 @@ function MapSection () {
               width: "100%",
               height: "100%",
             }}
-            level={3}
+            level={5}
           >
-          {selectedCategory === "all" &&
-          storePositions.map((position) => (
-            <MapMarker
-              key={`store-${position.lat},${position.lng}`}
-              position={position}
-              image={{
-                src: markerImage,
-                size: imageSize,
-                options: {
-                  spriteSize: spriteSize,
-                  spriteOrigin: storeOrigin,
-                },
-              }}
-            />
-          ))}
-          {selectedCategory === "all" &&
-          carparkPositions.map((position) => (
-            <MapMarker
-              key={`carpark-${position.lat},${position.lng}`}
-              position={position}
-              image={{
-                src: markerImage,
-                size: imageSize,
-                options: {
-                  spriteSize: spriteSize,
-                  spriteOrigin: carparkOrigin,
-                },
-              }}
-            />
-          ))
-        }
-        {selectedCategory === "all" &&
-            coffeePositions.map((position) => (
+          {(selectedCategory === "all" || selectedCategory === "safety") &&
+            safetyPositions.map((position) => (
               <MapMarker
-                key={`coffee-${position.lat},${position.lng}`}
+                key={`safety-${position.lat},${position.lng}`}
                 position={position}
                 image={{
                   src: markerImage,
-                  size: imageSize,
+                  size: {width: 40, height: 40},
                   options: {
                     spriteSize: spriteSize,
-                    spriteOrigin: coffeeOrigin,
+                    spriteOrigin: safetyOrigin,
                   },
                 }}
               />
             ))}
-        {selectedCategory === "coffee" &&
-            coffeePositions.map((position) => (
+          {(selectedCategory === "all" || selectedCategory === "report") &&
+            reportPositions.map((position) => (
               <MapMarker
-                key={`coffee-${position.lat},${position.lng}`}
+                key={`report-${position.lat},${position.lng}`}
                 position={position}
                 image={{
                   src: markerImage,
-                  size: imageSize,
+                  size: {width: 40, height: 40},
                   options: {
                     spriteSize: spriteSize,
-                    spriteOrigin: coffeeOrigin,
+                    spriteOrigin: reportOrigin,
                   },
                 }}
               />
             ))}
-          {selectedCategory === "store" &&
-            storePositions.map((position) => (
+            {(selectedCategory === "all" || selectedCategory === "cctv") &&
+            cctvPositions.map((position) => (
               <MapMarker
-                key={`store-${position.lat},${position.lng}`}
+                key={`cctv-${position.lat},${position.lng}`}
                 position={position}
                 image={{
                   src: markerImage,
-                  size: imageSize,
+                  size: {width: 64, height: 64},
                   options: {
                     spriteSize: spriteSize,
-                    spriteOrigin: storeOrigin,
-                  },
-                }}
-              />
-            ))}
-          {selectedCategory === "carpark" &&
-            carparkPositions.map((position) => (
-              <MapMarker
-                key={`carpark-${position.lat},${position.lng}`}
-                position={position}
-                image={{
-                  src: markerImage,
-                  size: imageSize,
-                  options: {
-                    spriteSize: spriteSize,
-                    spriteOrigin: carparkOrigin,
+                    spriteOrigin: cctvOrigin,
                   },
                 }}
               />
@@ -215,20 +166,20 @@ function MapSection () {
         <div className={`${style.category}`}>
           <ul>
             <li id="allMenu" onClick={() => setSelectedCategory("all")}>
-              <span className={`${style.ico_comm} ${style.ico_coffee}`}></span>
+              <span className={`${style.ico_comm} ${style.ico_all}`}></span>
               모두
             </li>
-            <li id="coffeeMenu" onClick={() => setSelectedCategory("coffee")}>
-              <span className={`${style.ico_comm} ${style.ico_coffee}`}></span>
-              커피숍
+            <li id="cctvMenu" onClick={() => setSelectedCategory("cctv")}>
+              <span className={`${style.ico_comm} ${style.ico_cctv}`}></span>
+              CCTV
             </li>
-            <li id="storeMenu" onClick={() => setSelectedCategory("store")}>
-              <span className={`${style.ico_comm} ${style.ico_store}`}></span>
-              편의점
+            <li id="safetyMenu" onClick={() => setSelectedCategory("safety")}>
+              <span className={`${style.ico_comm} ${style.ico_safety}`}></span>
+              대피소
             </li>
-            <li id="carparkMenu" onClick={() => setSelectedCategory("carpark")}>
-              <span className={`${style.ico_comm} ${style.ico_carpark}`}></span>
-              주차장
+            <li id="reportMenu" onClick={() => setSelectedCategory("report")}>
+              <span className={`${style.ico_comm} ${style.ico_report}`}></span>
+              제보
             </li>
           </ul>
         </div>
