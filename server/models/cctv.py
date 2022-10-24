@@ -11,7 +11,7 @@ class CCTV(db.Model):
     # Center Name
     Center = db.Column(db.String(20), nullable=False)
     # X COORD
-    Longtitude = db.Column(db.Float, nullable=False)
+    Longitude = db.Column(db.Float, nullable=False)
     # Y COORD
     Latitude = db.Column(db.Float, nullable=False)
     # CCTV Streaming URL
