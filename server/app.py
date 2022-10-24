@@ -54,7 +54,7 @@ class MemberList(Resource):
 class MemberCheck(Resource):
     def get(self, member_id): # member_id로 인풋받음
         # members = Member.query.get(id)
-        already_exist = Member.query.filter_by(ID=member_id).first() #이미 DB에 해당 ID가 존재하는지 확인
+        already_exist = Member.query.filter_by(id=member_id).first() #이미 DB에 해당 ID가 존재하는지 확인
         if already_exist:
             return False # 가입하려는 ID가 이미 DB에 존재하면 가입이 안되는거니까 False 리턴.
         else:
