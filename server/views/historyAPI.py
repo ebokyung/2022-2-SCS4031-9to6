@@ -1,8 +1,20 @@
-from flask import jsonify
-from flask_restful import Resource
+from flask import jsonify, make_response
+from flask_restful import Resource, reqparse
 from models import db
 from models.history import FloodHistory, FloodHistorySchema
 from views import s3
+import datetime
+
+class FloodHistoryList(Resource):
+
+    def get(self):    
+        flood_histories = FloodHistory.query.all()
+        flood_history_schema = FloodHistorySchema(many=True)
+        output = flood_history_schema.dump(flood_histories)
+        self.body = jsonify(output)
+        self.status_code = 200
+        response = (self.body, self.status_code)
+        return make_response(response)
 
 def s3_put_object(s3, bucket, filepath, access_key):
     """
@@ -25,6 +37,6 @@ def s3_put_object(s3, bucket, filepath, access_key):
         return False
     return True
 
-ret = s3_put_object(s3, '9to6bucket', 'flooding.jpg', 'flooding.jpg')
-if ret: print('success')
-else: print('fail')
+# ret = s3_put_object(s3, '9to6bucket', 'flooding.jpg', 'flooding.jpg')
+# if ret: print('success')
+# else: print('fail')

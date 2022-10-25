@@ -4,10 +4,11 @@ from flask_migrate import Migrate
 from flask_marshmallow import Marshmallow
 
 from models import db
-from models.history import FloodHistory, FloodHistorySchema
+from views import s3
 
 from views.cctvAPI import CCTVS, CCTVList
 from views.memberAPI import Members, MemberList, MemberCheck
+from views.historyAPI import FloodHistoryList
  
 import config
 
@@ -30,6 +31,7 @@ api.add_resource(CCTVList, '/cctvs')
 api.add_resource(Members, '/Members/<member_id>')
 api.add_resource(MemberList, '/Members')
 api.add_resource(MemberCheck, '/MembersCheck/<member_id>')
+api.add_resource(FloodHistoryList, '/FloodHistories')
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=True, port=5000)
