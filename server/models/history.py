@@ -1,6 +1,7 @@
 # Flood History class
 
 from models import db, ma
+from models.cctv import CCTV
 
 class FloodHistory(db.Model):
 
@@ -33,3 +34,4 @@ class FloodHistorySchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = FloodHistory
         load_instance = True
+        include_fk = True
