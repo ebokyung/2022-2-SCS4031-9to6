@@ -2,9 +2,12 @@ from flask import Flask, abort, jsonify
 from flask_restful import reqparse, abort, Api, Resource
 from flask_migrate import Migrate
 from flask_marshmallow import Marshmallow
+
 from models import db
 from models.member import Member, MemberSchema
 from models.cctv import CCTV, CCTVSchema
+from models.history import FloodHistory, FloodHistorySchema
+
 import config
 
 app = Flask(__name__)
