@@ -2,10 +2,8 @@ import boto3
 import os
 
 s3_config = {
-	# 'aws_access_key_id': os.environ.get('AWS_ACCESS_KEY_ID', 'key'),
-	# 'aws_secret_access_key': os.environ.get('AWS_SECRET_ACCESS_KEY', 'secret'),
-    'aws_access_key_id': 'AKIA3KWLDCIAPZ7J7HE5',
-	'aws_secret_access_key': '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',
+	'aws_access_key_id': os.environ.get('AWS_ACCESS_KEY_ID', 'key'),
+	'aws_secret_access_key': os.environ.get('AWS_SECRET_ACCESS_KEY', 'secret'),
 }
 
 def s3_connection():

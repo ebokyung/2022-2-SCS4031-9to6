@@ -21,7 +21,10 @@ def s3_put_object(s3, bucket, filepath, access_key):
             ExtraArgs={"ContentType": "image/jpg", "ACL": "public-read"},
         )
     except Exception as e:
+        print(e)
         return False
     return True
 
-s3_put_object(s3, '9to6Bucket', 'flooding.jpg', 'flooding')
+ret = s3_put_object(s3, '9to6bucket', 'flooding.jpg', 'flooding.jpg')
+if ret: print('success')
+else: print('fail')
