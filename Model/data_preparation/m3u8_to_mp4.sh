@@ -1,7 +1,7 @@
 # sh m3u8_to_mp4.sh 로 실행
 # 매번 ctrl+c를 눌러주어 mp4 저장을 멈추어야함
 
-for n in $(cat text.txt)
+for n in $(cat link_name.txt)
 do
     link=$(echo $n | cut -d "-" -f 1)
     fileName=$(echo $n | cut -d "-" -f 2)
