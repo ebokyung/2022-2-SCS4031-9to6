@@ -5,7 +5,7 @@ import { showSideBar } from '../../atoms';
 import { useEffect, useState } from 'react';
 import markerImage from '../../imgs/markerSprites.png';
 import style from './map.module.css';
-import {Map, MapMarker} from 'react-kakao-maps-sdk';
+import {Map, MapMarker, CustomOverlayMap} from 'react-kakao-maps-sdk';
 
 const Container = styled.section`
     width: 100%;
@@ -20,6 +20,8 @@ const Container = styled.section`
 
 function MapSection () {
     const visibility = useRecoilValue(showSideBar);
+
+    const [isOpen, setIsOpen] = useState(false);
 
     const spriteSize = { width: 392, height: 64 }
 
@@ -119,6 +121,7 @@ function MapSection () {
           >
           {(selectedCategory === "all" || selectedCategory === "safety") &&
             safetyPositions.map((position) => (
+              <>
               <MapMarker
                 key={`safety-${position.lat},${position.lng}`}
                 position={position}
@@ -130,7 +133,53 @@ function MapSection () {
                     spriteOrigin: safetyOrigin,
                   },
                 }}
+                onClick={() => setIsOpen(true)}
               />
+              {isOpen && (
+          <CustomOverlayMap position={position}>
+            <div className={style.wrap}>
+              <div className={style.info}>
+                <div className={style.title}>
+                  카카오 스페이스닷원
+                  <div
+                    className={style.close}
+                    onClick={() => setIsOpen(false)}
+                    title="닫기"
+                  ></div>
+                </div>
+                <div className={style.body}>
+                  <div className={style.img}>
+                    <img
+                      src="//t1.daumcdn.net/thumb/C84x76/?fname=http://t1.daumcdn.net/cfile/2170353A51B82DE005"
+                      width="73"
+                      height="70"
+                      alt="카카오 스페이스닷원"
+                    />
+                  </div>
+                  <div className={style.desc}>
+                    <div className={style.ellipsis}>
+                      제주특별자치도 제주시 첨단로 242
+                    </div>
+                    <div className={`${style.jibun} ${style.ellipsis}`}>
+                      (우) 63309 (지번) 영평동 2181
+                    </div>
+                    <div>
+                      <a
+                        href="https://www.kakaocorp.com/main"
+                        target="_blank"
+                        className={style.link}
+                        rel="noreferrer"
+                      >
+                        홈페이지
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            ;
+          </CustomOverlayMap>)}
+              </>
             ))}
           {(selectedCategory === "all" || selectedCategory === "report") &&
             reportPositions.map((position) => (
@@ -145,6 +194,7 @@ function MapSection () {
                     spriteOrigin: reportOrigin,
                   },
                 }}
+                onClick={() => setIsOpen(true)}
               />
             ))}
             {(selectedCategory === "all" || selectedCategory === "cctv") &&
@@ -160,6 +210,7 @@ function MapSection () {
                     spriteOrigin: cctvOrigin,
                   },
                 }}
+                onClick={() => setIsOpen(true)}
               />
             ))}
         </Map>
