@@ -9,6 +9,8 @@ from views import s3
 from views.cctvAPI import CCTVS, CCTVList
 from views.memberAPI import Members, MemberList, MemberCheck
 from views.historyAPI import FloodHistoryList
+
+from models.shelter import Shelter, ShelterSchema
  
 import config
 
