@@ -23,4 +23,9 @@ export const mainTheme ={
     // 푸터
     footerBackColor : "#D9D9D9",
     footerColor: "#FFFFFF",
+
+    // 메인페이지 사이드바
+    sideBackColor: "#404040",
+    tabBackColor: "rgba(0, 0, 0, 0.5)",
+
 }
