@@ -10,13 +10,19 @@ import Service from "./pages/Service";
 import MapInfo from "./pages/MapInfo";
 import NavBar from "./components/Navbar/Navbar";
 import Footer from "./components/Footer/Footer";
+import Notice from "./components/MainPage/Notice";
+import Chat from "./components/MainPage/Chat";
 
 function Routers() {
     return(
         <Router>
             <NavBar />
             <Routes>
-                <Route path="/" element={<MainPage />} />
+                <Route path="/*" element={<MainPage />} >
+                    {/* <Route index element={<Notice />} />
+                    <Route path="notice" element={<Notice />} />
+                    <Route path="chat" element={<Chat />} />  */}
+                </Route>
                 <Route path="/login" element={<LogIn />} />
                 <Route path="/signup" element={<SignUp />} />
                 <Route path="/mypage" element={<MyPage />} />
