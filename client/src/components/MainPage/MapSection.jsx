@@ -2,11 +2,16 @@
 import styled from 'styled-components';
 import { useRecoilValue } from 'recoil';
 import { showSideBar } from '../../atoms';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import markerImage from '../../imgs/markerSprites.png';
+import reportBtn from '../../imgs/reportBtn.png';
+import reportPositionMarker from '../../imgs/reportPositionMarker.png';
 import style from './map.module.css';
-import {Map, MapMarker, CustomOverlayMap, useMap} from 'react-kakao-maps-sdk';
+import {Map, MapMarker, CustomOverlayMap, useMap, ZoomControl} from 'react-kakao-maps-sdk';
 import ReactPlayer from 'react-player';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { motion } from "framer-motion";
+import { faXmark } from "@fortawesome/free-solid-svg-icons";
 
 const Container = styled.section`
     width: 100%;
@@ -19,10 +24,111 @@ const Container = styled.section`
     }
 `
 
+const ReportBtn = styled.button`
+  width: 50px;
+  height: 38px;
+  border: none;
+  position: absolute;
+  bottom: 120px;
+  right: 40px;
+  z-index:10;
+  background: url( ${reportBtn} ) no-repeat;
+  cursor: pointer;
+`
+
+const Overlay = styled(motion.div)`
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top:0;
+    left: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 500;
+    background-color: rgba(0, 0, 0, 0.7);
+`;
+
+const BigBox = styled.div`
+    width: 40%;
+    height: 40%;
+    background-color: white;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    div:last-child{
+      margin-left: 65%;
+    }
+`
+const XMark = styled(FontAwesomeIcon)`
+    font-size: 20px;
+    position: absolute;
+    top:20px;
+    right: 20px;
+    cursor: pointer;
+`
+
+const BoxTitle = styled.h1`
+    /* font-family: 'Nanum Myeongjo', serif; */
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 10px;
+`
+const BoxSubTitle = styled.h6`
+    /* font-family: 'Nanum Myeongjo', serif; */
+    color : #262626;
+    font-size: 11px;
+    font-weight: 300;
+    margin-bottom: 30px;
+`
+const BoxBody = styled.div`
+  width: 70%;
+  display: grid;
+  align-items: center;
+  grid-template-columns: 80px auto;
+`
+const Btn = styled.button`
+    width: fit-content;
+    height: 18px;
+    padding: 0 10px;
+    margin-top: 10px;
+    background-color: gray;
+    border-radius: 5px;
+    font-size: 14px;
+    text-align: center;
+    cursor: pointer;
+`
+const BoxBtn = styled(Btn)``
+const PinBtn = styled(Btn)``
+const ImgUploadBtn = styled(Btn)``
+
 function MapSection () {
     const visibility = useRecoilValue(showSideBar);
+    const [openReportModal, setOpenReportModal] = useState(false);
+    const [isReportMode, setIsReportMode] = useState(false);
+    const [reportPosition, setReportPosition] = useState();
+    const ref = useRef();
+    const inputRef = useRef();
 
-    const spriteSize = { width: 392, height: 64 }
+    const handleReportModalBtn = () => {
+      setOpenReportModal(prev=>!prev);
+    }
+
+    const handleReportPosition = () => {
+      ref.current.style.zIndex = -1;
+      setIsReportMode(true);
+    }
+    
+    const submitReportPosition = () => {
+      if (window.confirm('여기 위치에 제보하시겠습니까?')) {
+        setIsReportMode(false);
+        ref.current.style.zIndex = 500;
+        console.log(reportPosition);
+        inputRef.current.value = `lat: ${reportPosition.lat} lng: ${reportPosition.lng}`
+      }
+    }
 
     //-------------------------------------------------------------------
     // cctv 마커가 표시될 좌표 배열입니다
@@ -162,6 +268,7 @@ function MapSection () {
     //-------------------------------------------------------------------
 
   const [selectedCategory, setSelectedCategory] = useState("all")
+  const spriteSize = { width: 392, height: 64 }
 
   useEffect(() => {
     const allMenu = document.getElementById("allMenu")
@@ -364,6 +471,10 @@ function MapSection () {
             height: "100%",
           }}
           level={5}
+          onClick={(_t, mouseEvent) => setReportPosition({
+            lat: mouseEvent.latLng.getLat(),
+            lng: mouseEvent.latLng.getLng(),
+          })}
         >
           {/* 지도에 마커 그리기 */}
         {(selectedCategory === "all" || selectedCategory === "safety") &&
@@ -422,6 +533,19 @@ function MapSection () {
             />
           )
         )}
+
+        {/* 지도에 제보 위치 표시하는 마커 */}
+        {isReportMode && reportPosition &&
+        <MapMarker // 마커를 생성합니다
+          position={reportPosition}
+          draggable={true} // 마커가 드래그 가능하도록 설정합니다
+          image={{
+            src: reportPositionMarker,
+            size: {width: 64, height: 64},
+          }}
+          onMouseOut={submitReportPosition}
+        />}
+
       </Map>
 
       {/* 4가지 마커 메뉴 */}
@@ -445,6 +569,47 @@ function MapSection () {
           </li>
         </ul>
       </div>
+
+      {/* 제보 버튼 */}
+      <ReportBtn 
+        onClick={handleReportModalBtn}
+      />
+      {openReportModal ? 
+        <Overlay 
+            ref={ref}
+            initial={{ opacity : 0}}
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }}
+        >
+            <BigBox>
+                <XMark onClick = {() => setOpenReportModal(false)} icon={faXmark} />
+                <BoxTitle>
+                    제보 등록하기
+                </BoxTitle>
+                <BoxSubTitle>
+                    * 허위 제보로 인한 피해는 책임을 물을 수 있습니다.
+                </BoxSubTitle>
+                <BoxBody>
+                    <span>위치</span>
+                    <div>
+                      <input ref={inputRef}></input>
+                      <PinBtn onClick={handleReportPosition}>pin</PinBtn>
+                    </div>
+                    <span>사진</span>
+                    <div>
+                      <input></input>
+                      <ImgUploadBtn>upload</ImgUploadBtn>
+                    </div>
+                    <span>제보내용</span>
+                    <textarea></textarea>
+                </BoxBody>
+                <BoxBtn>
+                    제보하기
+                </BoxBtn>
+            </BigBox>
+        </Overlay> : null}
+
+
     </Container>)
 }
 export default MapSection;
