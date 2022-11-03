@@ -4,7 +4,7 @@ from sqlalchemy.exc import IntegrityError
 from models import db
 from models.cctv import CCTV, CCTVStatus
 from models.history import FloodHistory, FloodHistorySchema
-from views import s3
+from apis import s3
 from urllib.parse import urlencode, unquote
 import requests
 import json
