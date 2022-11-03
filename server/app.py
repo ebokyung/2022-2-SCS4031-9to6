@@ -9,6 +9,7 @@ from views import s3
 from views.cctvAPI import CCTVS, CCTVList
 from views.memberAPI import Members, MemberList, MemberCheck
 from views.historyAPI import FloodHistoryList
+from views.shelterAPI import Shelters, ShelterList
  
 import config
 
@@ -32,6 +33,8 @@ api.add_resource(Members, '/Members/<member_id>')
 api.add_resource(MemberList, '/Members')
 api.add_resource(MemberCheck, '/MembersCheck/<member_id>')
 api.add_resource(FloodHistoryList, '/FloodHistories')
+api.add_resource(Shelters, '/Shelters/<shelter_index>')
+api.add_resource(ShelterList, '/Shelters')
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=True, port=5000)
