@@ -10,6 +10,8 @@ from apis.cctvAPI import CCTVS, CCTVList
 from apis.memberAPI import Members, MemberList, MemberCheck
 from apis.historyAPI import FloodHistoryList
 from apis.shelterAPI import Shelters, ShelterList
+
+from models.posting import Posting, PostingSchema
  
 import config
 
