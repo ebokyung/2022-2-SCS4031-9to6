@@ -10,8 +10,7 @@ from apis.cctvAPI import CCTVS, CCTVList
 from apis.memberAPI import Members, MemberList, MemberCheck
 from apis.historyAPI import FloodHistoryList
 from apis.shelterAPI import Shelters, ShelterList
-
-from models.posting import Posting, PostingSchema
+from apis.postingAPI import Postings, PostingList
  
 import config
 
@@ -37,6 +36,8 @@ api.add_resource(MemberCheck, '/MembersCheck/<member_id>')
 api.add_resource(FloodHistoryList, '/FloodHistories')
 api.add_resource(Shelters, '/Shelters/<shelter_index>')
 api.add_resource(ShelterList, '/Shelters')
+api.add_resource(Postings, '/Postings/<posting_index>')
+api.add_resource(PostingList, '/Postings')
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=True, port=5000)
