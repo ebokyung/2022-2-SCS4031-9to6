@@ -14,9 +14,9 @@ import math
 class FloodHistoryList(Resource):
 
     parser = reqparse.RequestParser()
-    parser.add_argument('ID', required=True, type=str, help="CCTV ID", location='json')
-    parser.add_argument('STAGE', required=True, type=int, help="Detected Flooding Stage", location='json')
-    parser.add_argument('URL', type=str, help="Flooding Image URL", location='json')
+    parser.add_argument('ID', required=True, type=str, help="CCTV ID", location='form')
+    parser.add_argument('STAGE', required=True, type=int, help="Detected Flooding Stage", location='form')
+    parser.add_argument('URL', type=str, help="Flooding Image URL", location='form')
 
     body = ''
     status_code = 501
@@ -255,7 +255,7 @@ def getWeather(cctvID):
     #루프문에서 result_dict 에는 키와 값을 담아둔다 예)result_dict['PTY']='0'  , result_status['REH']='97'
     for item in ls_item:  #ls_item에 들어있는 배열의 개수만큼 반복함
         result=item
-        print(result)
+        # print(result)
         result_dict.setdefault(result.get("category"),result.get("obsrValue"))
 
     return result_dict["T1H"], result_dict["REH"], result_dict["RN1"]
