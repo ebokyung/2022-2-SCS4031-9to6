@@ -11,7 +11,7 @@ import {Map, MapMarker, CustomOverlayMap, useMap, ZoomControl} from 'react-kakao
 import ReactPlayer from 'react-player';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { motion } from "framer-motion";
-import { faXmark } from "@fortawesome/free-solid-svg-icons";
+import { faXmark, faLocationDot, faUpload } from "@fortawesome/free-solid-svg-icons";
 
 const Container = styled.section`
     width: 100%;
@@ -52,15 +52,19 @@ const Overlay = styled(motion.div)`
 const BigBox = styled.div`
     width: 40%;
     height: 40%;
+    min-width: 540px;
+    min-height: 250px;
     background-color: white;
     position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    div:last-child{
+    border-radius: 3px;
+    background-color: ${props=> props.theme.modalBackColor};
+    /* div:last-child{
       margin-left: 65%;
-    }
+    } */
 `
 const XMark = styled(FontAwesomeIcon)`
     font-size: 20px;
@@ -86,23 +90,62 @@ const BoxSubTitle = styled.h6`
 const BoxBody = styled.div`
   width: 70%;
   display: grid;
-  align-items: center;
   grid-template-columns: 80px auto;
+  row-gap: 0.5em;
+  div {
+    display: grid;
+    grid-template-columns: auto 20px;
+    /* justify-content: space-between; */
+  }
 `
 const Btn = styled.button`
     width: fit-content;
-    height: 18px;
-    padding: 0 10px;
-    margin-top: 10px;
-    background-color: gray;
+    height: 20px;
+    padding: 0 15px;
+    margin-top: 2rem;
+    background-color: ${props => props.theme.modalBtnColor};
+    border: none;
     border-radius: 5px;
     font-size: 14px;
     text-align: center;
     cursor: pointer;
 `
 const BoxBtn = styled(Btn)``
-const PinBtn = styled(Btn)``
-const ImgUploadBtn = styled(Btn)``
+const PinBtn = styled(FontAwesomeIcon)`
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: ${props=> props.theme.modalBtnColor};
+`
+const ImgUploadBtn = styled(FontAwesomeIcon)`
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: ${props=> props.theme.modalBtnColor};
+`
+
+const ReportInput = styled.input`
+  border: none;
+  border-radius: 3px;
+  padding: 0 10px;
+  font-size: 10px;
+  background-color: #dddddd;
+  color: #A2A2A6;
+  ::placeholder {
+      color: #A2A2A6;
+  }
+  :focus {
+      outline-color: ${props=> props.theme.modalBtnColor};
+  }
+`
+const ReportTextArea = styled.textarea`
+  border: none;
+  border-radius: 3px;
+  min-height: 35px;
+  resize: none;
+  padding: 10px;
+  :focus {
+      outline-color: ${props=> props.theme.modalBtnColor};
+  }
+`
 
 function MapSection () {
     const visibility = useRecoilValue(showSideBar);
@@ -110,7 +153,8 @@ function MapSection () {
     const [isReportMode, setIsReportMode] = useState(false);
     const [reportPosition, setReportPosition] = useState();
     const ref = useRef();
-    const inputRef = useRef();
+    const inputPositionRef = useRef();
+    const inputImgRef = useRef();
 
     const handleReportModalBtn = () => {
       setOpenReportModal(prev=>!prev);
@@ -126,8 +170,12 @@ function MapSection () {
         setIsReportMode(false);
         ref.current.style.zIndex = 500;
         console.log(reportPosition);
-        inputRef.current.value = `lat: ${reportPosition.lat} lng: ${reportPosition.lng}`
+        inputPositionRef.current.value = `lat: ${reportPosition.lat} lng: ${reportPosition.lng}`
       }
+    }
+
+    const submitReportImage = () => {
+
     }
 
     //-------------------------------------------------------------------
@@ -592,16 +640,16 @@ function MapSection () {
                 <BoxBody>
                     <span>위치</span>
                     <div>
-                      <input ref={inputRef}></input>
-                      <PinBtn onClick={handleReportPosition}>pin</PinBtn>
+                      <ReportInput ref={inputPositionRef} placeholder="오른쪽 버튼를 눌러 위치를 설정해주세요. ->" readOnly></ReportInput>
+                      <PinBtn onClick={handleReportPosition} icon={faLocationDot}/>
                     </div>
                     <span>사진</span>
                     <div>
-                      <input></input>
-                      <ImgUploadBtn>upload</ImgUploadBtn>
+                      <ReportInput type="file" accept="image/*" ref={inputImgRef} placeholder="오른쪽 버튼을 눌러 침수상황 사진을 업로드 해주세요. ->" readOnly></ReportInput>
+                      <ImgUploadBtn icon={faUpload} />
                     </div>
                     <span>제보내용</span>
-                    <textarea></textarea>
+                    <ReportTextArea></ReportTextArea>
                 </BoxBody>
                 <BoxBtn>
                     제보하기

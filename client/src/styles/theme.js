@@ -28,4 +28,8 @@ export const mainTheme ={
     sideBackColor: "#404040",
     tabBackColor: "rgba(0, 0, 0, 0.5)",
 
+    // 메인페이지 제보 등록 모달창
+    modalBackColor: "#FFA000",
+    modalBtnColor: "#FFD95B"
+
 }
