@@ -1,5 +1,7 @@
 .idea/
 Model/data/
+Model/image_classification/wandb/*
+Model/object_detection/yolov5
 
 .DS_Store
 */.DS_Store/*
