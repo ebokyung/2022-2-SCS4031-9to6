@@ -19,7 +19,8 @@ class PostingList(Resource):
 
     parser = reqparse.RequestParser()
     parser.add_argument('MemberID', type=str, help="Menber ID", location='form')
-    parser.add_argument('Address', required=True, type=str, help="Address", location='form')
+    parser.add_argument('Latitude', required=True, type=float, help="Latitude", location='form')
+    parser.add_argument('Longitude', required=True, type=float, help="Longitude", location='form')
     parser.add_argument('ImageFile', type=werkzeug.datastructures.FileStorage, help="Posting Image File", location='files')
     parser.add_argument('Content', required=True, type=str, help="Posting Content", location='form')
 
@@ -40,7 +41,8 @@ class PostingList(Resource):
         args = self.parser.parse_args()
 
         memberID = args['MemberID']
-        address = args['Address']
+        latitude = args['Latitude']
+        longitude = args['Longitude']
         imageFile = args['ImageFile']
         content = args['Content']
 
@@ -52,7 +54,7 @@ class PostingList(Resource):
             s3_put_object(s3, '9to6bucket', imageFile, img_name)
             image_url = 'https://{bucket_name}.s3.{location}.amazonaws.com/Posting/{s3_path}'.format(bucket_name='9to6bucket', location='ap-northeast-2', s3_path=img_name)
 
-            index = addPosting(memberID, address, content, image_url)
+            index = addPosting(memberID, latitude, longitude, content, image_url)
             query = Posting.query.get(index)
             schema = PostingSchema()
             self.body = jsonify(schema.dump(query))
@@ -75,11 +77,11 @@ class PostingList(Resource):
         return response
 
 
-def addPosting(memberID, address, content, image_url):
+def addPosting(memberID, latitude, longitude, content, image_url):
 
     date_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     index = db.session.query(Posting).count() + 1
-    latitude, longitude = get_location(address)
+    address = convert_coordinates_to_address(latitude, longitude)
 
     # 제보 객체 생성
     posting = Posting(
@@ -137,3 +139,22 @@ def get_location(address):
 #   address_name = address['address_name']
 
   return address['y'], address['x']
+
+def convert_coordinates_to_address(lat, lng):
+    """
+    입력받은 위도, 경도를 도로명, 지번 주소로 변환
+    """
+
+    y, x = str(lat), str(lng)
+    url = 'https://dapi.kakao.com/v2/local/geo/coord2address.json?x={}&y={}'.format(x, y)
+    header = {'Authorization': 'KakaoAK ' + '0db77db2aeaee483b88ae64dd6683afa'}
+ 
+    r = requests.get(url, headers=header)
+ 
+    if r.status_code == 200:
+        # road_address = r.json()["documents"][0]["road_address"]['address_name']
+        bunji_address = r.json()["documents"][0]["address"]['address_name']
+    else:
+        return None
+    
+    return bunji_address
