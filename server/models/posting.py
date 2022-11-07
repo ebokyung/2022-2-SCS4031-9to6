@@ -19,10 +19,10 @@ class Posting(db.Model):
     Datetime = db.Column(db.DateTime, nullable=False)
 
     # Image URL - S3에 저장된 이미지 URL
-    ImageURL = db.Column(db.Text)
+    ImageURL = db.Column(db.Text, nullable=False)
 
     # Content
-    Content = db.Column(db.Text)
+    Content = db.Column(db.Text, nullable=False)
 
     # X COORD
     Longitude = db.Column(db.Float, nullable=False)
