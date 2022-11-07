@@ -13,6 +13,7 @@ Model/object_detection/yolov5
 # gitignore template for Jupyter Notebooks
 # website: http://jupyter.org/
 
+*.ipynb
 .ipynb_checkpoints
 */.ipynb_checkpoints/*
 
