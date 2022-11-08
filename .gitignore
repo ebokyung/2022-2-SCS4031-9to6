@@ -1,7 +1,10 @@
 .idea/
 Model/data/
 Model/image_classification/wandb/*
-Model/object_detection/yolov5
+# Model/object_detection/yolov5
+Model/image_classification/__pycache__/
+*.pt
+*.h5
 
 .DS_Store
 */.DS_Store/*
