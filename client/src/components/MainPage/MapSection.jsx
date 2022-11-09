@@ -3,6 +3,7 @@ import styled from 'styled-components';
 import { useRecoilValue } from 'recoil';
 import { showSideBar } from '../../atoms';
 import { useEffect, useState, useRef } from 'react';
+import { useForm } from "react-hook-form";
 import markerImage from '../../imgs/markerSprites.png';
 import reportBtn from '../../imgs/reportBtn.png';
 import reportPositionMarker from '../../imgs/reportPositionMarker.png';
@@ -12,7 +13,7 @@ import ReactPlayer from 'react-player';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { motion } from "framer-motion";
 import { faXmark, faLocationDot, faUpload } from "@fortawesome/free-solid-svg-icons";
-// import axios from 'axios';
+import { API } from '../../axios';
 
 const Container = styled.section`
     width: 100%;
@@ -50,7 +51,7 @@ const Overlay = styled(motion.div)`
     background-color: rgba(0, 0, 0, 0.7);
 `;
 
-const BigBox = styled.div`
+const BigBox = styled.form`
     width: 40%;
     height: 40%;
     min-width: 540px;
@@ -85,7 +86,7 @@ const BoxSubTitle = styled.h6`
     font-weight: 300;
     margin-bottom: 30px;
 `
-const BoxBodyForm = styled.form`
+const BoxBody = styled.div`
   width: 70%;
   display: grid;
   grid-template-columns: 70px auto;
@@ -152,6 +153,9 @@ const ReportTextArea = styled.textarea`
 
 function MapSection () {
     const visibility = useRecoilValue(showSideBar);
+    const [cctvArray, setCctvArray] = useState([]);
+    const [shelterArray, setShelterArray] = useState([]);
+    const [postingArray, setPostingArray] = useState([]);
     
     const [isReportMode, setIsReportMode] = useState(false);
     const [reportPosition, setReportPosition] = useState();
@@ -160,6 +164,48 @@ function MapSection () {
     const inputPositionRef = useRef();
     const inputImgRef = useRef();
     const inputImgNameRef = useRef();
+
+    const { register, handleSubmit, setValue } = useForm();
+
+    // GET
+    const getdata = async() => {
+      try{
+          const cctvData = await API.get("/cctvs");
+          const shelterData = await API.get("/Shelters");
+          const postingData = await API.get("/Postings");
+          setCctvArray(cctvData.data.data);
+          setShelterArray(shelterData.data.data);
+          setPostingArray(postingData.data.data);
+      }catch(error){
+          console.log(error)
+      }
+    }
+
+    useEffect(()=>{
+        getdata();
+    },[])
+
+  //   // POST
+  //   const onValid = async(data) => {
+  //     const result = {
+  //         "Position" : data.position,
+  //         "Image" : data.image,
+  //         "Content" : data.content
+  //     }
+  //     try{
+  //         await LogAPI.post("/api/v1/emotion", result)
+  //         .then(
+  //             response => {
+  //                 console.log(response);
+  //             }
+  //         )
+  //         const data = await LogAPI.get("/api/v1/emotion?type=private");
+  //         setEmotion(data.data.data);
+  //     }catch(error){
+  //         console.log(error)
+  //     }
+  //     setValue("write", "")
+  // }
 
     const handleReportModalBtn = () => {
       setIsReportMode(prev=>!prev);
@@ -681,47 +727,55 @@ function MapSection () {
             initial={{ opacity : 0}}
             animate={{ opacity: 1 }} 
             exit={{ opacity: 0 }}
-        >
-            <BigBox>
-                <XMark onClick = {() => setIsReportMode(false)} icon={faXmark} />
-                <BoxTitle>
-                    제보 등록하기
-                </BoxTitle>
-                <BoxSubTitle>
-                    * 허위 제보로 인한 피해는 책임을 물을 수 있습니다.
-                </BoxSubTitle>
-                <BoxBodyForm>
-                    <span>위치</span>
-                    <div>
-                      <ReportInput ref={inputPositionRef} placeholder="오른쪽 버튼를 눌러 위치를 설정해주세요." readOnly></ReportInput>
-                      <PinBtn onClick={handleReportPosition} icon={faLocationDot}/>
-                    </div>
-                    <span>사진</span>
-                    <div>
-                      <ReportInput 
-                        placeholder="오른쪽 버튼을 눌러 침수상황 사진을 업로드 해주세요." 
-                        ref={inputImgNameRef} 
-                        disabled />
-                      <input 
-                        type="file" 
-                        accept="image/*" 
-                        style={{display: 'none'}}
-                        ref={inputImgRef} 
-                        onChange={onUploadImage}
-                        />
-                      <ImgUploadBtn 
-                        icon={faUpload} 
-                        onClick={onUploadImageButtonClick}
-                      />
-                    </div>
-                    <span>제보내용</span>
-                    <ReportTextArea></ReportTextArea>
-                </BoxBodyForm>
-                <BoxBtn>
-                    제보하기
-                </BoxBtn>
-            </BigBox>
-        </Overlay> : null}
+        />
+        //     <BigBox onSubmit={handleSubmit(onValid)}>
+        //         <XMark onClick = {() => setIsReportMode(false)} icon={faXmark} />
+        //         <BoxTitle>
+        //             제보 등록하기
+        //         </BoxTitle>
+        //         <BoxSubTitle>
+        //             * 허위 제보로 인한 피해는 책임을 물을 수 있습니다.
+        //         </BoxSubTitle>
+        //         <BoxBody>
+        //             <span>위치</span>
+        //             <div>
+        //               <ReportInput 
+        //                 {...register("position", {required : true})}
+        //                 ref={inputPositionRef} 
+        //                 placeholder="오른쪽 버튼를 눌러 위치를 설정해주세요." 
+        //                 readOnly />
+        //               <PinBtn onClick={handleReportPosition} icon={faLocationDot}/>
+        //             </div>
+        //             <span>사진</span>
+        //             <div>
+        //               <ReportInput 
+        //                 placeholder="오른쪽 버튼을 눌러 침수상황 사진을 업로드 해주세요." 
+        //                 ref={inputImgNameRef} 
+        //                 disabled />
+        //               <input 
+        //                 {...register("image", {required : true})}
+        //                 type="file" 
+        //                 accept="image/*" 
+        //                 style={{display: 'none'}}
+        //                 ref={inputImgRef} 
+        //                 onChange={onUploadImage}
+        //                 />
+        //               <ImgUploadBtn 
+        //                 icon={faUpload} 
+        //                 onClick={onUploadImageButtonClick}
+        //               />
+        //             </div>
+        //             <span>제보내용</span>
+        //             <ReportTextArea
+        //                 {...register("content", {required : true})}
+        //             />
+        //         </BoxBody>
+        //         <BoxBtn>
+        //             제보하기
+        //         </BoxBtn>
+        //     </BigBox>
+        // </Overlay> 
+        : null}
 
 
     </Container>)
