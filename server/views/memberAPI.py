@@ -86,12 +86,7 @@ class MemberCheck(Resource):
         else:
             return True # 가입하려는 ID가 DB에 없으면 회원가입 가능하므로 True 리턴.
         
-class Test(Resource):
-    def get(self):
-        members = Member.query.all()
-        member_schema = MemberSchema(many=True)
-        output = member_schema.dump(members)
-        return output
+
 
 
 # 로그인
