@@ -100,12 +100,7 @@ class Login(Resource):
     parser = reqparse.RequestParser()
     parser.add_argument('ID', required=True, type=str, location='json')
     parser.add_argument('Password', required=True, type=str, location='json')
-    
-    # def get(self):
-    #     members = Member.query.all()
-    #     member_schema = MemberSchema(many=True)
-    #     output = member_schema.dump(members)
-    #     return jsonify({'member' : output})
+
     
     def post(self):
         args = self.parser.parse_args()
@@ -132,114 +127,7 @@ class Login(Resource):
                 "message": "Unknown Error"
             }, 500
             
-        # members = Member.query.all()
-        # member_schema = MemberSchema(many=True)
-        # output = member_schema.dump(members)
-        # output = json.dumps(output1)    
-        # if id_temp not in output:
-        #     return {
-        #         "message": "User Not Found"
-        #     }, 404
-        # elif not bcrypt.checkpw(pw_temp.encode('utf-8'), pw_temp):  # 비밀번호 일치 확인
-        #     return {
-        #         "message": "Auth Failed"
-        #     }, 500
-        # elif pw_temp not in output:  # 비밀번호 일치 확인
-        #     return {
-        #         "message": "Auth Failed"
-        #     }, 500
-        # else:
-        #     return {
-        #         'Authorization': jwt.encode({'Password': pw_temp}, "secret", algorithm="HS256") # str으로 반환하여 return
-        #     }, 200
-
-        # if Member.query.get(id_temp) == None:
-        #     로그인 실패
-        # elif Member.query.get(id_temp):
-        #     로그인 성공 -> 토큰
-            
-        # if (id_temp == Member.query.get(id_temp)):
-        # if (id_temp in Member):
-        #     if (pw_temp in Member):
-        #         db.session['ID'] = id_temp
-                
-        #         self.status_code = 200
-        #         response = self.status_code
-        #         return make_response(response)
-
-
-# 로그인1
-class Login1(Resource):
-    def post(self, member_id, member_pw):
-        
-        id_list = Member.query.get(member_id)
-        pw_list = Member.query.get(member_pw)
-        
-        
-        # 1번째
-        if (member_id in id_list):
-            nth =  id_list.index()
-            if (member_pw in pw_list):
-                nnth = pw_list.index()
-                if nth == nnth:
-                    db.session['ID'] = member_id
-                    return redirect(url_for('/main'))
-        else:
-            return redirect(url_for('/login'))
-        
-        
-        # 2번째
-        if (member_id in id_list):
-            return id_list.index()
-        
-        if (member_pw in pw_list):
-            return pw_list.index()
-        
-        if id_list.index() == pw_list.index():
-            db.session['ID'] = member_id
-            return redirect(url_for('/main'))
-        
-        
-        # 3번째
-        if (member_id in id_list) and (member_pw in pw_list):
-            db.session['ID'] = member_id
-        
-        return redirect(url_for('/main'))
-        
-        
-# 로그인 2
-class index(Resource):
-    def post(self):
-        if Resource in db.session['ID']:  # session안에 username이 있으면 로그인
-            return redirect(url_for('/main'))
-        
-class Login2(Resource):
-    def post(self, member_id, member_pw):
-        
-        id_list = Member.query.get(member_id)
-        pw_list = Member.query.get(member_pw)
-        
-        if (member_id in id_list):
-            nth =  id_list.index()
-            if (member_pw in pw_list):
-                nnth = pw_list.index()
-                if nth == nnth:
-                    db.session['ID'] = member_id
-                    return index(member_id)
-        else:
-            return redirect(url_for('/login'))
-        
-
-# db.Member.find_one({'ID': id_receive, 'Password': pw_receive})
-# test 로그인
-class testlog(Resource):
-    status_code = 501
-    
-    def post(self):
-        dd = "kiho7248"
-        db.session['ID'] = dd
-        return jsonify({'ID':db.session['ID']})
-        
+ 
 # 로그아웃
 class Logout(Resource):
     status_code = 501
@@ -248,10 +136,3 @@ class Logout(Resource):
         self.status_code = 200
         response = self.status_code
         return response
-        # db.session['ID'].clear()
-        # db.session.pop('ID', None) 바로위에꺼 아니면 이거일듯
-        # return redirect(url_for('/login'))
-        # self.status_code = 200
-        # response = self.status_code
-        # return make_response(response)
-    
