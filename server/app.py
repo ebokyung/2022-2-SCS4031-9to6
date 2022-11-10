@@ -6,6 +6,8 @@ from flask_cors import CORS, cross_origin
 from datetime import timedelta
 
 
+import sys
+from pathlib import Path
 from models import db
 from views import s3
 
@@ -23,7 +25,7 @@ from views.bookmarkAPI import Bookmarks2
 from views.bookmarkAPI import Bookmarks3
 
 
- 
+
 import config
 
 app = Flask(__name__)
@@ -37,6 +39,12 @@ app.secret_key = '#$DSF51wfdFF2WE^4&@#$' # 세션 시크릿키
 migrate = Migrate(app, db)
 db.init_app(app)
 api = Api(app)
+
+# add ROOT to PATH
+FILE = Path(__file__).resolve()
+ROOT = FILE.parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.append(str(ROOT))
 
 # 모든 도메인에 대하여 CORS 설정
 CORS(app)
