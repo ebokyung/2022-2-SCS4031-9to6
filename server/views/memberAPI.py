@@ -1,4 +1,6 @@
-from flask import jsonify, make_response
+import json
+import bcrypt, jwt
+from flask import Response, jsonify, make_response, redirect, url_for, session
 from flask_restful import Resource, reqparse
 from sqlalchemy.exc import IntegrityError
 from models import db
@@ -22,6 +24,7 @@ class MemberList(Resource):
     
     body = ''
     status_code = 501
+    
     
     def get(self):
         members = Member.query.all()
@@ -83,3 +86,48 @@ class MemberCheck(Resource):
         else:
             return True # 가입하려는 ID가 DB에 없으면 회원가입 가능하므로 True 리턴.
         
+
+
+
+# 로그인
+class Login(Resource):
+    status_code = 501
+    parser = reqparse.RequestParser()
+    parser.add_argument('ID', required=True, type=str, location='json')
+    parser.add_argument('Password', required=True, type=str, location='json')
+
+    
+    def post(self):
+        args = self.parser.parse_args()
+        id_temp = args['ID']
+        pw_temp = args['Password']
+
+
+        try:
+            data = Member.query.filter_by(ID = id_temp, Password = pw_temp).first()
+            if data is not None:
+                hashedcode = jwt.encode({'ID': id_temp}, "secret", algorithm="HS256")
+                session['name'] = hashedcode
+                resp = make_response({
+                    'Authorization': hashedcode
+                }, 200)
+                resp.headers["Authorization"] = hashedcode
+                return resp
+            else:
+                return {
+                    "message": "Login Failed"
+                }, 403
+        except:
+            return {
+                "message": "Unknown Error"
+            }, 500
+            
+ 
+# 로그아웃
+class Logout(Resource):
+    status_code = 501
+    def post(self):
+        session.pop ('name', None)
+        self.status_code = 200
+        response = self.status_code
+        return response
