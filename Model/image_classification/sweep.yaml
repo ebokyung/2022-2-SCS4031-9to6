@@ -1,0 +1,22 @@
+program: sweep.py
+method: random
+metric:
+  name: val_loss
+  goal: minimize
+parameters:
+  pretrain_net:
+    values: ["Inception", "NasNet"]
+  batch_size:
+    values: [20, 50]
+  dropout:
+    values: [0.2, 0.5]
+  dense:
+    values: [32, 256, 1024]
+  learning_rate:
+    values: [1e-2, 1e-3, 1e-4, 3e-5]
+  optimizer:
+    values: ["adam", "sgd", "rmsprop"]
+  activation:
+    values: ["relu", "elu", "selu", "softmax"]
+project: flood24
+entity: hkleee
