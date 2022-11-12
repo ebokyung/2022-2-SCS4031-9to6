@@ -3,7 +3,7 @@ from flask_restful import Resource, reqparse
 from sqlalchemy.exc import IntegrityError
 from models import db
 from models.posting import Posting, PostingSchema
-from apis import s3
+from views import s3
 from datetime import datetime
 import requests, json
 import werkzeug

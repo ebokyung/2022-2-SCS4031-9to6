@@ -4,13 +4,13 @@ from flask_migrate import Migrate
 from flask_marshmallow import Marshmallow
 
 from models import db
-from apis import s3
+from views import s3
 
-from apis.cctvAPI import CCTVS, CCTVList
-from apis.memberAPI import Members, MemberList, MemberCheck
-from apis.historyAPI import FloodHistoryList
-from apis.shelterAPI import Shelters, ShelterList
-from apis.postingAPI import Postings, PostingList
+from views.cctvAPI import CCTVS, CCTVList
+from views.memberAPI import Members, MemberList, MemberCheck
+from views.historyAPI import FloodHistoryList
+from views.shelterAPI import Shelters, ShelterList
+from views.postingAPI import Postings, PostingList
  
 import config
 
