@@ -9,6 +9,14 @@ import requests, json
 import werkzeug
 
 class Postings(Resource):
+
+    parser = reqparse.RequestParser()
+    parser.add_argument('ImageFile', type=werkzeug.datastructures.FileStorage, help="Posting Image File", location='files')
+    parser.add_argument('Content', type=str, help="Posting Content", location='form')
+
+    body = ''
+    status_code = 501
+
     def get(self, posting_index):
         posting = db.one_or_404(db.select(Posting).filter_by(Index=posting_index))
         posting_schema = PostingSchema()
@@ -28,6 +36,56 @@ class Postings(Resource):
             posting.Index = index
             index += 1
         db.session.commit()
+
+    def put(self, posting_index):
+        posting = db.one_or_404(db.select(Posting).filter_by(Index=posting_index))
+        now = datetime.now()
+
+        args = self.parser.parse_args()
+        imageFile = args['ImageFile']
+        content = args['Content']
+        
+        try:
+            if imageFile != None:
+                print("image detected")
+                s3_delete_image(posting.ImageURL)
+
+                filename = imageFile.filename.split('.')[0]
+                ext = imageFile.filename.split('.')[-1]
+                img_name = now.strftime(f"{filename}-%Y-%m-%d-%H-%M-%S.{ext}")
+                s3_put_object(s3, '9to6bucket', imageFile, img_name)
+                image_url = 'https://{bucket_name}.s3.{location}.amazonaws.com/Posting/{s3_path}'.format(bucket_name='9to6bucket', location='ap-northeast-2', s3_path=img_name)
+
+                posting.ImageURL = image_url
+
+            if content != None:
+                print("content detected")
+                posting.Content = content
+
+            # 수정된 시간으로 변경
+            # posting.Datetime = now.strftime('%Y-%m-%d %H:%M:%S')
+            db.session.commit()    
+           
+            query = Posting.query.get(posting.Index)
+            schema = PostingSchema()
+            self.body = jsonify(schema.dump(query))
+            self.status_code = 201
+
+        except IntegrityError as error:
+            db.session.rollback()
+
+            error_message = str(error)
+            self.body = jsonify({"error": str(error), "type": "IntegrityError"})
+            if "Duplicate entry" in error_message:
+                self.status_code = 409
+            else:
+                self.status_code = 400
+
+        finally:
+            response = (self.body, self.status_code)
+            response = make_response(response)
+
+        return response
 
 class PostingList(Resource):
 
