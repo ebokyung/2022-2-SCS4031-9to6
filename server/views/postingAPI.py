@@ -15,6 +15,20 @@ class Postings(Resource):
         output = posting_schema.dump(posting)
         return jsonify({'posting' : output})
 
+    def delete(self, posting_index):
+        posting = db.one_or_404(db.select(Posting).filter_by(Index=posting_index))
+        s3_delete_image(posting.ImageURL)
+        db.session.delete(posting)
+        db.session.commit()
+
+        # 인덱스 업데이트 
+        postings = Posting.query.all()
+        index = 1
+        for posting in postings:
+            posting.Index = index
+            index += 1
+        db.session.commit()
+
 class PostingList(Resource):
 
     parser = reqparse.RequestParser()
@@ -63,6 +77,7 @@ class PostingList(Resource):
             self.status_code = 201
 
         except IntegrityError as error:
+            s3_delete_image(image_url)
             db.session.rollback()
 
             error_message = str(error)
@@ -77,6 +92,7 @@ class PostingList(Resource):
             response = make_response(response)
 
         return response
+
 
 
 def addPosting(memberID, latitude, longitude, address, content, image_url):
@@ -128,6 +144,10 @@ def s3_put_object(s3, bucket, file, filename):
         print(e)
         return False
     return True  
+
+def s3_delete_image(imageURL):
+    path = imageURL[51:]
+    s3.delete_object(Bucket='9to6bucket', Key=path)   
 
 
 def get_location(address):
