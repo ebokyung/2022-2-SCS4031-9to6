@@ -2,11 +2,18 @@
 import styled from 'styled-components';
 import { useRecoilValue } from 'recoil';
 import { showSideBar } from '../../atoms';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
+import { useForm } from "react-hook-form";
 import markerImage from '../../imgs/markerSprites.png';
+import reportBtn from '../../imgs/reportBtn.png';
+import reportPositionMarker from '../../imgs/reportPositionMarker.png';
 import style from './map.module.css';
-import {Map, MapMarker, CustomOverlayMap, useMap} from 'react-kakao-maps-sdk';
+import {Map, MapMarker, CustomOverlayMap, useMap, ZoomControl} from 'react-kakao-maps-sdk';
 import ReactPlayer from 'react-player';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { motion } from "framer-motion";
+import { faXmark, faLocationDot, faUpload } from "@fortawesome/free-solid-svg-icons";
+import { API } from '../../axios';
 
 const Container = styled.section`
     width: 100%;
@@ -19,10 +26,250 @@ const Container = styled.section`
     }
 `
 
+const ReportBtn = styled.button`
+  width: 50px;
+  height: 38px;
+  border: none;
+  position: absolute;
+  bottom: 120px;
+  right: 40px;
+  z-index:10;
+  background: url( ${reportBtn} ) no-repeat;
+  cursor: pointer;
+`
+
+const Overlay = styled(motion.div)`
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    top:0;
+    left: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 500;
+    background-color: rgba(0, 0, 0, 0.7);
+`;
+
+const BigBox = styled.form`
+    width: 40%;
+    height: 40%;
+    min-width: 540px;
+    min-height: 250px;
+    background-color: white;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 3px;
+    background-color: ${props=> props.theme.modalBackColor};
+`
+const XMark = styled(FontAwesomeIcon)`
+    font-size: 20px;
+    position: absolute;
+    top:20px;
+    right: 20px;
+    cursor: pointer;
+`
+
+const BoxTitle = styled.h1`
+    /* font-family: 'Nanum Myeongjo', serif; */
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 10px;
+`
+const BoxSubTitle = styled.h6`
+    /* font-family: 'Nanum Myeongjo', serif; */
+    color : #262626;
+    font-size: 11px;
+    font-weight: 300;
+    margin-bottom: 30px;
+`
+const BoxBody = styled.div`
+  width: 70%;
+  display: grid;
+  grid-template-columns: 70px auto;
+  row-gap: 0.5em;
+  margin-bottom: 30px;
+  div {
+    display: grid;
+    grid-template-columns: auto 20px;
+  }
+  span{
+    padding-top: 0.2rem;
+    font-size: 13px;
+  }
+`
+const Btn = styled.button`
+    width: 20%;
+    height: 20px;
+    padding: 0 20px;
+    /* margin: auto; */
+    background-color: ${props => props.theme.modalBtnColor};
+    border: none;
+    border-radius: 5px;
+    font-size: 12px;
+    text-align: center;
+    cursor: pointer;
+`
+const BoxBtn = styled(Btn)``
+const PinBtn = styled(FontAwesomeIcon)`
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: ${props=> props.theme.modalBtnColor};
+`
+const ImgUploadBtn = styled(FontAwesomeIcon)`
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: ${props=> props.theme.modalBtnColor};
+`
+
+const ReportInput = styled.input`
+  border: none;
+  border-radius: 3px;
+  padding: 0 10px;
+  margin-right: 0.5rem;
+  font-size: 11px;
+  background-color: #dddddd;
+  color: #A2A2A6;
+  ::placeholder {
+      color: #A2A2A6;
+  }
+  :focus {
+      outline-color: ${props=> props.theme.modalBtnColor};
+  }
+`
+const ReportTextArea = styled.textarea`
+  border: none;
+  border-radius: 3px;
+  min-height: 35px;
+  resize: none;
+  padding: 10px;
+  :focus {
+      outline-color: ${props=> props.theme.modalBtnColor};
+  }
+`
+
 function MapSection () {
     const visibility = useRecoilValue(showSideBar);
+    const [cctvArray, setCctvArray] = useState([]);
+    const [shelterArray, setShelterArray] = useState([]);
+    const [postingArray, setPostingArray] = useState([]);
+    
+    const [isReportMode, setIsReportMode] = useState(false);
+    const [reportPosition, setReportPosition] = useState();
 
-    const spriteSize = { width: 392, height: 64 }
+    const modalOverlayRef = useRef();
+    const inputPositionRef = useRef();
+    const inputImgRef = useRef();
+    const inputImgNameRef = useRef();
+
+    const { register, handleSubmit, setValue } = useForm();
+
+    // GET
+    const getdata = async() => {
+      try{
+          const cctvData = await API.get("/cctvs");
+          const shelterData = await API.get("/Shelters");
+          const postingData = await API.get("/Postings");
+          setCctvArray(cctvData.data.data);
+          setShelterArray(shelterData.data.data);
+          setPostingArray(postingData.data.data);
+      }catch(error){
+          console.log(error)
+      }
+    }
+
+    useEffect(()=>{
+        getdata();
+    },[])
+
+  //   // POST
+  //   const onValid = async(data) => {
+  //     const result = {
+  //         "Position" : data.position,
+  //         "Image" : data.image,
+  //         "Content" : data.content
+  //     }
+  //     try{
+  //         await LogAPI.post("/api/v1/emotion", result)
+  //         .then(
+  //             response => {
+  //                 console.log(response);
+  //             }
+  //         )
+  //         const data = await LogAPI.get("/api/v1/emotion?type=private");
+  //         setEmotion(data.data.data);
+  //     }catch(error){
+  //         console.log(error)
+  //     }
+  //     setValue("write", "")
+  // }
+
+    const handleReportModalBtn = () => {
+      setIsReportMode(prev=>!prev);
+    }
+
+    const handleReportPosition = () => {
+      modalOverlayRef.current.style.zIndex = -1;
+    }
+
+    function getAddr(lat,lng){
+      // 주소-좌표 변환 객체를 생성합니다
+      let geocoder = new kakao.maps.services.Geocoder();
+   
+      let coord = new kakao.maps.LatLng(lat, lng);
+      let callback = function(result, status) {
+          if (status === kakao.maps.services.Status.OK) {
+              const arr  ={ ...result};
+              const _arr = arr[0].address.address_name;
+              // console.log(_arr); 
+              inputPositionRef.current.value = _arr;
+          }
+     }
+      geocoder.coord2Address(coord.getLng(), coord.getLat(), callback);
+   }
+
+    useEffect (()=>{
+      setReportPosition(null)
+    }, [isReportMode])
+    
+    const submitReportPosition = () => {
+      if (window.confirm('여기 위치에 제보하시겠습니까?')) {
+        modalOverlayRef.current.style.zIndex = 500;
+        getAddr(reportPosition.lat, reportPosition.lng);
+      }
+    }
+
+    const onUploadImageButtonClick = (e) => {
+      e.preventDefault();
+      inputImgRef.current.click();
+    }
+
+    const onUploadImage = (e) => {
+      e.preventDefault();
+      // console.log(e.target.files[0].name);
+      inputImgNameRef.current.value = e.target.files[0].name;
+      // const formData = new FormData();
+      // formData.append('image', e.target.files[0]);
+  
+      // axios({
+      //   baseURL: API_HOST,
+      //   url: '/images/:username/thumbnail',
+      //   method: 'POST',
+      //   data: formData,
+      //   headers: {
+      //     'Content-Type': 'multipart/form-data',
+      //   },
+      // })
+      //   .then(response => {
+      //     console.log(response.data);
+      //   })
+      //   .catch(error => {
+      //     console.error(error);
+      //   });
+    }
 
     //-------------------------------------------------------------------
     // cctv 마커가 표시될 좌표 배열입니다
@@ -162,6 +409,7 @@ function MapSection () {
     //-------------------------------------------------------------------
 
   const [selectedCategory, setSelectedCategory] = useState("all")
+  const spriteSize = { width: 392, height: 64 }
 
   useEffect(() => {
     const allMenu = document.getElementById("allMenu")
@@ -204,7 +452,8 @@ function MapSection () {
     }
   }, [selectedCategory])
 
-  // 마커별-인포위도우별 컴포넌트
+  // 마커별 인포위도우 컴포넌트
+  // 대피소 마커 인포윈도우
   const EventMarkerContainer_safety = ( props ) => {
     const map = useMap()
     const [isVisible, setIsVisible] = useState(false)
@@ -237,6 +486,7 @@ function MapSection () {
       </>
     )
   }
+  // 제보 마커 인포윈도우
   const EventMarkerContainer_report = ( props ) => {
     const map = useMap()
     const [isVisible, setIsVisible] = useState(false)
@@ -286,6 +536,7 @@ function MapSection () {
       </>
     )
   }
+  // cctv 마커 인포윈도우
   const EventMarkerContainer_cctv = ( props ) => {
     const map = useMap()
     const [isVisible, setIsVisible] = useState(false)
@@ -364,6 +615,13 @@ function MapSection () {
             height: "100%",
           }}
           level={5}
+          onClick={isReportMode ? 
+            (_t, mouseEvent) => { 
+            setReportPosition({
+              lat: mouseEvent.latLng.getLat(),
+              lng: mouseEvent.latLng.getLng(),
+            }) 
+          } : undefined }
         >
           {/* 지도에 마커 그리기 */}
         {(selectedCategory === "all" || selectedCategory === "safety") &&
@@ -422,6 +680,19 @@ function MapSection () {
             />
           )
         )}
+
+        {/* 지도에 제보 위치 표시하는 마커 */}
+        {isReportMode && reportPosition &&
+        <MapMarker // 마커를 생성합니다
+          position={reportPosition}
+          draggable={true} // 마커가 드래그 가능하도록 설정합니다
+          image={{
+            src: reportPositionMarker,
+            size: {width: 64, height: 64},
+          }}
+          onMouseOut={()=> submitReportPosition()} // 마우스가 마커를 벗어나면 위치가 설정됩니다
+        />}
+
       </Map>
 
       {/* 4가지 마커 메뉴 */}
@@ -445,6 +716,68 @@ function MapSection () {
           </li>
         </ul>
       </div>
+
+      {/* 제보 버튼 */}
+      <ReportBtn 
+        onClick={handleReportModalBtn}
+      />
+      {isReportMode ? 
+        <Overlay 
+            ref={modalOverlayRef}
+            initial={{ opacity : 0}}
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }}
+        />
+        //     <BigBox onSubmit={handleSubmit(onValid)}>
+        //         <XMark onClick = {() => setIsReportMode(false)} icon={faXmark} />
+        //         <BoxTitle>
+        //             제보 등록하기
+        //         </BoxTitle>
+        //         <BoxSubTitle>
+        //             * 허위 제보로 인한 피해는 책임을 물을 수 있습니다.
+        //         </BoxSubTitle>
+        //         <BoxBody>
+        //             <span>위치</span>
+        //             <div>
+        //               <ReportInput 
+        //                 {...register("position", {required : true})}
+        //                 ref={inputPositionRef} 
+        //                 placeholder="오른쪽 버튼를 눌러 위치를 설정해주세요." 
+        //                 readOnly />
+        //               <PinBtn onClick={handleReportPosition} icon={faLocationDot}/>
+        //             </div>
+        //             <span>사진</span>
+        //             <div>
+        //               <ReportInput 
+        //                 placeholder="오른쪽 버튼을 눌러 침수상황 사진을 업로드 해주세요." 
+        //                 ref={inputImgNameRef} 
+        //                 disabled />
+        //               <input 
+        //                 {...register("image", {required : true})}
+        //                 type="file" 
+        //                 accept="image/*" 
+        //                 style={{display: 'none'}}
+        //                 ref={inputImgRef} 
+        //                 onChange={onUploadImage}
+        //                 />
+        //               <ImgUploadBtn 
+        //                 icon={faUpload} 
+        //                 onClick={onUploadImageButtonClick}
+        //               />
+        //             </div>
+        //             <span>제보내용</span>
+        //             <ReportTextArea
+        //                 {...register("content", {required : true})}
+        //             />
+        //         </BoxBody>
+        //         <BoxBtn>
+        //             제보하기
+        //         </BoxBtn>
+        //     </BigBox>
+        // </Overlay> 
+        : null}
+
+
     </Container>)
 }
 export default MapSection;
