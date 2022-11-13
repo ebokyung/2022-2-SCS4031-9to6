@@ -1,5 +1,7 @@
 import styled from 'styled-components';
-import PageHeader from '../components/PageHeader';
+import ReportClusterMap from '../components/ReportPage/ReportClusterMap';
+import ReportList from '../components/ReportPage/ReportList';
+
 
 const Wrapper = styled.body`
     width: 100vw;
@@ -19,7 +21,8 @@ function Report () {
     return(
     <Wrapper>
         <Container>
-            <PageHeader title={'제보 페이지'} />
+            <ReportClusterMap />
+            <ReportList />
         </Container>
     </Wrapper>)
 }
