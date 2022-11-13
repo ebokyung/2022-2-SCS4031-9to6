@@ -151,17 +151,30 @@ const ReportTextArea = styled.textarea`
   }
 `
 
+const ShelterInfowindowBody =styled.div`
+  width: 90%;
+  margin: 10px auto;
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  row-gap: 0.5em;
+  /* span{
+    white-space: wrap;
+  } */
+`
+
 function MapSection () {
     const visibility = useRecoilValue(showSideBar);
-    const [cctvArray, setCctvArray] = useState([]);
-    const [shelterArray, setShelterArray] = useState([]);
-    const [postingArray, setPostingArray] = useState([]);
+    const [cctvPositions, setCctvPositions] = useState([]);
+    const [shelterPositions, setShelterPositions] = useState([]);
+    // const [reportPositions, setReportPositions] = useState([]);
     
     const [isReportMode, setIsReportMode] = useState(false);
     const [reportPosition, setReportPosition] = useState();
 
     const modalOverlayRef = useRef();
-    const inputPositionRef = useRef();
+    const inputPositionAddrRef = useRef();
+    const inputPositionCoordLatRef = useRef();
+    const inputPositionCoordLngRef = useRef();
     const inputImgRef = useRef();
     const inputImgNameRef = useRef();
 
@@ -172,10 +185,12 @@ function MapSection () {
       try{
           const cctvData = await API.get("/cctvs");
           const shelterData = await API.get("/Shelters");
-          const postingData = await API.get("/Postings");
-          setCctvArray(cctvData.data.data);
-          setShelterArray(shelterData.data.data);
-          setPostingArray(postingData.data.data);
+          // const reportData = await API.get("/Postings");
+          setCctvPositions(cctvData.data.cctv);
+          setShelterPositions(shelterData.data);
+          // setReportPositions(reportData.data.data);
+          console.log(cctvData.data.cctv)
+          console.log(shelterData.data)
       }catch(error){
           console.log(error)
       }
@@ -185,26 +200,28 @@ function MapSection () {
         getdata();
     },[])
 
-  //   // POST
+    // POST
   //   const onValid = async(data) => {
   //     const result = {
-  //         "Position" : data.position,
-  //         "Image" : data.image,
-  //         "Content" : data.content
+  //         // "MemberID": "(회원 아이디, 로그인 안했을 경우 요청X)",
+  //         "Latitude": data.Latitude,
+  //         "Longitude": data.Longitude,
+  //         "ImageFile": data.ImageFile,
+  //         "Content": data.Content,
   //     }
   //     try{
-  //         await LogAPI.post("/api/v1/emotion", result)
+  //         await API.post("/Postings", result)
   //         .then(
   //             response => {
   //                 console.log(response);
   //             }
   //         )
-  //         const data = await LogAPI.get("/api/v1/emotion?type=private");
-  //         setEmotion(data.data.data);
+  //         // const data = await API.get("/Postings");
+  //         // setEmotion(data.data.data);
   //     }catch(error){
   //         console.log(error)
   //     }
-  //     setValue("write", "")
+  //     setValue("Content", "")
   // }
 
     const handleReportModalBtn = () => {
@@ -225,7 +242,7 @@ function MapSection () {
               const arr  ={ ...result};
               const _arr = arr[0].address.address_name;
               // console.log(_arr); 
-              inputPositionRef.current.value = _arr;
+              inputPositionAddrRef.current.value = _arr;
           }
      }
       geocoder.coord2Address(coord.getLng(), coord.getLat(), callback);
@@ -239,6 +256,8 @@ function MapSection () {
       if (window.confirm('여기 위치에 제보하시겠습니까?')) {
         modalOverlayRef.current.style.zIndex = 500;
         getAddr(reportPosition.lat, reportPosition.lng);
+        inputPositionCoordLatRef.current.value = reportPosition.lat;
+        inputPositionCoordLngRef.current.value = reportPosition.lng;
       }
     }
 
@@ -251,162 +270,62 @@ function MapSection () {
       e.preventDefault();
       // console.log(e.target.files[0].name);
       inputImgNameRef.current.value = e.target.files[0].name;
-      // const formData = new FormData();
-      // formData.append('image', e.target.files[0]);
-  
-      // axios({
-      //   baseURL: API_HOST,
-      //   url: '/images/:username/thumbnail',
-      //   method: 'POST',
-      //   data: formData,
-      //   headers: {
-      //     'Content-Type': 'multipart/form-data',
-      //   },
-      // })
-      //   .then(response => {
-      //     console.log(response.data);
-      //   })
-      //   .catch(error => {
-      //     console.error(error);
-      //   });
     }
 
-    //-------------------------------------------------------------------
-    // cctv 마커가 표시될 좌표 배열입니다
-  const cctvPositions = [
-    {
-      id: 1,
-      name: 'cctv1',
-      center: '서울교통',
-      url: 'http://210.179.218.54:1935/live/333.stream/playlist.m3u8',
-      lat: 37.497535461505684,
-      lng: 127.02948149502778,
-    },
-    {
-      id: 2,
-      name: 'cctv2',
-      center: '국가교통',
-      url: 'http://210.179.218.54:1935/live/333.stream/playlist.m3u8',
-      lat: 37.499590490909185, 
-      lng: 127.0263723554437,
-    },
-    {
-      id: 3,
-      name: 'cctv3',
-      center: '국가교통',
-      url: 'http://210.179.218.54:1935/live/333.stream/playlist.m3u8',
-      lat: 37.499427948430814, 
-      lng: 127.02794423197847,
-    },
-    {
-      id: 4,
-      name: 'cctv4',
-      center: '국가교통',
-      url: 'http://210.179.218.52:1935/live/157.stream/playlist.m3u8',
-      lat: 37.498553760499505, 
-      lng: 127.02882598822454,
-    },
-    {
-      id: 5,
-      name: 'cctv5',
-      center: '국가교통',
-      url: 'http://210.179.218.52:1935/live/157.stream/playlist.m3u8',
-      lat: 37.497625593121384, 
-      lng: 127.02935713582038,
-    },
-    {
-      id: 6,
-      name: 'cctv6',
-      center: '국가교통',
-      url: 'http://210.179.218.52:1935/live/157.stream/playlist.m3u8',
-      lat: 37.49646391248451, 
-      lng: 127.02675574250912,
-    },
-    {
-      id: 7,
-      name: 'cctv7',
-      center: '국가교통',
-      url: 'http://210.179.218.51:1935/live/180.stream/playlist.m3u8',
-      lat: 37.49629291770947, 
-      lng: 127.02587362608637,
-    },
-    {
-      id: 8,
-      name: 'cctv8',
-      center: '국가교통',
-      url: 'http://210.179.218.51:1935/live/180.stream/playlist.m3u8',
-      lat: 37.49754540521486, 
-      lng: 127.02546694890695,
-    }
-  ]
   const cctvOrigin = { x: 110, y: 0 }
-
-  // 대피소 마커가 표시될 좌표 배열입니다
-  const safetyPositions = [
-    {
-      content: '대피소1',
-      latlng: { lat: 37.497535461505684, lng: 127.02948149502778 },
-    },
-    {
-      content: '대피소2',
-      latlng: { lat: 37.49671536281186, lng: 127.03020491448352 },
-    },
-    {
-      content: '대피소3',
-      latlng: { lat: 37.496201943633714, lng: 127.02959405469642 },
-    },
-    {
-      content: '대피소4',
-      latlng: { lat: 37.49640072567703, lng: 127.02726459882308 },
-    },
-    {
-      content: '대피소5',
-      latlng: { lat: 37.49640098874988, lng: 127.02609983175294 },
-    },
-    {
-      content: '대피소6',
-      latlng: { lat: 37.49932849491523, lng: 127.02935780247945 },
-    },
-    {
-      content: '대피소7',
-      latlng: { lat: 37.49996818951873, lng: 127.02943721562295 },
-    },
-  ]
-  const safetyOrigin = { x: 60, y: 0 }
-
-  // 제보 마커가 표시될 좌표 배열입니다
-  const reportPositions = [
-  {
-    content: '제보1',
-    latlng: { lat: 37.49966168796031, lng: 127.03007039430118 },
-  },
-  {
-    content: '제보2',
-    latlng: { lat: 37.499463762912974, lng: 127.0288828824399 },
-  },
-  {
-    content: '제보3',
-    latlng: { lat: 37.49896834100913, lng: 127.02833986892401 },
-  },
-  {
-    content: '제보4',
-    latlng: { lat: 37.49893267508434, lng: 127.02673400572665 },
-  },
-  {
-    content: '제보5',
-    latlng: { lat: 37.49872543597439, lng: 127.02676785815386 },
-  },
-  {
-    content: '제보6',
-    latlng: { lat: 37.49813096097184, lng: 127.02591949495914 },
-  },
-  {
-    content: '제보7',
-    latlng: { lat: 37.497680616783086, lng: 127.02518427952202 },
-  }
-  ]
+  const shelterOrigin = { x: 60, y: 0 }
   const reportOrigin = { x: 10, y: 10 }
-    //-------------------------------------------------------------------
+  const reportPositions = [
+    {
+      Content: '제보1',
+      Latitude: 37.49966168796031,
+      Longitude: 127.03007039430118,
+      Address: '도로명주소',
+      Datetime: '제보시간',
+    },
+    {
+      Content: '제보2',
+      Latitude: 37.499463762912974,
+      Longitude: 127.0288828824399,
+      Address: '도로명주소',
+      Datetime: '제보시간',
+    },
+    {
+      Content: '제보3',
+      Latitude: 37.49896834100913,
+      Longitude: 127.02833986892401,
+      Address: '도로명주소',
+      Datetime: '제보시간',
+    },
+    {
+      Content: '제보4',
+      Latitude: 37.49893267508434,
+      Longitude: 127.02673400572665,
+      Address: '도로명주소',
+      Datetime: '제보시간',
+    },
+    {
+      Content: '제보5',
+      Latitude: 37.49872543597439,
+      Longitude: 127.02676785815386,
+      Address: '도로명주소',
+      Datetime: '제보시간',
+    },
+    {
+      Content: '제보6',
+      Latitude: 37.49813096097184,
+      Longitude: 127.02591949495914,
+      Address: '도로명주소',
+      Datetime: '제보시간',
+    },
+    {
+      Content: '제보7',
+      Latitude: 37.497680616783086,
+      Longitude: 127.02518427952202,
+      Address: '도로명주소',
+      Datetime: '제보시간',
+    }
+    ]
 
   const [selectedCategory, setSelectedCategory] = useState("all")
   const spriteSize = { width: 392, height: 64 }
@@ -414,7 +333,7 @@ function MapSection () {
   useEffect(() => {
     const allMenu = document.getElementById("allMenu")
     const cctvMenu = document.getElementById("cctvMenu")
-    const safetyMenu = document.getElementById("safetyMenu")
+    const shelterMenu = document.getElementById("shelterMenu")
     const reportMenu = document.getElementById("reportMenu")
 
     if (selectedCategory === "all") {
@@ -423,7 +342,7 @@ function MapSection () {
 
       // cctv, 대피소와 제보 카테고리는 선택되지 않은 스타일로 바꿉니다
       cctvMenu.className = ""
-      safetyMenu.className = ""
+      shelterMenu.className = ""
       reportMenu.className = ""
     } else if (selectedCategory === "cctv") {
       // cctv 카테고리를 선택된 스타일로 변경하고
@@ -431,15 +350,15 @@ function MapSection () {
 
       // 모두, 대피소와 제보 카테고리는 선택되지 않은 스타일로 바꿉니다
       allMenu.className = ""
-      safetyMenu.className = ""
+      shelterMenu.className = ""
       reportMenu.className = ""
-    }else if (selectedCategory === "safety") {
+    }else if (selectedCategory === "shelter") {
       // 대피소 카테고리가 클릭됐을 때
 
       // 대피소 카테고리를 선택된 스타일로 변경하고
       allMenu.className = ""
       cctvMenu.className = ""
-      safetyMenu.className = `${style.menu_selected}`
+      shelterMenu.className = `${style.menu_selected}`
       reportMenu.className = ""
     } else if (selectedCategory === "report") {
       // 제보 카테고리가 클릭됐을 때
@@ -447,14 +366,14 @@ function MapSection () {
       // 제보 카테고리를 선택된 스타일로 변경하고
       allMenu.className = ""
       cctvMenu.className = ""
-      safetyMenu.className = ""
+      shelterMenu.className = ""
       reportMenu.className = `${style.menu_selected}`
     }
   }, [selectedCategory])
 
   // 마커별 인포위도우 컴포넌트
   // 대피소 마커 인포윈도우
-  const EventMarkerContainer_safety = ( props ) => {
+  const EventMarkerContainer_shelter = ( props ) => {
     const map = useMap()
     const [isVisible, setIsVisible] = useState(false)
 
@@ -470,15 +389,22 @@ function MapSection () {
       />
         {isVisible && 
         <CustomOverlayMap position={props.position}>
-          <div className={style.wrap}>
-            <div className={style.info}>
+          <div className={style.wrap} style={{height: '140px'}}>
+            <div className={style.info} style={{height: '130px'}}>
               <div
                 className={style.close}
                 onClick={() => setIsVisible(false)}
                 title="닫기"
               />
+              <div className={style.title}>
+                {props.name}
+              </div>
               <div className={style.body}>
-                {props.content}
+                <ShelterInfowindowBody>
+                  <span>위치:</span><span>{props.address}</span>
+                  <span>시설:</span><span>{props.type}</span>
+                  <span>규모:</span><span>{props.area}</span>
+                </ShelterInfowindowBody>
               </div>
             </div>
           </div>
@@ -603,7 +529,7 @@ function MapSection () {
     <Container id={style.mapwrap} className={visibility ? '' : 'hide'}>
       
       {/* 지도 */}
-      <Map id='map'
+      <Map
           center={{
             // 지도의 중심좌표
             lat: 37.498004414546934,
@@ -624,18 +550,21 @@ function MapSection () {
           } : undefined }
         >
           {/* 지도에 마커 그리기 */}
-        {(selectedCategory === "all" || selectedCategory === "safety") &&
-          safetyPositions.map((position) => (
-            <EventMarkerContainer_safety
-              key={`safety-${position.latlng.lat},${position.latlng.lng}`}
-              position={position.latlng}
-              content={position.content}
+        {(selectedCategory === "all" || selectedCategory === "shelter") &&
+          shelterPositions.map((position) => (
+            <EventMarkerContainer_shelter
+              key={`shelter-${position.Latitude},${position.Longitude}`}
+              position={{lat: position.Latitude , lng: position.Longitude} }
+              address={position.Address}
+              name={position.Name}
+              type={position.Type}
+              area={position.Area}
               markerImage={{
                 src: markerImage,
                 size: {width: 40, height: 40},
                 options: {
                   spriteSize: spriteSize,
-                  spriteOrigin: safetyOrigin,
+                  spriteOrigin: shelterOrigin,
                 },
               }}
             />
@@ -644,11 +573,12 @@ function MapSection () {
         {(selectedCategory === "all" || selectedCategory === "report") &&
           reportPositions.map((position) => (
             <EventMarkerContainer_report
-              key={`report-${position.latlng.lat},${position.latlng.lng}`}
-              position={position.latlng}
-              address='도로명주소'
-              time='제보시간'
-              content={position.content}
+              key={`report-${position.Latitude},${position.Longitude}`}
+              position={{lat: position.Latitude , lng: position.Longitude}}
+              address={position.Address}
+              time={position.Datetime}
+              content={position.Content}
+              image={position.ImageFile}
               markerImage={{
                 src: markerImage,
                 size: {width: 40, height: 40},
@@ -663,11 +593,11 @@ function MapSection () {
         {(selectedCategory === "all" || selectedCategory === "cctv") &&
           cctvPositions.map((position) => (
             <EventMarkerContainer_cctv
-              key={`cctv-${position.lat},${position.lng}`}
-              position ={position}
-              name={position.name}
-              center={position.center}
-              url={position.url}
+              key={`cctv-${position.Latitude},${position.Longitude}`}
+              position ={{lat: position.Latitude , lng: position.Longitude}}
+              name={position.Name}
+              center={position.Center}
+              url={position.URL}
               // cctv 마커 이미지
               markerImage={{
                 src: markerImage,
@@ -706,8 +636,8 @@ function MapSection () {
             <span className={`${style.ico_comm} ${style.ico_cctv}`}></span>
             CCTV
           </li>
-          <li id="safetyMenu" onClick={() => setSelectedCategory("safety")}>
-            <span className={`${style.ico_comm} ${style.ico_safety}`}></span>
+          <li id="shelterMenu" onClick={() => setSelectedCategory("shelter")}>
+            <span className={`${style.ico_comm} ${style.ico_shelter}`}></span>
             대피소
           </li>
           <li id="reportMenu" onClick={() => setSelectedCategory("report")}>
@@ -727,54 +657,66 @@ function MapSection () {
             initial={{ opacity : 0}}
             animate={{ opacity: 1 }} 
             exit={{ opacity: 0 }}
-        />
-        //     <BigBox onSubmit={handleSubmit(onValid)}>
-        //         <XMark onClick = {() => setIsReportMode(false)} icon={faXmark} />
-        //         <BoxTitle>
-        //             제보 등록하기
-        //         </BoxTitle>
-        //         <BoxSubTitle>
-        //             * 허위 제보로 인한 피해는 책임을 물을 수 있습니다.
-        //         </BoxSubTitle>
-        //         <BoxBody>
-        //             <span>위치</span>
-        //             <div>
-        //               <ReportInput 
-        //                 {...register("position", {required : true})}
-        //                 ref={inputPositionRef} 
-        //                 placeholder="오른쪽 버튼를 눌러 위치를 설정해주세요." 
-        //                 readOnly />
-        //               <PinBtn onClick={handleReportPosition} icon={faLocationDot}/>
-        //             </div>
-        //             <span>사진</span>
-        //             <div>
-        //               <ReportInput 
-        //                 placeholder="오른쪽 버튼을 눌러 침수상황 사진을 업로드 해주세요." 
-        //                 ref={inputImgNameRef} 
-        //                 disabled />
-        //               <input 
-        //                 {...register("image", {required : true})}
-        //                 type="file" 
-        //                 accept="image/*" 
-        //                 style={{display: 'none'}}
-        //                 ref={inputImgRef} 
-        //                 onChange={onUploadImage}
-        //                 />
-        //               <ImgUploadBtn 
-        //                 icon={faUpload} 
-        //                 onClick={onUploadImageButtonClick}
-        //               />
-        //             </div>
-        //             <span>제보내용</span>
-        //             <ReportTextArea
-        //                 {...register("content", {required : true})}
-        //             />
-        //         </BoxBody>
-        //         <BoxBtn>
-        //             제보하기
-        //         </BoxBtn>
-        //     </BigBox>
-        // </Overlay> 
+        >
+            {/* <BigBox onSubmit={handleSubmit(onValid)}> */}
+            <BigBox>
+                <XMark onClick = {() => setIsReportMode(false)} icon={faXmark} />
+                <BoxTitle>
+                    제보 등록하기
+                </BoxTitle>
+                <BoxSubTitle>
+                    * 허위 제보로 인한 피해는 책임을 물을 수 있습니다.
+                </BoxSubTitle>
+                <BoxBody>
+                    <span>위치</span>
+                    <div>
+                      <ReportInput 
+                        ref={inputPositionAddrRef} 
+                        placeholder="오른쪽 버튼를 눌러 위치를 설정해주세요." 
+                        disabled />
+                      <input 
+                        // {...register("Latitude", {required : true})}
+                        type="number"
+                        style={{display: 'none'}}
+                        ref={inputPositionCoordLatRef} 
+                      />
+                      <input 
+                        // {...register("Logitude", {required : true})}
+                        type="number"
+                        style={{display: 'none'}}
+                        ref={inputPositionCoordLngRef} 
+                      />
+                      <PinBtn onClick={handleReportPosition} icon={faLocationDot}/>
+                    </div>
+                    <span>사진</span>
+                    <div>
+                      <ReportInput 
+                        placeholder="오른쪽 버튼을 눌러 침수상황 사진을 업로드 해주세요." 
+                        ref={inputImgNameRef} 
+                        disabled />
+                      <input 
+                        // {...register("ImageFile", {required : true})}
+                        type="file" 
+                        accept="image/*" 
+                        style={{display: 'none'}}
+                        ref={inputImgRef} 
+                        onChange={onUploadImage}
+                        />
+                      <ImgUploadBtn 
+                        icon={faUpload} 
+                        onClick={onUploadImageButtonClick}
+                      />
+                    </div>
+                    <span>제보내용</span>
+                    <ReportTextArea
+                        // {...register("Content", {required : true})}
+                    />
+                </BoxBody>
+                <BoxBtn>
+                    제보하기
+                </BoxBtn>
+            </BigBox>
+        </Overlay> 
         : null}
 
 

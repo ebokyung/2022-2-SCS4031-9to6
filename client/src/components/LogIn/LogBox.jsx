@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import { useNavigate } from "react-router-dom";
 import { useForm } from 'react-hook-form';
-// import { API } from '../../axios';
+import { API } from '../../axios';
 
 const Container = styled.section`
     width: 50%;
@@ -76,22 +76,21 @@ function LogBox () {
         formState: { errors },
     } = useForm();
 
-    const onValid = (data) => {
+    const onValid = async (data) => {
         const result = {
             "ID": data.id,
-            "password": data.pw,
+            "Password": data.pw,
         };
-        console.log(result);
-        // try{
-        //     await API.post('/api/...', result).then(
-        //         response => {
-        //             console.log(response);
-        //         }
-        //     )
+        try{
+            await API.post('/Login', result).then(
+                response => {
+                    console.log(response);
+                }
+            )
             navigate("/")
-        // } catch(error){
-        //     window.alert(error.response.data.message)
-        // }
+        } catch(error){
+            console.log(error)
+        }
     };
     
     return(

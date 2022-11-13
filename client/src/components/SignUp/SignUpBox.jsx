@@ -2,7 +2,7 @@ import styled from 'styled-components';
 import { useNavigate } from "react-router-dom";
 import { useForm } from 'react-hook-form';
 import { useState } from 'react';
-// import { API } from '../../axios';
+import { API } from '../../axios';
 
 const Container = styled.section`
     width: 50%;
@@ -74,23 +74,7 @@ function SignUpBox () {
     // 비밀번호 입력 형식
     var regExp = /^(?!((?:[A-Za-z]+)|(?:[~!@#$%^&*()_+=]+)|(?=[0-9]+))$)[A-Za-z\d~!@#$%^&*()_+=]{8,}$/;
 
-    // submit 했을때 유효하면
-    const onSubmit = async(result) => {
-        console.log(result);
-        // try{
-        //     await API.post('/api/...', result).then(
-        //         response => {
-        //             console.log(response);
-        //         }
-        //     )
-        window.alert("회원가입이 완료되었습니다. 🙌🏻");
-        navigate("/login");
-        // } catch(error){
-        //     console.log(error)
-        // }
-    }
-
-    // submit 했을때 각 입력창 유효성 확인하기
+    // submit 했을때 각 입력창 유효성 확인하고 
     const {
         register,
         handleSubmit,
@@ -98,7 +82,7 @@ function SignUpBox () {
         setError
     } = useForm();
 
-    const onValid = (data) => {
+    const onValid = async (data) => {
         if (data.pw !== data.pw1){
             window.alert("비밀번호가 일치하지 않습니다.")
             setError("pw1", {shouldFocus : true})
@@ -107,14 +91,37 @@ function SignUpBox () {
         // 에러없으면 
         const result = {
             'ID': data.id,
-		    'e-mail': data.email,
-		    'password': data.pw,
+		    'Email': data.email,
+		    'Password': data.pw,
         }
-        onSubmit(result);
+        try{
+            await API.post('/Members', result).then(
+                response => {
+                    console.log(response);
+                }
+            )
+            window.alert("회원가입이 완료되었습니다. 🙌🏻");
+            navigate("/login");
+        } catch(error){
+            console.log(error)
+        }
+        
     };
 
     // 아이디 입력할때마다 중복 확인하기
-    // ...
+    const [inputId, setInputId] = useState();
+    const onChangeId = async (e) => {
+        setInputId(e.target.value);
+        try{
+            await API.get('/MembersCheck/${inputId}', inputId).then(
+                response => {
+                    console.log(response);
+                }
+            )
+        } catch(error){
+            console.log(error)
+        }     
+    }
 
     // 비밀번호 입력할때마다 조건에 맞는지 검사하기
     const [inputPw, setInputPw] = useState();
@@ -155,6 +162,7 @@ function SignUpBox () {
                 </Label>
                 <Input {...register("id", { 
                     required: "* 아이디를 입력해주세요.", })}
+                    onChange={onChangeId}
                     placeholder="id">
                 </Input>
             </FieldSet>
