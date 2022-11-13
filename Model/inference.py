@@ -1,4 +1,4 @@
-#import tensorflow as tf
+import tensorflow as tf
 import glob
 
 import torch
@@ -19,8 +19,8 @@ if str(ROOT) not in sys.path:
 
 from Model.object_detection.detect import detection_run
 from Model.data_loader.frame_extraction import get_one_frame
-from object_detection.models.common import DetectMultiBackend
-from object_detection.utils.torch_utils import select_device
+from Model.object_detection.models.common import DetectMultiBackend
+from Model.object_detection.utils.torch_utils import select_device
 
 
 # delete url
@@ -82,11 +82,11 @@ def read_image_from_dir(img_dir, input_size=299):
 class Inference:
     def __init__(self, base_dir='.'):
         # load model
-        # self.binary_model = tf.keras.models.load_model('./image_classification/best.h5')
+        self.binary_model = tf.keras.models.load_model('./image_classification/best.h5')
         print("TF Model Loaded!")
 
         device = select_device()
-        self.detection_model = DetectMultiBackend('./object_detection/best.pt', device=device)
+        self.detection_model = DetectMultiBackend(ROOT/'Model/object_detection/best.pt', device=device)
         self.detection_model.names[0] = '0단계'
         self.detection_model.names[1] = '1단계'
         self.detection_model.names[2] = '2단계'
@@ -163,14 +163,16 @@ class Inference:
             src = np.array(src)
             result = self.classification_inference(src)
             result = 9
+
+        # image S3 저장
+        if result != 0:
+            imageURL = ''
+            # TODO
+        else:
+            os.remove(mp4_src)
+            os.remove(img_src)
         # 0 : 정상
         # 1,2,3(object detection) : n단계
         # 9 (binary classification) : 침수
-        return result
+        return result, imageURL
 
-
-if __name__ == '__main__':
-    inf = Inference('./temp')
-
-    r = inf.run(dummy_url)
-    print(r)
