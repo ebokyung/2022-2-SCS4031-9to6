@@ -1,4 +1,6 @@
 #import tensorflow as tf
+import glob
+
 import torch
 import cv2
 import subprocess
@@ -15,13 +17,14 @@ ROOT = FILE.parents[1]
 if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))
 
-# from Model.object_detection.yolov5.detect import detection_run
-# from Model.data_loader.frame_extraction import get_frame, get_one_frame
+from Model.object_detection.detect import detection_run
+from Model.data_loader.frame_extraction import get_one_frame
+from object_detection.models.common import DetectMultiBackend
+from object_detection.utils.torch_utils import select_device
 
-# TODO
+
 # delete url
 dummy_url = 'http://210.179.218.52:1935/live/157.stream/playlist.m3u8'
-file_name = ''
 
 
 def raise_sigint():
@@ -44,24 +47,29 @@ def raise_sigint():
 
 
 def ffmpeg(m3u8_url, save_dir):
-    global file_name
-    file_name = str(time.time()).replace('.', '') + '.mp4'
+    file_name = str(time.time()).replace('.', '')
+
+    f"#######save to {save_dir}/{file_name}.mp4###########\n"
     try:
         subprocess.run(['ffmpeg', '-i', m3u8_url, '-bsf:a', 'aac_adtstoasc', '-vcodec', 'copy',
-                        '-c', 'copy', '-crf', '50', save_dir + '/' + file_name])
-    except Exception as e:
-        print('done')
+                        '-c', 'copy', '-crf', '50', save_dir + '/' + file_name+'.mp4'])
+
+    except KeyboardInterrupt as e:
+        # print(e)
+        print('ffmpeg done')
 
 
 def download_mp4(m3u8_url, save_dir='.'):
     if __name__ == '__main__':
         process = Process(target=ffmpeg, args=(m3u8_url, save_dir))
         process.start()
-        time.sleep(1)
+        time.sleep(2)
+
         try:
             raise_sigint()
         except:
-            print('done!')
+            print('process done')
+    return True
 
 
 def read_image_from_dir(img_dir, input_size=299):
@@ -72,23 +80,59 @@ def read_image_from_dir(img_dir, input_size=299):
 
 
 class Inference:
-    def __init__(self, base_dir):
+    def __init__(self, base_dir='.'):
         # load model
-        self.binary_model = tf.keras.models.load_model('./image_classification/best.h5')
-        self.detection_model = torch.hub.load('ultralytics/yolov5', 'custom', path='./object_detection/best.pt')
+        # self.binary_model = tf.keras.models.load_model('./image_classification/best.h5')
+        print("TF Model Loaded!")
+
+        device = select_device()
+        self.detection_model = DetectMultiBackend('./object_detection/best.pt', device=device)
+        self.detection_model.names[0] = '0단계'
+        self.detection_model.names[1] = '1단계'
+        self.detection_model.names[2] = '2단계'
+        self.detection_model.names[3] = '3단계'
+        print("Torch Model Loaded!")
+
         self.base_dir = base_dir
+        if not os.path.isdir(self.base_dir):
+            os.mkdir(self.base_dir)
 
     def detection_inference(self, src):
         # dummy
         # TODO
-        result = self.detection_model(src)
+        result = detection_run(
+                                model=self.detection_model,
+                                source=src,  # file/dir/URL/glob/screen/0(webcam)
+                                imgsz=(640, 640),  # inference size (height, width)
+                                conf_thres=0.4,  # confidence threshold
+                                iou_thres=0.45,  # NMS IOU threshold
+                                max_det=1000,  # maximum detections per image
+                                view_img=False,  # show results
+                                save_txt=False,  # save results to *.txt
+                                save_conf=False,  # save confidences in --save-txt labels
+                                nosave=False,  # do not save images/videos
+                                classes=None,  # filter by class: --class 0, or --class 0 2 3
+                                agnostic_nms=False,  # class-agnostic NMS
+                                augment=False,  # augmented inference
+                                visualize=False,  # visualize features
+                                update=False,  # update all models
+                                project='./runs/detect',  # save results to project/name
+                                name='exp',  # save results to project/name
+                                exist_ok=False,  # existing project/name ok, do not increment
+                                )
 
         if len(result) == 0:
             # no detection 이면
             return False
         else:
             # result에서 가장 많은 빈도수를 보이는 단계를 리턴
-            return 1
+            values = np.array(list(result.values()))
+            idx = np.where(values == max(values))
+            final_result = ''
+            keys = list(result.keys())
+            for i in idx[0]:
+                final_result = max(final_result, keys[i])
+            return int(final_result[0])
 
     def classification_inference(self, src):
         img = read_image_from_dir(src)
@@ -98,16 +142,35 @@ class Inference:
         else:  # normal
             return 0
 
+    def get_recent_mp4(self):
+        mp4_list = glob.glob(self.base_dir+'/*.mp4')
+        mp4_list = list(map(lambda x: x.split('/')[-1].split('.')[0], mp4_list))
+        return max(mp4_list)
+
     def run(self, url):
-        # TODO
         download_mp4(url, self.base_dir)
-        result = self.detection_inference(self.base_dir+'/'+file_name)
+
+        file_name = self.get_recent_mp4()
+        mp4_src = os.path.join(self.base_dir, file_name+'.mp4')
+        print('##### path:', mp4_src)
+        get_one_frame(mp4_src, self.base_dir)
+
+        img_src = self.base_dir+'/'+file_name+'.jpg'
+        result = self.detection_inference(img_src)
         if result is False:
             # no detection 일때 binary detection
-            src = read_image_from_dir(file_name)
+            src = read_image_from_dir(img_src)
             src = np.array(src)
             result = self.classification_inference(src)
+            result = 9
         # 0 : 정상
         # 1,2,3(object detection) : n단계
         # 9 (binary classification) : 침수
         return result
+
+
+if __name__ == '__main__':
+    inf = Inference('./temp')
+
+    r = inf.run(dummy_url)
+    print(r)

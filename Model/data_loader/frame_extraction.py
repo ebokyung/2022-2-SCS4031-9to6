@@ -38,7 +38,7 @@ def get_frame(video_path, save_dir):
     video.release()
 
 
-def get_one_frame(video_path, save_dir):
+def get_one_frame(video_path, save_dir='.'):
     video = cv2.VideoCapture(video_path)
 
     if not video.isOpened():
@@ -47,7 +47,7 @@ def get_one_frame(video_path, save_dir):
 
     ret, image = video.read()
     try:
-        file_name = video_path.split('/')[-1]
+        file_name = video_path.split('/')[-1].split('.')[0]
         cv2.imwrite(save_dir + "/{}.jpg".format(file_name), image)
     except Exception as e:
         video.release()
@@ -55,3 +55,5 @@ def get_one_frame(video_path, save_dir):
         print(e)
 
     video.release()
+
+
