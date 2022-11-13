@@ -151,6 +151,17 @@ const ReportTextArea = styled.textarea`
   }
 `
 
+const ShelterInfowindowBody =styled.div`
+  width: 90%;
+  margin: 10px auto;
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  row-gap: 0.5em;
+  /* span{
+    white-space: wrap;
+  } */
+`
+
 function MapSection () {
     const visibility = useRecoilValue(showSideBar);
     const [cctvPositions, setCctvPositions] = useState([]);
@@ -273,42 +284,42 @@ function MapSection () {
       Datetime: '제보시간',
     },
     {
-      content: '제보2',
+      Content: '제보2',
       Latitude: 37.499463762912974,
       Longitude: 127.0288828824399,
       Address: '도로명주소',
       Datetime: '제보시간',
     },
     {
-      content: '제보3',
+      Content: '제보3',
       Latitude: 37.49896834100913,
       Longitude: 127.02833986892401,
       Address: '도로명주소',
       Datetime: '제보시간',
     },
     {
-      content: '제보4',
+      Content: '제보4',
       Latitude: 37.49893267508434,
       Longitude: 127.02673400572665,
       Address: '도로명주소',
       Datetime: '제보시간',
     },
     {
-      content: '제보5',
+      Content: '제보5',
       Latitude: 37.49872543597439,
       Longitude: 127.02676785815386,
       Address: '도로명주소',
       Datetime: '제보시간',
     },
     {
-      content: '제보6',
+      Content: '제보6',
       Latitude: 37.49813096097184,
       Longitude: 127.02591949495914,
       Address: '도로명주소',
       Datetime: '제보시간',
     },
     {
-      content: '제보7',
+      Content: '제보7',
       Latitude: 37.497680616783086,
       Longitude: 127.02518427952202,
       Address: '도로명주소',
@@ -378,15 +389,22 @@ function MapSection () {
       />
         {isVisible && 
         <CustomOverlayMap position={props.position}>
-          <div className={style.wrap}>
-            <div className={style.info}>
+          <div className={style.wrap} style={{height: '140px'}}>
+            <div className={style.info} style={{height: '130px'}}>
               <div
                 className={style.close}
                 onClick={() => setIsVisible(false)}
                 title="닫기"
               />
+              <div className={style.title}>
+                {props.name}
+              </div>
               <div className={style.body}>
-                {props.content}
+                <ShelterInfowindowBody>
+                  <span>위치:</span><span>{props.address}</span>
+                  <span>시설:</span><span>{props.type}</span>
+                  <span>규모:</span><span>{props.area}</span>
+                </ShelterInfowindowBody>
               </div>
             </div>
           </div>
@@ -537,7 +555,10 @@ function MapSection () {
             <EventMarkerContainer_shelter
               key={`shelter-${position.Latitude},${position.Longitude}`}
               position={{lat: position.Latitude , lng: position.Longitude} }
-              content={position.content}
+              address={position.Address}
+              name={position.Name}
+              type={position.Type}
+              area={position.Area}
               markerImage={{
                 src: markerImage,
                 size: {width: 40, height: 40},
@@ -557,6 +578,7 @@ function MapSection () {
               address={position.Address}
               time={position.Datetime}
               content={position.Content}
+              image={position.ImageFile}
               markerImage={{
                 src: markerImage,
                 size: {width: 40, height: 40},
