@@ -166,15 +166,13 @@ function MapSection () {
     const visibility = useRecoilValue(showSideBar);
     const [cctvPositions, setCctvPositions] = useState([]);
     const [shelterPositions, setShelterPositions] = useState([]);
-    // const [reportPositions, setReportPositions] = useState([]);
+    const [reportPositions, setReportPositions] = useState([]);
     
     const [isReportMode, setIsReportMode] = useState(false);
     const [reportPosition, setReportPosition] = useState();
 
     const modalOverlayRef = useRef();
     const inputPositionAddrRef = useRef();
-    const inputPositionCoordLatRef = useRef();
-    const inputPositionCoordLngRef = useRef();
     const inputImgRef = useRef();
     const inputImgNameRef = useRef();
 
@@ -185,12 +183,13 @@ function MapSection () {
       try{
           const cctvData = await API.get("/cctvs");
           const shelterData = await API.get("/Shelters");
-          // const reportData = await API.get("/Postings");
+          const reportData = await API.get("/Postings");
           setCctvPositions(cctvData.data.cctv);
           setShelterPositions(shelterData.data);
-          // setReportPositions(reportData.data.data);
-          console.log(cctvData.data.cctv)
-          console.log(shelterData.data)
+          setReportPositions(reportData.data);
+          // console.log(cctvData.data.cctv)
+          // console.log(shelterData.data)
+          // console.log(reportData.data)
       }catch(error){
           console.log(error)
       }
@@ -201,28 +200,37 @@ function MapSection () {
     },[])
 
     // POST
-  //   const onValid = async(data) => {
-  //     const result = {
-  //         // "MemberID": "(회원 아이디, 로그인 안했을 경우 요청X)",
-  //         "Latitude": data.Latitude,
-  //         "Longitude": data.Longitude,
-  //         "ImageFile": data.ImageFile,
-  //         "Content": data.Content,
-  //     }
-  //     try{
-  //         await API.post("/Postings", result)
-  //         .then(
-  //             response => {
-  //                 console.log(response);
-  //             }
-  //         )
-  //         // const data = await API.get("/Postings");
-  //         // setEmotion(data.data.data);
-  //     }catch(error){
-  //         console.log(error)
-  //     }
-  //     setValue("Content", "")
-  // }
+    const onValid = async(data) => {
+      console.log(data.ImageFile);
+      const result = {
+          // "MemberID": "(회원 아이디, 로그인 안했을 경우 요청X)",
+          "Address": inputPositionAddrRef.current.value,
+          "Latitude": reportPosition.lat,
+          "Longitude": reportPosition.lng,
+          "ImageFile": data.ImageFile,
+          "Content": data.Content,
+      }
+      console.log(result);
+      try{
+          await API.post("/Postings", result, {
+            headers: {
+              "Content-Type": `multipart/form-data`,
+            },
+          })
+          .then(
+              response => {
+                  console.log(response);
+              }
+          )
+          const data = await API.get("/Postings");
+          // console.log(data.data);
+          setReportPositions(data.data);
+      }catch(error){
+          console.log(error)
+      }
+      // setValue("Content", "")
+      setIsReportMode(prev => !prev);
+  }
 
     const handleReportModalBtn = () => {
       setIsReportMode(prev=>!prev);
@@ -256,8 +264,6 @@ function MapSection () {
       if (window.confirm('여기 위치에 제보하시겠습니까?')) {
         modalOverlayRef.current.style.zIndex = 500;
         getAddr(reportPosition.lat, reportPosition.lng);
-        inputPositionCoordLatRef.current.value = reportPosition.lat;
-        inputPositionCoordLngRef.current.value = reportPosition.lng;
       }
     }
 
@@ -267,65 +273,14 @@ function MapSection () {
     }
 
     const onUploadImage = (e) => {
-      e.preventDefault();
-      // console.log(e.target.files[0].name);
+      // e.preventDefault();
+      setValue('ImageFile', e.target.files[0]);
       inputImgNameRef.current.value = e.target.files[0].name;
     }
 
   const cctvOrigin = { x: 110, y: 0 }
   const shelterOrigin = { x: 60, y: 0 }
   const reportOrigin = { x: 10, y: 10 }
-  const reportPositions = [
-    {
-      Content: '제보1',
-      Latitude: 37.49966168796031,
-      Longitude: 127.03007039430118,
-      Address: '도로명주소',
-      Datetime: '제보시간',
-    },
-    {
-      Content: '제보2',
-      Latitude: 37.499463762912974,
-      Longitude: 127.0288828824399,
-      Address: '도로명주소',
-      Datetime: '제보시간',
-    },
-    {
-      Content: '제보3',
-      Latitude: 37.49896834100913,
-      Longitude: 127.02833986892401,
-      Address: '도로명주소',
-      Datetime: '제보시간',
-    },
-    {
-      Content: '제보4',
-      Latitude: 37.49893267508434,
-      Longitude: 127.02673400572665,
-      Address: '도로명주소',
-      Datetime: '제보시간',
-    },
-    {
-      Content: '제보5',
-      Latitude: 37.49872543597439,
-      Longitude: 127.02676785815386,
-      Address: '도로명주소',
-      Datetime: '제보시간',
-    },
-    {
-      Content: '제보6',
-      Latitude: 37.49813096097184,
-      Longitude: 127.02591949495914,
-      Address: '도로명주소',
-      Datetime: '제보시간',
-    },
-    {
-      Content: '제보7',
-      Latitude: 37.497680616783086,
-      Longitude: 127.02518427952202,
-      Address: '도로명주소',
-      Datetime: '제보시간',
-    }
-    ]
 
   const [selectedCategory, setSelectedCategory] = useState("all")
   const spriteSize = { width: 392, height: 64 }
@@ -441,11 +396,11 @@ function MapSection () {
               </div>
               <div className={style.body}>
                 <div className={style.img}>
-                  {/* <img
-                    src={props.img}
+                  <img
+                    src={props.image}
                     width="100%" 
                     height="100%" 
-                  /> */}이미지
+                  />
                 </div>
                 <div className={style.desc}>
                   <span>
@@ -578,7 +533,7 @@ function MapSection () {
               address={position.Address}
               time={position.Datetime}
               content={position.Content}
-              image={position.ImageFile}
+              image={position.ImageURL}
               markerImage={{
                 src: markerImage,
                 size: {width: 40, height: 40},
@@ -658,8 +613,8 @@ function MapSection () {
             animate={{ opacity: 1 }} 
             exit={{ opacity: 0 }}
         >
-            {/* <BigBox onSubmit={handleSubmit(onValid)}> */}
-            <BigBox>
+            <BigBox onSubmit={handleSubmit(onValid)}>
+            {/* <BigBox> */}
                 <XMark onClick = {() => setIsReportMode(false)} icon={faXmark} />
                 <BoxTitle>
                     제보 등록하기
@@ -671,36 +626,26 @@ function MapSection () {
                     <span>위치</span>
                     <div>
                       <ReportInput 
+                        type="text"
                         ref={inputPositionAddrRef} 
                         placeholder="오른쪽 버튼를 눌러 위치를 설정해주세요." 
                         disabled />
-                      <input 
-                        // {...register("Latitude", {required : true})}
-                        type="number"
-                        style={{display: 'none'}}
-                        ref={inputPositionCoordLatRef} 
-                      />
-                      <input 
-                        // {...register("Logitude", {required : true})}
-                        type="number"
-                        style={{display: 'none'}}
-                        ref={inputPositionCoordLngRef} 
-                      />
                       <PinBtn onClick={handleReportPosition} icon={faLocationDot}/>
                     </div>
                     <span>사진</span>
                     <div>
                       <ReportInput 
                         placeholder="오른쪽 버튼을 눌러 침수상황 사진을 업로드 해주세요." 
-                        ref={inputImgNameRef} 
+                        ref={inputImgNameRef}
                         disabled />
                       <input 
-                        // {...register("ImageFile", {required : true})}
+                        {...register("ImageFile", {required : true})}
                         type="file" 
                         accept="image/*" 
                         style={{display: 'none'}}
                         ref={inputImgRef} 
                         onChange={onUploadImage}
+                        // multiple="multiple"
                         />
                       <ImgUploadBtn 
                         icon={faUpload} 
@@ -709,7 +654,7 @@ function MapSection () {
                     </div>
                     <span>제보내용</span>
                     <ReportTextArea
-                        // {...register("Content", {required : true})}
+                        {...register("Content", {required : true})}
                     />
                 </BoxBody>
                 <BoxBtn>

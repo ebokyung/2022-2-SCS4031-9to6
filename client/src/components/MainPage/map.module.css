@@ -6,7 +6,7 @@
 .category .ico_comm {display:block;margin:0 auto 2px;width:50px;height:40px;background:url('../../imgs/markerIconSprites.png') no-repeat;} 
 .category .ico_all {background:url('../../imgs/all_icon.png') no-repeat; background-position:5px 0;}
 .category .ico_cctv {background-position:-127px -10px;}  
-.category .ico_safety {background-position:-66px -10px;}   
+.category .ico_shelter {background-position:-66px -10px;}   
 .category .ico_report {background-position:-5px -10px;} 
 
 .wrap {position: absolute;left: 0;bottom: 35px;width: 310px;height: 260px;margin-left: -144px;text-align: left;overflow: hidden;font-size: 12px;font-family: 'Malgun Gothic', dotum, '돋움', sans-serif;line-height: 1.5;}
