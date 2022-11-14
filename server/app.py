@@ -5,6 +5,7 @@ from flask_marshmallow import Marshmallow
 from flask_cors import CORS, cross_origin
 from datetime import timedelta
 
+
 from models import db
 from views import s3
 
@@ -13,6 +14,12 @@ from views.memberAPI import Members, MemberList, MemberCheck, Login, Logout
 from views.historyAPI import FloodHistoryList
 from views.shelterAPI import Shelters, ShelterList
 from views.postingAPI import Postings, PostingList
+from flask import jsonify, make_response
+from flask_restful import Resource, reqparse
+from sqlalchemy.exc import IntegrityError
+from models import db
+from views.bookmarkAPI import Bookmarks
+
  
 import config
 
@@ -23,6 +30,7 @@ app.config['JSON_AS_ASCII'] = False
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=30) # 로그인세션 유지시간 30분 설정
 app.secret_key = '#$DSF51wfdFF2WE^4&@#$' # 세션 시크릿키
 
+
 migrate = Migrate(app, db)
 db.init_app(app)
 api = Api(app)
@@ -31,6 +39,7 @@ api = Api(app)
 CORS(app)
 # 특정 주소, 도메인, 포트 등만 사용 가능하도록 설정
 # CORS(app, resources={r'*': {'origins': 'https://webisfree.com:3000'}})
+
 
 
 @app.route('/', methods=['GET'])
@@ -50,6 +59,7 @@ api.add_resource(Postings, '/Postings/<posting_index>')
 api.add_resource(PostingList, '/Postings')
 api.add_resource(Login, '/Login')
 api.add_resource(Logout, '/Logout')
+api.add_resource(Bookmarks, '/Bookmark')
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=True, port=5000)
