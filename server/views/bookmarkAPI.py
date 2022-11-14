@@ -21,6 +21,8 @@ class Bookmarks(Resource):
         bookmark_schema = BookmarkSchema(many=True)
         output = bookmark_schema.dump(bookmark)
         return jsonify({'Bookmark' : output})
+    
+
 
     def post(self):
         args = self.parser.parse_args()
@@ -60,3 +62,18 @@ def addBookmarkInfo(memberID2, cctvID2):
     # 테이블에 객체 저장
     db.session.add(bookmarkINFO)
     db.session.commit()
+    
+
+
+class Bookmarks2(Resource):
+    def get(self):
+        bookmark = Bookmark.query.all()
+        bookmark_schema = BookmarkSchema(many=True)
+        output = bookmark_schema.dump(bookmark)
+        return jsonify({'Bookmark' : output})
+    
+    
+    def delete(self, M_ID, C_ID):
+        bookmark_regi = db.one_or_404(db.select(Bookmark).filter_by(memberID = M_ID, cctvID = C_ID))
+        db.session.delete(bookmark_regi)
+        db.session.commit()
