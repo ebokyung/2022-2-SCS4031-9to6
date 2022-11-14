@@ -19,6 +19,7 @@ from flask_restful import Resource, reqparse
 from sqlalchemy.exc import IntegrityError
 from models import db
 from views.bookmarkAPI import Bookmarks
+from views.bookmarkAPI import Bookmarks2
 
  
 import config
@@ -60,6 +61,7 @@ api.add_resource(PostingList, '/Postings')
 api.add_resource(Login, '/Login')
 api.add_resource(Logout, '/Logout')
 api.add_resource(Bookmarks, '/Bookmark')
+api.add_resource(Bookmarks2, '/Bookmark/<M_ID>/<C_ID>')
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=True, port=5000)
