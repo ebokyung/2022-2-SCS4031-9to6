@@ -14,6 +14,7 @@ import sys
 
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[1]
+print(ROOT)
 if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))
 from Model.object_detection.detect import detection_run
@@ -87,7 +88,7 @@ class Inference:
         print("TF Model Loaded!")
 
         device = select_device()
-        self.detection_model = DetectMultiBackend('/2022-2-SCS4031-9to6/Model/object_detection/best.pt', device=device)
+        self.detection_model = DetectMultiBackend(ROOT/'Model/object_detection/best.pt', device=device)
         self.detection_model.names[0] = '0단계'
         self.detection_model.names[1] = '1단계'
         self.detection_model.names[2] = '2단계'
