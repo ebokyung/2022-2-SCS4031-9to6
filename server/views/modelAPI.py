@@ -20,13 +20,14 @@ from models.cctv import CCTV
 inference = Inference(ROOT / 'temp')
 
 
-class DLModel(Resource):
-    def get(cctvID):
-        cctv = db.one_or_404(db.select(CCTV).filter_by(Index=cctvID))
+class AIModel(Resource):
+    
+    def get(self, cctv_id):
+        cctv = db.one_or_404(db.select(CCTV).filter_by(Index=cctv_id))
         url = cctv.URL
         stage, imageURL = inference.run(url)
         result = {
-            'cctvID': cctvID,
+            'cctvID': cctv_id,
             'stage': stage,
             'imageURL': imageURL
         }

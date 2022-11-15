@@ -7,6 +7,7 @@ from views import s3
 from datetime import datetime
 import requests, json
 import werkzeug
+from views.utils import s3_put_object, s3_delete_image
 
 class Postings(Resource):
 
@@ -176,36 +177,6 @@ def addPosting(memberID, latitude, longitude, address, content, image_url):
     db.session.commit()
 
     return index
-
-
-# s3에 객체 업로드
-def s3_put_object(s3, bucket, file, filename):
-    """
-    s3 bucket에 지정 파일 업로드
-    :param s3: 연결된 s3 객체(boto3 client)
-    :param bucket: 버킷명
-    :param file: 파일
-    :param filename: 저장 파일명
-    :return: 성공 시 True, 실패 시 False 반환
-    """
-    try:
-        s3.put_object(
-            Body=file,
-            Bucket=bucket,
-            Key=f'Posting/{filename}',
-            ContentType=file.content_type,
-            ACL='public-read',
-            # ExtraArgs={"ContentType": "image/jpg", "ACL": "public-read"},
-        )
-        
-    except Exception as e:
-        print(e)
-        return False
-    return True  
-
-def s3_delete_image(imageURL):
-    path = imageURL[51:]
-    s3.delete_object(Bucket='9to6bucket', Key=path)   
 
 
 def get_location(address):
