@@ -1,4 +1,4 @@
-import tensorflow as tf
+#import tensorflow as tf
 import glob
 
 import torch
@@ -16,12 +16,12 @@ FILE = Path(__file__).resolve()
 ROOT = FILE.parents[1]
 if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))
-
 from Model.object_detection.detect import detection_run
 from Model.data_loader.frame_extraction import get_one_frame
 from Model.object_detection.models.common import DetectMultiBackend
 from Model.object_detection.utils.torch_utils import select_device
-
+#from server.views import s3
+#from server.views.utils import s3_upload_file, s3_delete_image
 
 # delete url
 dummy_url = 'http://210.179.218.52:1935/live/157.stream/playlist.m3u8'
@@ -81,12 +81,13 @@ def read_image_from_dir(img_dir, input_size=299):
 
 class Inference:
     def __init__(self, base_dir='.'):
+        print(base_dir)
         # load model
-        self.binary_model = tf.keras.models.load_model('./image_classification/best.h5')
+        # self.binary_model = tf.keras.models.load_model('./image_classification/best.h5')
         print("TF Model Loaded!")
 
         device = select_device()
-        self.detection_model = DetectMultiBackend(ROOT/'Model/object_detection/best.pt', device=device)
+        self.detection_model = DetectMultiBackend('/2022-2-SCS4031-9to6/Model/object_detection/best.pt', device=device)
         self.detection_model.names[0] = '0단계'
         self.detection_model.names[1] = '1단계'
         self.detection_model.names[2] = '2단계'
@@ -155,7 +156,8 @@ class Inference:
         print('##### path:', mp4_src)
         get_one_frame(mp4_src, self.base_dir)
 
-        img_src = self.base_dir+'/'+file_name+'.jpg'
+        img_name = file_name+'.jpg'
+        img_src = self.base_dir+'/'+img_name
         result = self.detection_inference(img_src)
         if result is False:
             # no detection 일때 binary detection
@@ -166,13 +168,33 @@ class Inference:
 
         # image S3 저장
         if result != 0:
-            imageURL = ''
-            # TODO
+            # 판단결과 침수일때, 이미지 저장
+            i = 0
+            while True:
+                s3_uploaded = s3_upload_file(s3, '9to6bucket', img_src, f'Flood/{img_name}')
+                if s3_uploaded:
+                    image_url = 'https://{bucket_name}.s3.{location}.amazonaws.com/Posting/{s3_path}'.format(bucket_name='9to6bucket', 
+                                                                                                            location='ap-northeast-2', 
+                                                                                                            s3_path=img_name)
+                    break
+                else:    
+                    # s3에 이미지 저장 3번까지 시도
+                    i += 1
+                    print('image upload failed, Retry upload image {} times'.format(i))
+                    if i >=3 :
+                        print('image upload failed...T,T')
+                        image_url = ''
+                        break  
         else:
             os.remove(mp4_src)
             os.remove(img_src)
+            image_url = ''
+
         # 0 : 정상
         # 1,2,3(object detection) : n단계
         # 9 (binary classification) : 침수
-        return result, imageURL
+        return result, image_url
 
+
+
+inf = Inference()
