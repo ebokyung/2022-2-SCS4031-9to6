@@ -1,9 +1,9 @@
 from flask import jsonify, make_response
 from flask_restful import Resource, reqparse
 from sqlalchemy.exc import IntegrityError
-from models import db
-from models.cctv import CCTV, CCTVStatus
-from models.history import FloodHistory, FloodHistorySchema
+from model import db
+from model.cctv import CCTV, CCTVStatus
+from model.history import FloodHistory, FloodHistorySchema
 from views import s3
 from urllib.parse import urlencode, unquote
 import requests

@@ -1,8 +1,8 @@
 from flask import jsonify, make_response
 from flask_restful import Resource, reqparse
 from sqlalchemy.exc import IntegrityError
-from models import db
-from models.posting import Posting, PostingSchema
+from model import db
+from model.posting import Posting, PostingSchema
 from views import s3
 from datetime import datetime
 import requests, json

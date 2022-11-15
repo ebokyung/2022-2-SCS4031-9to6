@@ -12,8 +12,8 @@ from Model.inference import Inference
 from flask import jsonify, make_response
 from flask_restful import Resource, reqparse
 # from sqlalchemy.exc import IntegrityError
-from models import db
-from models.cctv import CCTV
+from model import db
+from model.cctv import CCTV
 # from views import s3
 # import requests, json
 
