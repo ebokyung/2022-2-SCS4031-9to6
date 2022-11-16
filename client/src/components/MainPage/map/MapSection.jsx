@@ -1,19 +1,19 @@
 /*global kakao*/
 import styled from 'styled-components';
 import { useRecoilValue } from 'recoil';
-import { showSideBar } from '../../atoms';
+import { showSideBar } from '../../../atoms';
 import { useEffect, useState, useRef } from 'react';
 import { useForm } from "react-hook-form";
-import markerImage from '../../imgs/markerSprites.png';
-import reportBtn from '../../imgs/reportBtn.png';
-import reportPositionMarker from '../../imgs/reportPositionMarker.png';
+import markerImage from '../../../imgs/markerSprites.png';
+import reportBtn from '../../../imgs/reportBtn.png';
+import reportPositionMarker from '../../../imgs/reportPositionMarker.png';
 import style from './map.module.css';
-import {Map, MapMarker, CustomOverlayMap, useMap, ZoomControl} from 'react-kakao-maps-sdk';
-import ReactPlayer from 'react-player';
+import {Map, MapMarker, ZoomControl} from 'react-kakao-maps-sdk';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { motion } from "framer-motion";
 import { faXmark, faLocationDot, faUpload } from "@fortawesome/free-solid-svg-icons";
-import { API } from '../../axios';
+import { API } from '../../../axios';
+import { EventMarkerContainer_cctv, EventMarkerContainer_shelter, EventMarkerContainer_report } from './markerContainer';
 
 const Container = styled.section`
     width: 100%;
@@ -49,8 +49,7 @@ const Overlay = styled(motion.div)`
     align-items: center;
     z-index: 500;
     background-color: rgba(0, 0, 0, 0.7);
-`;
-
+`
 const BigBox = styled.form`
     width: 40%;
     height: 40%;
@@ -64,6 +63,7 @@ const BigBox = styled.form`
     justify-content: center;
     border-radius: 3px;
     background-color: ${props=> props.theme.modalBackColor};
+    box-shadow: rgba(0, 0, 0, 0.4) 0px 5px 10px;
 `
 const XMark = styled(FontAwesomeIcon)`
     font-size: 20px;
@@ -72,7 +72,6 @@ const XMark = styled(FontAwesomeIcon)`
     right: 20px;
     cursor: pointer;
 `
-
 const BoxTitle = styled.h1`
     /* font-family: 'Nanum Myeongjo', serif; */
     font-size: 20px;
@@ -101,7 +100,7 @@ const BoxBody = styled.div`
     font-size: 13px;
   }
 `
-const Btn = styled.button`
+const BoxBtn = styled.button`
     width: 20%;
     height: 20px;
     padding: 0 20px;
@@ -113,7 +112,6 @@ const Btn = styled.button`
     text-align: center;
     cursor: pointer;
 `
-const BoxBtn = styled(Btn)``
 const PinBtn = styled(FontAwesomeIcon)`
   font-size: 1.2rem;
   cursor: pointer;
@@ -124,7 +122,6 @@ const ImgUploadBtn = styled(FontAwesomeIcon)`
   cursor: pointer;
   color: ${props=> props.theme.modalBtnColor};
 `
-
 const ReportInput = styled.input`
   border: none;
   border-radius: 3px;
@@ -151,34 +148,38 @@ const ReportTextArea = styled.textarea`
   }
 `
 
-const ShelterInfowindowBody =styled.div`
-  width: 90%;
-  margin: 10px auto;
-  display: grid;
-  grid-template-columns: 40px 1fr;
-  row-gap: 0.5em;
-  /* span{
-    white-space: wrap;
-  } */
-`
 
 function MapSection () {
     const visibility = useRecoilValue(showSideBar);
+
+    const [selectedCategory, setSelectedCategory] = useState("all");
+
+    // 마커 이미지(sprite)
+    const spriteSize = { width: 392, height: 64 }
+    const cctvOrigin = { x: 110, y: 0 }
+    const shelterOrigin = { x: 60, y: 0 }
+    const reportOrigin = { x: 10, y: 10 }
+
+    // 각 마커별 전체 데이터 받아 올 변수
     const [cctvPositions, setCctvPositions] = useState([]); // cctv 마커 전체 (첫 렌더링때, 단계 변할때?)
     const [shelterPositions, setShelterPositions] = useState([]); // 대피소 마커 전체 (첫 렌더링때만)
     const [reportPositions, setReportPositions] = useState([]); // 제보 마커 전체 (첫 렌더링, 제보 바뀔때)
     
-    const [isReportMode, setIsReportMode] = useState(false); // 제보등록 모드 여부 (boolean)
-    const [reportCoord, setReportCoord] = useState(); // 제보할 좌표 값 (object) { lat: number, lng: number }
+    // 모든 마커 중 클릭된 마커 하나의 인포윈도우만 열기 위한 상태변수
+    const [selectedMarkerCctv, setSeleteMarkerCctv] = useState();
+    const [selectedMarkerShelter, setSeleteMarkerShelter] = useState();
+    const [selectedMarkerReport, setSeleteMarkerReport] = useState();
 
-    const modalOverlayRef = useRef(); // 제보등록 모달창 참조
-    // const inputPositionAddrRef = useRef(); // 좌표를 주소로 변환한 값을 사용자에게 보여주기 위한 인풋창 참조
+    // 제보 등록 관련 변수들
+    const [isReportMode, setIsReportMode] = useState(false); // 제보등록 모드 여부 (boolean)
+    const modalOverlayRef = useRef(); // 제보등록 모달창 참조 
+    const [reportCoord, setReportCoord] = useState(); // 제보할 좌표 값 (object) { lat: number, lng: number }
     const inputImgRef = useRef();   // 파일 탐색기가 작동되고 실제 이미지 파일을 가지는 (사용자에게 안보이는) 인풋창 참조
     const inputImgNameRef = useRef(); // 이미지 이름을 보여주기 위한 (사용자에게 보여지는)인풋창 참조
-
     const { register, handleSubmit, setValue } = useForm();
 
-    // GET
+    // API 연결 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // 마커 데이터 GET
     const getdata = async() => {
       try{
           const cctvData = await API.get("/cctvs");
@@ -199,9 +200,8 @@ function MapSection () {
         getdata();
     },[])
 
-    // POST
+    // 제보 등록 POST & 전체 제보 데이터 GET
     const onValid = async(data) => {
-      console.log(data.ImageFile);
       const result = {
           // "MemberID": "(회원 아이디, 로그인 안했을 경우 요청X)",
           "Address": data.Address,
@@ -222,69 +222,19 @@ function MapSection () {
                   console.log(response);
               }
           )
+          // 등록 후 데이터 다시 불러오기
           const data = await API.get("/Postings");
-          // console.log(data.data);
           setReportPositions(data.data);
           setIsReportMode(prev => !prev);
       }catch(error){
           console.log(error)
       }
-      // setValue("Content", "")
-      // setIsReportMode(prev => !prev);
   }
+  // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
-    const handleReportPosition = () => {
-      modalOverlayRef.current.style.zIndex = -1;
-    }
 
-    function getAddr(lat,lng){
-      // 주소-좌표 변환 객체를 생성합니다
-      let geocoder = new kakao.maps.services.Geocoder();
-   
-      let coord = new kakao.maps.LatLng(lat, lng);
-      let callback = function(result, status) {
-          if (status === kakao.maps.services.Status.OK) {
-              const arr  ={ ...result};
-              const _arr = arr[0].address.address_name;
-              // inputPositionAddrRef.current.value = _arr;
-              setValue("Address", _arr);
-          }
-     }
-      geocoder.coord2Address(coord.getLng(), coord.getLat(), callback);
-   }
-
-    useEffect (()=>{ // 제보 등록 모달창이 닫히면 ... 으로 하고 싶은데,
-      setReportCoord(null); // 제보할 좌표 
-      setValue("Address", '');
-      setValue("Content", '');
-    }, [isReportMode])
-    
-    const submitReportPosition = () => {
-      if (window.confirm('여기 위치에 제보하시겠습니까?')) {
-        modalOverlayRef.current.style.zIndex = 500;
-        getAddr(reportCoord.lat, reportCoord.lng);
-      }
-    }
-
-    const onUploadImageButtonClick = (e) => {
-      e.preventDefault();
-      inputImgRef.current.click();
-    }
-
-    const onUploadImage = (e) => {
-      // e.preventDefault();
-      setValue('ImageFile', e.target.files[0]);
-      inputImgNameRef.current.value = e.target.files[0].name;
-    }
-
-  const cctvOrigin = { x: 110, y: 0 }
-  const shelterOrigin = { x: 60, y: 0 }
-  const reportOrigin = { x: 10, y: 10 }
-
-  const [selectedCategory, setSelectedCategory] = useState("all")
-  const spriteSize = { width: 392, height: 64 }
-
+  // 카테고리 변경 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   useEffect(() => {
     const allMenu = document.getElementById("allMenu")
     const cctvMenu = document.getElementById("cctvMenu")
@@ -325,168 +275,60 @@ function MapSection () {
       reportMenu.className = `${style.menu_selected}`
     }
   }, [selectedCategory])
+  //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-  // 마커별 인포위도우 컴포넌트
-  // 대피소 마커 인포윈도우
-  const EventMarkerContainer_shelter = ( props ) => {
-    const map = useMap()
-    const [isVisible, setIsVisible] = useState(false)
-    // const [isClicked, setIsClicked] = useState(false)
 
-    return (
-      <>
-      <MapMarker
-        position={props.position} // 마커를 표시할 위치
-        onClick={(marker) => {
-          map.panTo(marker.getPosition())
-          setIsVisible(prev=>!prev)
-          setSeleteMarkerShelter(props.index)
-          // console.log(`누른거state: ${selectedMarkerShelter}, index: ${props.index}`)
-          // setIsClicked(selectedMarkerShelter === props.index)
-        }}
-        image={props.markerImage}
-      />
-        {isVisible && selectedMarkerShelter === props.index &&
-        <CustomOverlayMap position={props.position}>
-          {/*clickabl={true}> */}
-          <div className={style.wrap} style={{height: '140px'}}>
-            <div className={style.info} style={{height: '130px'}}>
-              <div
-                className={style.close}
-                onClick={() => setIsVisible(false)}
-                title="닫기"
-              />
-              <div className={style.title}>
-                {props.name}
-              </div>
-              <div className={style.body}>
-                <ShelterInfowindowBody>
-                  <span>위치:</span><span>{props.address}</span>
-                  <span>시설:</span><span>{props.type}</span>
-                  <span>규모:</span><span>{props.area}</span>
-                </ShelterInfowindowBody>
-              </div>
-            </div>
-          </div>
-        </CustomOverlayMap>}
-      </>
-    )
-  }
-  // 제보 마커 인포윈도우
-  const EventMarkerContainer_report = ( props ) => {
-    const map = useMap()
-    const [isVisible, setIsVisible] = useState(false)
 
-    return (
-      <>
-      <MapMarker
-        position={props.position} // 마커를 표시할 위치
-        onClick={(marker) => { 
-          map.panTo(marker.getPosition())
-          setIsVisible(true)
-        }}
-        image={props.markerImage}
-      />
-        {isVisible && 
-        <CustomOverlayMap position={props.position}>
-          <div className={style.wrap}>
-            <div className={style.info}>
-              <div className={style.title}>
-                {props.address}
-                <div
-                  className={style.close}
-                  onClick={() => setIsVisible(false)}
-                  title="닫기"
-                ></div>
-              </div>
-              <div className={style.body}>
-                <div className={style.img}>
-                  <img
-                    src={props.image}
-                    width="100%" 
-                    height="100%" 
-                  />
-                </div>
-                <div className={style.desc}>
-                  <span>
-                    {props.content}
-                  </span>
-                  <span>
-                    {props.time}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </CustomOverlayMap>}
-      </>
-    )
-  }
-  // cctv 마커 인포윈도우
-  const EventMarkerContainer_cctv = ( props ) => {
-    const map = useMap()
-    const [isVisible, setIsVisible] = useState(false)
+  // 제보등록 관련 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // 제보위치 설정을 위해 모달창 잠깐 내리기
+    const handleReportPosition = () => {
+      modalOverlayRef.current.style.zIndex = -1;
+    }
 
-    return (
-      <>
-      <MapMarker
-        position={props.position} // 마커를 표시할 위치
-        onClick={(marker) => { 
-          map.panTo(marker.getPosition())
-          setIsVisible(true)
-        }}
-        image={props.markerImage}
-      />
-        {isVisible && <CustomOverlayMap position={props.position}>
-          <div className={style.wrap}>
-            <div className={style.info}>
-              <div className={style.title}>
-                <button>star</button>
-                <span>{props.name}</span>
-                <span className={style.class}>( 침수 0단계 )</span>
-                <div
-                  className={style.close}
-                  onClick={() => setIsVisible(false)}
-                  title="닫기"
-                ></div>
-              </div>
-              <div className={style.body}>
-                <div className={style.video}>
-                  <ReactPlayer 
-                    url={props.url}
-                    width="100%" 
-                    height="100%" 
-                    muted={true}
-                    playing={true} 
-                    loop={true}
-                  />
-                </div>
-                <div className={style.desc}>
-                  <span>
-                    <a
-                      href="https://www.kakaocorp.com/main"
-                      target="_blank"
-                      className={style.link}
-                      rel="noreferrer"
-                    >
-                      행동지침 바로가기
-                    </a>
-                  </span>
-                  <span>
-                    {props.center}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </CustomOverlayMap>}
-      </>
-    )
-  }
+    // 좌표 -> 주소 변환하기 
+    function getAddr(lat,lng){
+      let geocoder = new kakao.maps.services.Geocoder();
+   
+      let coord = new kakao.maps.LatLng(lat, lng);
+      let callback = function(result, status) {
+          if (status === kakao.maps.services.Status.OK) {
+              const arr  ={ ...result};
+              const _arr = arr[0].address.address_name;
+              setValue("Address", _arr);
+          }
+     }
+      geocoder.coord2Address(coord.getLng(), coord.getLat(), callback);
+   }
 
-  const [selectedMarkerShelter, setSeleteMarkerShelter] = useState();
-  // const [selectedMarkerShelter, setSeleteMarkerShelter] = useState();
-  // const [selectedMarkerShelter, setSeleteMarkerShelter] = useState();
+    // 
+    const submitReportPosition = () => {
+      if (window.confirm('여기 위치에 제보하시겠습니까?')) {
+        modalOverlayRef.current.style.zIndex = 500;
+        getAddr(reportCoord.lat, reportCoord.lng);
+      }
+    }
+
+    const onUploadImageButtonClick = (e) => {
+      e.preventDefault();
+      inputImgRef.current.click();
+    }
+
+    const onUploadImage = (e) => {
+      // e.preventDefault();
+      setValue('ImageFile', e.target.files[0]);
+      inputImgNameRef.current.value = e.target.files[0].name;
+    }
+
+    // 제보등록 모달창이 닫히면 ... 으로 하고 싶은데, 일단 모드 바뀔때마다 인풋창 리셋
+    useEffect (()=>{ 
+      setReportCoord(null); // 제보할 좌표 
+      setValue("Address", '');
+      setValue("Content", '');
+    }, [isReportMode])
+  
+  //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
 
     return(
     <Container id={style.mapwrap} className={visibility ? '' : 'hide'}>
@@ -513,6 +355,7 @@ function MapSection () {
           } : undefined }
         >
           {/* 지도에 마커 그리기 */}
+          {/* 지도에 마커 그리기 - 대피소 */}
         {(selectedCategory === "all" || selectedCategory === "shelter") &&
           shelterPositions.map((position, index) => (
             <EventMarkerContainer_shelter
@@ -531,13 +374,14 @@ function MapSection () {
                 },
               }}
               index={index}
-              // onClick={()=>setSeleteMarkerShelter(index)}
-              // isClicked={selectedMarkerShelter === index}
+              onClick={()=>setSeleteMarkerShelter(index)}
+              isClicked={selectedMarkerShelter === index}
             />
           )
         )}
+        {/* 지도에 마커 그리기 - 제보 */}
         {(selectedCategory === "all" || selectedCategory === "report") &&
-          reportPositions.map((position) => (
+          reportPositions.map((position, index) => (
             <EventMarkerContainer_report
               key={`report-${position.Latitude},${position.Longitude}`}
               position={{lat: position.Latitude , lng: position.Longitude}}
@@ -552,19 +396,22 @@ function MapSection () {
                   spriteSize: spriteSize,
                   spriteOrigin: reportOrigin,
                 },
-              }} 
+              }}
+              index={index}
+              onClick={()=>setSeleteMarkerReport(index)}
+              isClicked={selectedMarkerReport === index}
             />
           )
         )}
+        {/* 지도에 마커 그리기 - cctv */}
         {(selectedCategory === "all" || selectedCategory === "cctv") &&
-          cctvPositions.map((position) => (
+          cctvPositions.map((position, index) => (
             <EventMarkerContainer_cctv
               key={`cctv-${position.Latitude},${position.Longitude}`}
               position ={{lat: position.Latitude , lng: position.Longitude}}
               name={position.Name}
               center={position.Center}
               url={position.URL}
-              // cctv 마커 이미지
               markerImage={{
                 src: markerImage,
                 size: {width: 64, height: 64},
@@ -573,11 +420,14 @@ function MapSection () {
                   spriteOrigin: cctvOrigin,
                 },
               }}
+              index={index}
+              onClick={()=>setSeleteMarkerCctv(index)}
+              isClicked={selectedMarkerCctv === index}
             />
           )
         )}
 
-        {/* 지도에 제보 위치 표시하는 마커 */}
+        {/* 제보등록할때, 지도에 제보 위치 표시하는 마커 */}
         {isReportMode && reportCoord &&
         <MapMarker // 마커를 생성합니다
           position={reportCoord}
@@ -591,7 +441,7 @@ function MapSection () {
 
       </Map>
 
-      {/* 4가지 마커 메뉴 */}
+      {/* 4가지 마커 카테고리 */}
       <div className={`${style.category}`}>
         <ul>
           <li id="allMenu" onClick={() => setSelectedCategory("all")}>
@@ -613,7 +463,7 @@ function MapSection () {
         </ul>
       </div>
 
-      {/* 제보 버튼 */}
+      {/* 제보등록 버튼 */}
       <ReportBtn 
         onClick={()=>setIsReportMode(true)}
       />
@@ -624,57 +474,54 @@ function MapSection () {
             animate={{ opacity: 1 }} 
             exit={{ opacity: 0 }}
         >
-            <BigBox onSubmit={handleSubmit(onValid)}>
-            {/* <BigBox> */}
-                <XMark onClick = {()=>setIsReportMode(false)} icon={faXmark} />
-                <BoxTitle>
-                    제보 등록하기
-                </BoxTitle>
-                <BoxSubTitle>
-                    * 허위 제보로 인한 피해는 책임을 물을 수 있습니다.
-                </BoxSubTitle>
-                <BoxBody>
-                    <span>위치</span>
-                    <div>
-                      <ReportInput 
-                        {...register("Address", {required : true})}
-                        type="text"
-                        // ref={inputPositionAddrRef} 
-                        placeholder="오른쪽 버튼를 눌러 위치를 설정해주세요." 
-                        disabled />
-                      <PinBtn onClick={handleReportPosition} icon={faLocationDot}/>
-                    </div>
-                    <span>사진</span>
-                    <div>
-                      <ReportInput 
-                        placeholder="오른쪽 버튼을 눌러 침수상황 사진을 업로드 해주세요." 
-                        ref={inputImgNameRef}
-                        disabled />
-                      <input 
-                        {...register("ImageFile", {required : true})}
-                        type="file" 
-                        accept="image/*" 
-                        style={{display: 'none'}}
-                        ref={inputImgRef} 
-                        onChange={onUploadImage}
-                        // multiple="multiple"
-                        />
-                      <ImgUploadBtn 
-                        icon={faUpload} 
-                        onClick={onUploadImageButtonClick}
+          <BigBox onSubmit={handleSubmit(onValid)}>
+              <XMark onClick = {()=>setIsReportMode(false)} icon={faXmark} />
+              <BoxTitle>
+                  제보 등록하기
+              </BoxTitle>
+              <BoxSubTitle>
+                  * 허위 제보로 인한 피해는 책임을 물을 수 있습니다.
+              </BoxSubTitle>
+              <BoxBody>
+                  <span>위치</span>
+                  <div>
+                    <ReportInput 
+                      {...register("Address", {required : true})}
+                      type="text"
+                      placeholder="오른쪽 버튼를 눌러 위치를 설정해주세요." 
+                      disabled />
+                    <PinBtn onClick={handleReportPosition} icon={faLocationDot}/>
+                  </div>
+                  <span>사진</span>
+                  <div>
+                    <ReportInput 
+                      placeholder="오른쪽 버튼을 눌러 침수상황 사진을 업로드 해주세요." 
+                      ref={inputImgNameRef}
+                      disabled />
+                    <input 
+                      {...register("ImageFile", {required : true})}
+                      type="file" 
+                      accept="image/*" 
+                      style={{display: 'none'}}
+                      ref={inputImgRef} 
+                      onChange={onUploadImage}
+                      // multiple="multiple"
                       />
-                    </div>
-                    <span>제보내용</span>
-                    <ReportTextArea
-                        {...register("Content", {required : true})}
+                    <ImgUploadBtn 
+                      icon={faUpload} 
+                      onClick={onUploadImageButtonClick}
                     />
-                </BoxBody>
-                <BoxBtn>
-                    제보하기
-                </BoxBtn>
-            </BigBox>
-        </Overlay> 
-        : null}
+                  </div>
+                  <span>제보내용</span>
+                  <ReportTextArea
+                      {...register("Content", {required : true})}
+                  />
+              </BoxBody>
+              <BoxBtn>
+                  제보하기
+              </BoxBtn>
+          </BigBox>
+        </Overlay> : null}
 
 
     </Container>)
