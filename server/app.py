@@ -29,6 +29,7 @@ from views.bookmarkAPI import Bookmarks3
 from views.modelAPI import AIModel
 import config
 
+
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = config.alchemy_uri()
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -43,12 +44,10 @@ api = Api(app)
 
 # add ROOT to PATH
 FILE = Path(__file__).resolve()
-YOLO_ROOT = '/2022-2-SCS4031-9to6/Model/object_detection'
-if YOLO_ROOT not in sys.path:
-    sys.path.append(YOLO_ROOT)
 ROOT = FILE.parents[1]
 if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))
+
 
 # 모든 도메인에 대하여 CORS 설정
 CORS(app)
