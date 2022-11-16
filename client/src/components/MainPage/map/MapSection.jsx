@@ -370,7 +370,7 @@ function MapSection () {
         {(selectedCategory === "all" || selectedCategory === "shelter") &&
           shelterPositions.map((position, index) => (
             <EventMarkerContainer_shelter
-              key={`shelter-${position.Latitude},${position.Longitude}`}
+              key={`shelter-${index}`}
               position={{lat: position.Latitude , lng: position.Longitude} }
               address={position.Address}
               name={position.Name}
@@ -394,7 +394,7 @@ function MapSection () {
         {(selectedCategory === "all" || selectedCategory === "report") &&
           reportPositions.map((position, index) => (
             <EventMarkerContainer_report
-              key={`report-${position.Latitude},${position.Longitude}`}
+              key={`report-${index}`}
               position={{lat: position.Latitude , lng: position.Longitude}}
               address={position.Address}
               time={position.Datetime}
@@ -418,7 +418,7 @@ function MapSection () {
         {(selectedCategory === "all" || selectedCategory === "cctv") &&
           cctvPositions.map((position, index) => (
             <EventMarkerContainer_cctv
-              key={`cctv-${position.Latitude},${position.Longitude}`}
+              key={`cctv-${index}`}
               position ={{lat: position.Latitude , lng: position.Longitude}}
               name={position.Name}
               center={position.Center}
