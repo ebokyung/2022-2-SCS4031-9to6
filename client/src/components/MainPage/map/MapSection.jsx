@@ -78,12 +78,13 @@ const BoxTitle = styled.h1`
     font-weight: 600;
     margin-bottom: 10px;
 `
-const BoxSubTitle = styled.h6`
+const BoxSubTitle = styled.div`
     /* font-family: 'Nanum Myeongjo', serif; */
     color : #262626;
-    font-size: 11px;
+    font-size: 0.5rem;
     font-weight: 300;
-    margin-bottom: 30px;
+    /* margin-bottom: 30px; */
+    height: 48px;
 `
 const BoxBody = styled.div`
   width: 70%;
@@ -147,7 +148,13 @@ const ReportTextArea = styled.textarea`
       outline-color: ${props=> props.theme.modalBtnColor};
   }
 `
-
+const AlertP = styled.p`
+    margin: 10px auto;
+    font-weight: 400;
+    font-size: 0.6rem;
+    text-align: center;
+    color: red;
+`
 
 function MapSection () {
     const visibility = useRecoilValue(showSideBar);
@@ -176,7 +183,7 @@ function MapSection () {
     const [reportCoord, setReportCoord] = useState(); // 제보할 좌표 값 (object) { lat: number, lng: number }
     const inputImgRef = useRef();   // 파일 탐색기가 작동되고 실제 이미지 파일을 가지는 (사용자에게 안보이는) 인풋창 참조
     const inputImgNameRef = useRef(); // 이미지 이름을 보여주기 위한 (사용자에게 보여지는)인풋창 참조
-    const { register, handleSubmit, setValue } = useForm();
+    const { register, handleSubmit, setValue, formState: { errors }, clearErrors } = useForm();
 
     // API 연결 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // 마커 데이터 GET
@@ -295,6 +302,7 @@ function MapSection () {
               const arr  ={ ...result};
               const _arr = arr[0].address.address_name;
               setValue("Address", _arr);
+              // clearErrors('Address');
           }
      }
       geocoder.coord2Address(coord.getLng(), coord.getLat(), callback);
@@ -316,6 +324,7 @@ function MapSection () {
     const onUploadImage = (e) => {
       // e.preventDefault();
       setValue('ImageFile', e.target.files[0]);
+      // clearErrors('ImageFile');
       inputImgNameRef.current.value = e.target.files[0].name;
     }
 
@@ -323,7 +332,9 @@ function MapSection () {
     useEffect (()=>{ 
       setReportCoord(null); // 제보할 좌표 
       setValue("Address", '');
+      setValue("ImageFile", null);
       setValue("Content", '');
+      clearErrors(['Address','ImageFile','Content']);
     }, [isReportMode])
   
   //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -481,12 +492,13 @@ function MapSection () {
               </BoxTitle>
               <BoxSubTitle>
                   * 허위 제보로 인한 피해는 책임을 물을 수 있습니다.
+                <AlertP>{errors?.Address?.message || errors?.ImageFile?.message || errors?.Content?.message}</AlertP>
               </BoxSubTitle>
               <BoxBody>
                   <span>위치</span>
                   <div>
                     <ReportInput 
-                      {...register("Address", {required : true})}
+                      {...register("Address", {required : '* 제보할 위치를 설정해 주세요.'})}
                       type="text"
                       placeholder="오른쪽 버튼를 눌러 위치를 설정해주세요." 
                       disabled />
@@ -499,7 +511,7 @@ function MapSection () {
                       ref={inputImgNameRef}
                       disabled />
                     <input 
-                      {...register("ImageFile", {required : true})}
+                      {...register("ImageFile", {required : '* 침수상황을 알 수 있도록 사진을 첨부해 주세요.'})}
                       type="file" 
                       accept="image/*" 
                       style={{display: 'none'}}
@@ -514,7 +526,7 @@ function MapSection () {
                   </div>
                   <span>제보내용</span>
                   <ReportTextArea
-                      {...register("Content", {required : true})}
+                      {...register("Content", {required : '* 제보 내용을 입력해 주세요.'})}
                   />
               </BoxBody>
               <BoxBtn>
