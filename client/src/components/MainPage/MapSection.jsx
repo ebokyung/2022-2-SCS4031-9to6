@@ -164,17 +164,17 @@ const ShelterInfowindowBody =styled.div`
 
 function MapSection () {
     const visibility = useRecoilValue(showSideBar);
-    const [cctvPositions, setCctvPositions] = useState([]);
-    const [shelterPositions, setShelterPositions] = useState([]);
-    const [reportPositions, setReportPositions] = useState([]);
+    const [cctvPositions, setCctvPositions] = useState([]); // cctv 마커 전체 (첫 렌더링때, 단계 변할때?)
+    const [shelterPositions, setShelterPositions] = useState([]); // 대피소 마커 전체 (첫 렌더링때만)
+    const [reportPositions, setReportPositions] = useState([]); // 제보 마커 전체 (첫 렌더링, 제보 바뀔때)
     
-    const [isReportMode, setIsReportMode] = useState(false);
-    const [reportPosition, setReportPosition] = useState();
+    const [isReportMode, setIsReportMode] = useState(false); // 제보등록 모드 여부 (boolean)
+    const [reportCoord, setReportCoord] = useState(); // 제보할 좌표 값 (object) { lat: number, lng: number }
 
-    const modalOverlayRef = useRef();
-    const inputPositionAddrRef = useRef();
-    const inputImgRef = useRef();
-    const inputImgNameRef = useRef();
+    const modalOverlayRef = useRef(); // 제보등록 모달창 참조
+    // const inputPositionAddrRef = useRef(); // 좌표를 주소로 변환한 값을 사용자에게 보여주기 위한 인풋창 참조
+    const inputImgRef = useRef();   // 파일 탐색기가 작동되고 실제 이미지 파일을 가지는 (사용자에게 안보이는) 인풋창 참조
+    const inputImgNameRef = useRef(); // 이미지 이름을 보여주기 위한 (사용자에게 보여지는)인풋창 참조
 
     const { register, handleSubmit, setValue } = useForm();
 
@@ -204,9 +204,9 @@ function MapSection () {
       console.log(data.ImageFile);
       const result = {
           // "MemberID": "(회원 아이디, 로그인 안했을 경우 요청X)",
-          "Address": inputPositionAddrRef.current.value,
-          "Latitude": reportPosition.lat,
-          "Longitude": reportPosition.lng,
+          "Address": data.Address,
+          "Latitude": reportCoord.lat,
+          "Longitude": reportCoord.lng,
           "ImageFile": data.ImageFile,
           "Content": data.Content,
       }
@@ -225,16 +225,14 @@ function MapSection () {
           const data = await API.get("/Postings");
           // console.log(data.data);
           setReportPositions(data.data);
+          setIsReportMode(prev => !prev);
       }catch(error){
           console.log(error)
       }
       // setValue("Content", "")
-      setIsReportMode(prev => !prev);
+      // setIsReportMode(prev => !prev);
   }
 
-    const handleReportModalBtn = () => {
-      setIsReportMode(prev=>!prev);
-    }
 
     const handleReportPosition = () => {
       modalOverlayRef.current.style.zIndex = -1;
@@ -249,21 +247,23 @@ function MapSection () {
           if (status === kakao.maps.services.Status.OK) {
               const arr  ={ ...result};
               const _arr = arr[0].address.address_name;
-              // console.log(_arr); 
-              inputPositionAddrRef.current.value = _arr;
+              // inputPositionAddrRef.current.value = _arr;
+              setValue("Address", _arr);
           }
      }
       geocoder.coord2Address(coord.getLng(), coord.getLat(), callback);
    }
 
-    useEffect (()=>{
-      setReportPosition(null)
+    useEffect (()=>{ // 제보 등록 모달창이 닫히면 ... 으로 하고 싶은데,
+      setReportCoord(null); // 제보할 좌표 
+      setValue("Address", '');
+      setValue("Content", '');
     }, [isReportMode])
     
     const submitReportPosition = () => {
       if (window.confirm('여기 위치에 제보하시겠습니까?')) {
         modalOverlayRef.current.style.zIndex = 500;
-        getAddr(reportPosition.lat, reportPosition.lng);
+        getAddr(reportCoord.lat, reportCoord.lng);
       }
     }
 
@@ -331,19 +331,24 @@ function MapSection () {
   const EventMarkerContainer_shelter = ( props ) => {
     const map = useMap()
     const [isVisible, setIsVisible] = useState(false)
+    // const [isClicked, setIsClicked] = useState(false)
 
     return (
       <>
       <MapMarker
         position={props.position} // 마커를 표시할 위치
-        onClick={(marker) => { 
+        onClick={(marker) => {
           map.panTo(marker.getPosition())
-          setIsVisible(true)
+          setIsVisible(prev=>!prev)
+          setSeleteMarkerShelter(props.index)
+          // console.log(`누른거state: ${selectedMarkerShelter}, index: ${props.index}`)
+          // setIsClicked(selectedMarkerShelter === props.index)
         }}
         image={props.markerImage}
       />
-        {isVisible && 
+        {isVisible && selectedMarkerShelter === props.index &&
         <CustomOverlayMap position={props.position}>
+          {/*clickabl={true}> */}
           <div className={style.wrap} style={{height: '140px'}}>
             <div className={style.info} style={{height: '130px'}}>
               <div
@@ -479,6 +484,9 @@ function MapSection () {
     )
   }
 
+  const [selectedMarkerShelter, setSeleteMarkerShelter] = useState();
+  // const [selectedMarkerShelter, setSeleteMarkerShelter] = useState();
+  // const [selectedMarkerShelter, setSeleteMarkerShelter] = useState();
 
     return(
     <Container id={style.mapwrap} className={visibility ? '' : 'hide'}>
@@ -498,7 +506,7 @@ function MapSection () {
           level={5}
           onClick={isReportMode ? 
             (_t, mouseEvent) => { 
-            setReportPosition({
+            setReportCoord({
               lat: mouseEvent.latLng.getLat(),
               lng: mouseEvent.latLng.getLng(),
             }) 
@@ -506,7 +514,7 @@ function MapSection () {
         >
           {/* 지도에 마커 그리기 */}
         {(selectedCategory === "all" || selectedCategory === "shelter") &&
-          shelterPositions.map((position) => (
+          shelterPositions.map((position, index) => (
             <EventMarkerContainer_shelter
               key={`shelter-${position.Latitude},${position.Longitude}`}
               position={{lat: position.Latitude , lng: position.Longitude} }
@@ -522,6 +530,9 @@ function MapSection () {
                   spriteOrigin: shelterOrigin,
                 },
               }}
+              index={index}
+              // onClick={()=>setSeleteMarkerShelter(index)}
+              // isClicked={selectedMarkerShelter === index}
             />
           )
         )}
@@ -567,9 +578,9 @@ function MapSection () {
         )}
 
         {/* 지도에 제보 위치 표시하는 마커 */}
-        {isReportMode && reportPosition &&
+        {isReportMode && reportCoord &&
         <MapMarker // 마커를 생성합니다
-          position={reportPosition}
+          position={reportCoord}
           draggable={true} // 마커가 드래그 가능하도록 설정합니다
           image={{
             src: reportPositionMarker,
@@ -604,7 +615,7 @@ function MapSection () {
 
       {/* 제보 버튼 */}
       <ReportBtn 
-        onClick={handleReportModalBtn}
+        onClick={()=>setIsReportMode(true)}
       />
       {isReportMode ? 
         <Overlay 
@@ -615,7 +626,7 @@ function MapSection () {
         >
             <BigBox onSubmit={handleSubmit(onValid)}>
             {/* <BigBox> */}
-                <XMark onClick = {() => setIsReportMode(false)} icon={faXmark} />
+                <XMark onClick = {()=>setIsReportMode(false)} icon={faXmark} />
                 <BoxTitle>
                     제보 등록하기
                 </BoxTitle>
@@ -626,8 +637,9 @@ function MapSection () {
                     <span>위치</span>
                     <div>
                       <ReportInput 
+                        {...register("Address", {required : true})}
                         type="text"
-                        ref={inputPositionAddrRef} 
+                        // ref={inputPositionAddrRef} 
                         placeholder="오른쪽 버튼를 눌러 위치를 설정해주세요." 
                         disabled />
                       <PinBtn onClick={handleReportPosition} icon={faLocationDot}/>
