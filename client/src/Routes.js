@@ -10,8 +10,8 @@ import Service from "./pages/Service";
 import MapInfo from "./pages/MapInfo";
 import NavBar from "./components/Navbar/Navbar";
 import Footer from "./components/Footer/Footer";
-import Notice from "./components/MainPage/Notice";
-import Chat from "./components/MainPage/Chat";
+import Notice from "./components/MainPage/sidebar/Notice";
+import Chat from "./components/MainPage/sidebar/Chat";
 
 function Routers() {
     return(

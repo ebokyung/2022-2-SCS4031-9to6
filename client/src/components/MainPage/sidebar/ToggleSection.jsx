@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import { useRecoilState } from 'recoil';
-import { showSideBar } from '../../atoms';
+import { showSideBar } from '../../../atoms';
 import { Routes, Route, Link, useMatch } from 'react-router-dom';
 import Notice from './Notice';
 import Chat from './Chat';
