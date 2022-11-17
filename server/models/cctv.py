@@ -18,6 +18,8 @@ class CCTV(db.Model):
     Latitude = db.Column(db.Float, nullable=False)
     # CCTV Streaming URL
     URL = db.Column(db.Text)
+    # Region
+    Region = db.Column(db.String(10), nullable=False)
 
 class CCTVSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
