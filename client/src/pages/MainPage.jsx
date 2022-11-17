@@ -1,6 +1,6 @@
 import styled from 'styled-components';
-import ToggleSection from '../components/MainPage/ToggleSection';
-import MapSection from '../components/MainPage/MapSection';
+import ToggleSection from '../components/MainPage/sidebar/ToggleSection';
+import MapSection from '../components/MainPage/map/MapSection';
 
 const Wrapper = styled.body`
     width: 100vw;
