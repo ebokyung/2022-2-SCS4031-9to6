@@ -11,9 +11,12 @@ class FloodHistory(db.Model):
     # Datetime - YYYY-MM-DD HH:MM:SS
     Datetime = db.Column(db.DateTime, nullable=False)
 
-    # CCTV ID(외래키) 
+    # CCTV ID, Name(외래키) 
     CCTVID = db.Column(db.String(7), db.ForeignKey('cctv.ID', ondelete='CASCADE'))
-    cctv = db.relationship('CCTV', backref=db.backref('history_set'))
+    cctv_id = db.relationship('CCTV', foreign_keys='FloodHistory.CCTVID', backref=db.backref('history_set_by_id'))
+    
+    CCTVName = db.Column(db.String(20), db.ForeignKey('cctv.Name', ondelete='CASCADE'))
+    cctv_name = db.relationship('CCTV', foreign_keys='FloodHistory.CCTVName', backref=db.backref('history_set_by_name'))
 
     # Flood Stage - 침수 단계
     FloodStage = db.Column(db.Integer, nullable=False)

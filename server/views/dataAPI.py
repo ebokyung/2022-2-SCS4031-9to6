@@ -28,6 +28,7 @@ class FloodHistoryData(Resource):
 
         flood_history_schema = FloodHistorySchema(many=True)
         output = flood_history_schema.dump(flood_history_data)
+
         self.body = jsonify(output)
         self.status_code = 200
         response = (self.body, self.status_code)
