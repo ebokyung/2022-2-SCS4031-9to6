@@ -5,9 +5,10 @@ import { Routes, Route, Link, useMatch } from 'react-router-dom';
 import Notice from './Notice';
 import Chat from './Chat';
 
-const Container = styled.section`
-    min-width: 460px;
+const Wrapper = styled.section`
+    width: 460px;
     min-height: ${props => props.theme.minHeight};
+    max-height: 100vh;
     background-color: ${props => props.theme.sideBackColor};
     transition: all .5s;
     position: absolute;
@@ -17,6 +18,12 @@ const Container = styled.section`
         left: -440px;
         background-color: ${props => props.theme.sideBackColor};
     }
+`
+const Container = styled.div`
+    position: relative;
+    width: inherit;
+    height: inherit;
+    overflow-y: hidden;
 `
 
 const VisibilityToggle = styled.button`
@@ -63,24 +70,26 @@ function ToggleSection () {
     }
 
     return(
-        <Container className={visibility ? '' : 'hide'}>
+        <Wrapper className={visibility ? '' : 'hide'}>
             <VisibilityToggle onClick={handleToggle} show={visibility}/>
-            
-            <Tabs>
-                <Tab isActive={noticeMatch !== null || mainMatch !== null}>
-                    <Link to={`notice`}>알림</Link>
-                </Tab>
-                <Tab isActive={chatMatch !== null}>
-                    <Link to={`chat`}>채팅</Link>
-                </Tab>
-            </Tabs>
+            <Container>    
+                <Tabs>
+                    <Tab isActive={noticeMatch !== null || mainMatch !== null}>
+                        <Link to={`notice`}>알림</Link>
+                    </Tab>
+                    <Tab isActive={chatMatch !== null}>
+                        <Link to={`chat`}>채팅</Link>
+                    </Tab>
+                </Tabs>
 
-            <Routes>
-                <Route index element={<Notice />} />
-                <Route path="notice" element={<Notice />} />
-                <Route path="chat" element={<Chat />} />
-            </Routes>
-        </Container>
+                <Routes>
+                    <Route index element={<Notice />} />
+                    <Route path="notice" element={<Notice />} />
+                    <Route path="chat" element={<Chat />} />
+                </Routes>
+            </Container>
+        </Wrapper>
+        
     )
 }
 export default ToggleSection;
