@@ -51,60 +51,73 @@ const ItemAddr = styled.h4``
 
 const test = [
   {
+    id: 0,
     state: 'down',
     step: 0,
     time: '18:30',
     addr: '서울시 강남구 1085-1'
   },
   {
+    id: 1,
     state: 'down',
     step: 0,
-    time: '18:30',
+    time: '18:31',
     addr: '서울시 강남구 1085-1'
   },
   {
+    id: 2,
     state: 'up',
     step: 3,
-    time: '18:30',
+    time: '18:32',
     addr: '서울시 강남구 1085-1'
   },
   {
+    id: 3,
     state: 'down',
     step: 0,
-    time: '18:30',
+    time: '18:33',
     addr: '서울시 강남구 1085-1'
   },
   {
+    id: 4,
     state: 'up',
     step: 3,
-    time: '18:30',
+    time: '18:34',
     addr: '서울시 강남구 1085-1'
   },
   {
+    id: 5,
     state: 'down',
     step: 0,
-    time: '18:30',
+    time: '18:35',
     addr: '서울시 강남구 1085-1'
-  },  {
+  },  
+  {
+    id: 6,
     state: 'up',
     step: 2,
-    time: '18:30',
+    time: '18:36',
     addr: '서울시 강남구 1085-1'
   },
   {
+    id: 7,
     state: 'down',
     step: 0,
-    time: '18:30',
+    time: '18:37',
     addr: '서울시 강남구 1085-1'
-  },  {
-    state: '침수 경보 (3단계)',
-    time: '18:30',
+  },  
+  {
+    id: 8,
+    state: 'up',
+    step: 3,
+    time: '18:38',
     addr: '서울시 강남구 1085-1'
   },
   {
+    id: 9,
     state: 'down',
     step: 0,
-    time: '18:30',
+    time: '18:39',
     addr: '서울시 강남구 1085-1'
   },
 ]
@@ -114,7 +127,7 @@ function Notice() {
       <Wrapper>
         <Container>
             {test.map( (item) => (
-              <Box key={item.index} state={item.state}>
+              <Box key={item.id} state={item.state}>
                 <Items>
                   <ItemTitle>
                     <div>
