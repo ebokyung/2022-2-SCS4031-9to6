@@ -1,7 +1,7 @@
 /*global kakao*/
 import styled from 'styled-components';
-import { useRecoilValue } from 'recoil';
-import { showSideBar } from '../../../atoms';
+import { useRecoilValue, useRecoilState } from 'recoil';
+import { showSideBar, setBookmark } from '../../../atoms';
 import { useEffect, useState, useRef } from 'react';
 import { useForm } from "react-hook-form";
 import markerImage from '../../../imgs/markerSprites.png';
@@ -12,7 +12,7 @@ import {Map, MapMarker, ZoomControl} from 'react-kakao-maps-sdk';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { motion } from "framer-motion";
 import { faXmark, faLocationDot, faUpload } from "@fortawesome/free-solid-svg-icons";
-import { API } from '../../../axios';
+import { API, LogAPI } from '../../../axios';
 import { EventMarkerContainer_cctv, EventMarkerContainer_shelter, EventMarkerContainer_report } from './markerContainer';
 
 const Container = styled.section`
@@ -158,6 +158,9 @@ const AlertP = styled.p`
 
 function MapSection () {
     const visibility = useRecoilValue(showSideBar);
+    const logCheck = localStorage.getItem("token") || sessionStorage.getItem("token");
+    const [bookmarkList, setBookmarkList] = useRecoilState(setBookmark);
+    const bookmarkArray = useRecoilValue(setBookmark);
 
     const [selectedCategory, setSelectedCategory] = useState("all");
 
@@ -203,9 +206,25 @@ function MapSection () {
       }
     }
 
+    const getBookmarkData = async() => {
+      try{
+          const bookmarkData = await LogAPI.get("/Bookmark");
+          // console.log(bookmarkData.data.Bookmark);
+          setBookmarkList(bookmarkData.data.Bookmark);
+        }catch(error){
+          console.log(error)
+      }
+    }
     useEffect(()=>{
+        if(logCheck) { 
+          getBookmarkData(); 
+        }
         getdata();
     },[])
+
+    // useEffect(()=>{
+    //   console.log(bookmarkArray);
+    // },[bookmarkList]);
 
     // 제보 등록 POST & 전체 제보 데이터 GET
     const onValid = async(data) => {
@@ -421,6 +440,7 @@ function MapSection () {
               key={`cctv-${index}`}
               position ={{lat: position.Latitude , lng: position.Longitude}}
               name={position.Name}
+              cctvId={position.ID}
               center={position.Center}
               url={position.URL}
               markerImage={{
@@ -434,6 +454,10 @@ function MapSection () {
               index={index}
               onClick={()=>setSeleteMarkerCctv(index)}
               isClicked={selectedMarkerCctv === index}
+              isBookmarkActive={logCheck}
+              isMarked={()=>(
+                bookmarkArray.filter((i)=>(i.cctvID === position.ID)).length > 0
+              )}
             />
           )
         )}
