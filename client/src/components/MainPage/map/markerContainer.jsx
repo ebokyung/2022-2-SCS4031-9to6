@@ -1,8 +1,13 @@
 import styled from 'styled-components';
 import style from './map.module.css';
-import { useState} from 'react';
+import { useEffect, useState} from 'react';
 import {MapMarker, CustomOverlayMap, useMap} from 'react-kakao-maps-sdk';
 import ReactPlayer from 'react-player';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faStar } from "@fortawesome/free-solid-svg-icons";
+// import { useRecoilState } from 'recoil';
+// import { setBookmark } from '../../../atoms';
+import { LogAPI } from '../../../axios';
 
 const ShelterInfowindowBody =styled.div`
   width: 90%;
@@ -10,6 +15,12 @@ const ShelterInfowindowBody =styled.div`
   display: grid;
   grid-template-columns: 40px 1fr;
   row-gap: 0.5em;
+`
+const ItemStar = styled(FontAwesomeIcon)`
+    cursor: pointer;
+    font-size: 15px;
+    transition: all 0.3s;
+    color: ${props => props.isMarked ? "#FFA000" : "#b7b7b7"};
 `
   
   // 마커별 인포위도우의 내용과 모양이 다르기 때문에 각 컴포넌트 생성
@@ -117,9 +128,34 @@ const ShelterInfowindowBody =styled.div`
 
 
   // cctv 마커 & 인포윈도우
+  const user = JSON.parse(sessionStorage.getItem("token"));
   export const EventMarkerContainer_cctv = ( props ) => {
     const map = useMap()
     const [isVisible, setIsVisible] = useState(false)
+    const [isMarked, setIsMarked] = useState(props.isMarked);
+    // const [bookmarkList, setBookmarkList] = useRecoilState(setBookmark);
+
+    const onStar = async() => {
+      setIsMarked(prev=>!prev)
+      const result = {
+        'memberID1': user.ID,
+        'cctvID1': props.cctvId,
+      }
+      try {
+        if(!isMarked){ 
+          // setBookmarkList(prev => [...prev, result])
+          await LogAPI.post('/Bookmark', result);
+        } else {
+          // setBookmarkList(prev => (
+          //   prev.filter(i => i.cctvID !== props.cctvId)
+          // ))
+          await LogAPI.delete(`/Bookmark/${user}/${props.cctvId}`);
+        }
+      } catch(e) {
+        console.log(e)
+      }
+    }
+
 
     return (
       <>
@@ -140,7 +176,13 @@ const ShelterInfowindowBody =styled.div`
           <div className={style.wrap}>
             <div className={style.info}>
               <div className={style.title}>
-                <button>star</button>
+                <span>
+                  {props.isBookmarkActive ? 
+                      <ItemStar icon={faStar} isMarked={isMarked} onClick={()=>onStar()}/> 
+                      // <ItemStar icon={faStar} style={{color : "#b7b7b7"}} onClick={()=>onStar(props.cctvId)}/> 
+                      : <ItemStar icon={faStar} isMarked={false} onClick={()=>alert('로그인시 이용가능합니다.')}/> 
+                  }
+                </span>
                 <span>{props.name}</span>
                 <span className={style.class}>( 침수 0단계 )</span>
                 <div
