@@ -1,5 +1,7 @@
 import styled from 'styled-components';
-import PageHeader from '../components/PageHeader';
+import Bookmark from '../components/MyPage/Bookmark';
+import MyPostings from '../components/MyPage/MyPostings';
+import { useNavigate } from "react-router-dom";
 
 const Wrapper = styled.body`
     width: 100vw;
@@ -16,10 +18,21 @@ const Container = styled.section`
 
 
 function MyPage () {
+    const navigate = useNavigate();
+
+
+    const logOut = () => {
+        sessionStorage.removeItem('token')
+        navigate("/")
+    }
+    
     return(
     <Wrapper>
         <Container>
-            <PageHeader title={'마이 페이지'} />
+            <Bookmark />
+            <MyPostings />
+            <div>비밀번호 수정</div>
+            <div onClick={logOut}>로그아웃</div>
         </Container>
     </Wrapper>)
 }
