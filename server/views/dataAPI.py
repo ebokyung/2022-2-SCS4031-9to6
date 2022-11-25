@@ -36,9 +36,6 @@ class FloodHistoryData(Resource):
         response = (self.body, self.status_code)
         return make_response(response)   
 
-def dict_helper(objlist):
-    result2 = [item.obj_to_dict() for item in objlist]
-    return result2
 
 class PostingData(Resource):
 
@@ -48,15 +45,40 @@ class PostingData(Resource):
     def get(self):
 
         query_result = db.session.query(Posting.Region, func.count(Posting.Region)).group_by(Posting.Region).order_by(func.count(Posting.Region).desc()).all()
-        # posting_data = [tuple(data) for data in posting_data]
         posting_data = []
-        for result in query_result:
+        for result in query_result: 
             data_dict = {}
             data_dict["Region"] = result[0]
             data_dict["Count"] = result[1]
             posting_data.append(data_dict)
     
         self.body = jsonify(posting_data)
+        self.status_code = 200
+        response = (self.body, self.status_code)
+        return make_response(response)
+
+class CCTVData(Resource):
+
+    body = ''
+    status_code = 501
+
+    def get(self):
+
+        cctv_names = db.session.query(FloodHistory.CCTVName, func.count(FloodHistory.CCTVName)).group_by(FloodHistory.CCTVName).order_by(func.count(FloodHistory.CCTVName).desc()).all()
+        cctv_data = []  
+        for name in cctv_names:
+            data_dict = {}
+            history_per_cctv = db.session.query(FloodHistory.CCTVName, FloodHistory.FloodStage, func.count(FloodHistory.FloodStage)).filter(FloodHistory.CCTVName == name[0]).group_by(FloodHistory.FloodStage).all()
+            
+            stage_dict = {}
+            for history in history_per_cctv:
+                stage_dict[history[1]] = history[2]
+
+            data_dict["CCTVName"] = name[0]
+            data_dict["FloodStageData"] = stage_dict
+            cctv_data.append(data_dict)
+
+        self.body = jsonify(cctv_data)
         self.status_code = 200
         response = (self.body, self.status_code)
         return make_response(response)
