@@ -108,6 +108,8 @@ class Login(Resource):
             if data is not None:
                 hashedcode = jwt.encode({'ID': id_temp}, "secret", algorithm="HS256")
                 session['name'] = hashedcode
+                # originalID = jwt.decode(hashedcode, "secret", algorithms="HS256")
+                # print(originalID)
                 resp = make_response({
                     'Authorization': hashedcode
                 }, 200)

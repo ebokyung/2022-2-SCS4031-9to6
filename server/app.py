@@ -4,6 +4,10 @@ from flask_migrate import Migrate
 from flask_marshmallow import Marshmallow
 from flask_cors import CORS, cross_origin
 from datetime import timedelta
+from flask import Flask, render_template, session
+from flask_socketio import SocketIO, send
+
+import socketio
 
 
 from models import db
@@ -20,6 +24,10 @@ from sqlalchemy.exc import IntegrityError
 from models import db
 from views.bookmarkAPI import Bookmarks
 from views.bookmarkAPI import Bookmarks2
+from views.bookmarkAPI import Bookmarks3
+
+
+from views.chatAPI import chat
 
  
 import config
@@ -47,6 +55,7 @@ CORS(app)
 def index():
        return "Flooding24"        
 
+
 # Users API Route
 api.add_resource(CCTVS, '/cctvs/<cctv_id>')
 api.add_resource(CCTVList, '/cctvs')
@@ -62,6 +71,11 @@ api.add_resource(Login, '/Login')
 api.add_resource(Logout, '/Logout')
 api.add_resource(Bookmarks, '/Bookmark')
 api.add_resource(Bookmarks2, '/Bookmark/<M_ID>/<C_ID>')
+api.add_resource(Bookmarks3, '/Bookmark/<m_id>')
+
+api.add_resource(chat, '/chat')
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=True, port=5000)
+    socketio.run(host="0.0.0.0", debug=True, port=5000)
