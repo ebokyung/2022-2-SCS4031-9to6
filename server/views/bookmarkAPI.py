@@ -77,3 +77,13 @@ class Bookmarks2(Resource):
         bookmark_regi = db.one_or_404(db.select(Bookmark).filter_by(memberID = M_ID, cctvID = C_ID))
         db.session.delete(bookmark_regi)
         db.session.commit()
+
+
+
+class Bookmarks3(Resource):
+    def get(self, m_id):
+        bookmark = Bookmark.query.filter_by(memberID=m_id).all()
+        bookmark_schema = BookmarkSchema(many=True)
+        output = bookmark_schema.dump(bookmark)
+        return jsonify({'Bookmark' : output})
+    
