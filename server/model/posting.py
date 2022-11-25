@@ -15,6 +15,9 @@ class Posting(db.Model):
     # Address
     Address = db.Column(db.String(100), nullable=False)
 
+    # Posting Region
+    Region = db.Column(db.String(30), nullable=False)
+
     # Datetime - YYYY-MM-DD HH:MM:SS
     Datetime = db.Column(db.DateTime, nullable=False)
 

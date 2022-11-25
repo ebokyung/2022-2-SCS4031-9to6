@@ -1,4 +1,4 @@
-from flask import Flask, abort, jsonify,make_response
+from flask import Flask, abort, jsonify
 from flask_restful import reqparse, abort, Api, Resource
 from flask_migrate import Migrate
 from flask_marshmallow import Marshmallow
@@ -18,8 +18,10 @@ from views.shelterAPI import Shelters, ShelterList
 from views.postingAPI import Postings, PostingList
 from views.bookmarkAPI import Bookmarks
 from views.bookmarkAPI import Bookmarks2
+from views.dataAPI import FloodHistoryData, PostingData, CCTVData
 from views.bookmarkAPI import Bookmarks3
 from views.modelAPI import AIModel
+
 import config
 
 
@@ -69,6 +71,9 @@ api.add_resource(Logout, '/Logout')
 api.add_resource(AIModel, '/inference/<cctv_id>')
 api.add_resource(Bookmarks, '/Bookmark')
 api.add_resource(Bookmarks2, '/Bookmark/<M_ID>/<C_ID>')
+api.add_resource(FloodHistoryData, '/Data/FloodHistory')
+api.add_resource(PostingData, '/Data/Posting')
+api.add_resource(CCTVData, '/Data/CCTV')
 api.add_resource(Bookmarks3, '/Bookmark/<m_id>')
 
 

@@ -82,10 +82,13 @@ def addFloodHistory(cctvID, stage, imageURL):
 
         date_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
+        cctvName = CCTV.query.get(cctvID).Name
+
         # 침수 이력 객체 생성
         flood_history = FloodHistory(
             Datetime = date_time,
             CCTVID = cctvID,
+            CCTVName = cctvName,
             FloodStage = detected_stage,
             ImageURL = imageURL,
             Temperature = temperature,
