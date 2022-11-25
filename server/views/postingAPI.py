@@ -120,6 +120,11 @@ class PostingList(Resource):
         imageFile = args['ImageFile']
         content = args['Content']
 
+        address_token = address.split()
+        region = ""
+        for i in range(3):
+            region += (address_token[i] + " ")
+
         try:
             filename = imageFile.filename.split('.')[0]
             ext = imageFile.filename.split('.')[-1]
@@ -128,7 +133,7 @@ class PostingList(Resource):
             s3_put_object(s3, '9to6bucket', imageFile, img_name)
             image_url = 'https://{bucket_name}.s3.{location}.amazonaws.com/Posting/{s3_path}'.format(bucket_name='9to6bucket', location='ap-northeast-2', s3_path=img_name)
 
-            index = addPosting(memberID, latitude, longitude, address, content, image_url)
+            index = addPosting(memberID, latitude, longitude, address, region, content, image_url)
             query = Posting.query.get(index)
             schema = PostingSchema()
             self.body = jsonify(schema.dump(query))
@@ -153,7 +158,7 @@ class PostingList(Resource):
 
 
 
-def addPosting(memberID, latitude, longitude, address, content, image_url):
+def addPosting(memberID, latitude, longitude, address, region, content, image_url):
 
     date_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     index = db.session.query(Posting).count() + 1
@@ -164,6 +169,7 @@ def addPosting(memberID, latitude, longitude, address, content, image_url):
         Index = index,
         MemberID = memberID,
         Address = address,
+        Region = region,
         Datetime = date_time,
         ImageURL = image_url,
         Content = content,

@@ -20,9 +20,8 @@ from sqlalchemy.exc import IntegrityError
 from models import db
 from views.bookmarkAPI import Bookmarks
 from views.bookmarkAPI import Bookmarks2
+from views.dataAPI import FloodHistoryData, PostingData, CCTVData
 from views.bookmarkAPI import Bookmarks3
-
-
  
 import config
 
@@ -65,9 +64,10 @@ api.add_resource(Login, '/Login')
 api.add_resource(Logout, '/Logout')
 api.add_resource(Bookmarks, '/Bookmark')
 api.add_resource(Bookmarks2, '/Bookmark/<M_ID>/<C_ID>')
+api.add_resource(FloodHistoryData, '/Data/FloodHistory')
+api.add_resource(PostingData, '/Data/Posting')
+api.add_resource(CCTVData, '/Data/CCTV')
 api.add_resource(Bookmarks3, '/Bookmark/<m_id>')
-
-
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=True, port=5000)
