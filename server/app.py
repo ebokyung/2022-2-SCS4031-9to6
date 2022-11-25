@@ -64,15 +64,10 @@ api.add_resource(Login, '/Login')
 api.add_resource(Logout, '/Logout')
 api.add_resource(Bookmarks, '/Bookmark')
 api.add_resource(Bookmarks2, '/Bookmark/<M_ID>/<C_ID>')
-<<<<<<< HEAD
 api.add_resource(FloodHistoryData, '/Data/FloodHistory')
 api.add_resource(PostingData, '/Data/Posting')
 api.add_resource(CCTVData, '/Data/CCTV')
-=======
 api.add_resource(Bookmarks3, '/Bookmark/<m_id>')
-
-
->>>>>>> 5d16374e265adf1308feeee4ad7d40f460f8ba6a
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", debug=True, port=5000)
