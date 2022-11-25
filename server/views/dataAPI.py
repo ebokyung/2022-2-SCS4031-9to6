@@ -1,9 +1,11 @@
 from flask import jsonify, make_response
 from flask_restful import Resource, reqparse
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy import func
 from models import db
 from models.cctv import CCTV, CCTVStatus
 from models.history import FloodHistory, FloodHistorySchema
+from models.posting import Posting
 import requests
 import json
 
@@ -33,4 +35,29 @@ class FloodHistoryData(Resource):
         self.status_code = 200
         response = (self.body, self.status_code)
         return make_response(response)   
+
+def dict_helper(objlist):
+    result2 = [item.obj_to_dict() for item in objlist]
+    return result2
+
+class PostingData(Resource):
+
+    body = ''
+    status_code = 501
+
+    def get(self):
+
+        query_result = db.session.query(Posting.Region, func.count(Posting.Region)).group_by(Posting.Region).order_by(func.count(Posting.Region).desc()).all()
+        # posting_data = [tuple(data) for data in posting_data]
+        posting_data = []
+        for result in query_result:
+            data_dict = {}
+            data_dict["Region"] = result[0]
+            data_dict["Count"] = result[1]
+            posting_data.append(data_dict)
+    
+        self.body = jsonify(posting_data)
+        self.status_code = 200
+        response = (self.body, self.status_code)
+        return make_response(response)
 
