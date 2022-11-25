@@ -1,14 +1,14 @@
-from flask import Flask, abort, jsonify
+from flask import Flask, abort, jsonify,make_response
 from flask_restful import reqparse, abort, Api, Resource
 from flask_migrate import Migrate
 from flask_marshmallow import Marshmallow
 from flask_cors import CORS, cross_origin
 from datetime import timedelta
-
+from sqlalchemy.exc import IntegrityError
+from model import db
 
 import sys
 from pathlib import Path
-from model import db
 from views import s3
 
 from views.cctvAPI import CCTVS, CCTVList
@@ -16,16 +16,9 @@ from views.memberAPI import Members, MemberList, MemberCheck, Login, Logout
 from views.historyAPI import FloodHistoryList
 from views.shelterAPI import Shelters, ShelterList
 from views.postingAPI import Postings, PostingList
-from flask import jsonify, make_response
-from flask_restful import Resource, reqparse
-from sqlalchemy.exc import IntegrityError
-from models import db
 from views.bookmarkAPI import Bookmarks
 from views.bookmarkAPI import Bookmarks2
 from views.bookmarkAPI import Bookmarks3
-
-
-
 from views.modelAPI import AIModel
 import config
 
@@ -55,10 +48,9 @@ CORS(app)
 # CORS(app, resources={r'*': {'origins': 'https://webisfree.com:3000'}})
 
 
-
 @app.route('/', methods=['GET'])
 def index():
-       return "Flooding24"        
+       return "Flooding24"
 
 
 # Users API Route
@@ -78,7 +70,6 @@ api.add_resource(AIModel, '/inference/<cctv_id>')
 api.add_resource(Bookmarks, '/Bookmark')
 api.add_resource(Bookmarks2, '/Bookmark/<M_ID>/<C_ID>')
 api.add_resource(Bookmarks3, '/Bookmark/<m_id>')
-
 
 
 if __name__ == "__main__":
