@@ -2,7 +2,7 @@ import styled from 'styled-components';
 
 const Header = styled.header`
     display: flex;
-    font-family: 'Nanum Myeongjo', serif;
+    /* font-family: 'Nanum Myeongjo', serif; */
 `
 
 const Head = styled.div`
