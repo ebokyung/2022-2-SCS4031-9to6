@@ -116,7 +116,7 @@ function Navbar () {
     const shelterMatch = useMatch("/safety/shelter");
     const statisticsMatch = useMatch("/statistics");
     const serviceMatch = useMatch("/service/*");
-    const mapMatch = useMatch("/service/map");
+    const guideMatch = useMatch("/service/guide");
     // 로그인 했는지 안했는지
     const logCheck = localStorage.getItem("token") || sessionStorage.getItem("token")
 
@@ -146,10 +146,10 @@ function Navbar () {
                 </Item>
                 <Item isActive={reportMatch !== null} onClick={() => navigate("/report")}>제보보기</Item>
                 <Item isActive={statisticsMatch !== null} onClick={() => navigate("/statistics")}>데이터분석</Item>
-                <Item drop={true} isActive={serviceMatch !== null || mapMatch !== null}>서비스소개
+                <Item drop={true} isActive={serviceMatch !== null || guideMatch !== null}>서비스소개
                     <DropDown>
                             <DropDownItem isActive={serviceMatch !== null} onClick={() => navigate("/service")}>서비스 소개</DropDownItem>
-                            <DropDownItem isActive={mapMatch !== null} onClick={() => navigate("/service/map")}>지도 이용안내</DropDownItem>
+                            <DropDownItem isActive={guideMatch !== null} onClick={() => navigate("/service/guide")}>지도 이용안내</DropDownItem>
                     </DropDown>
                 </Item>
             </Menu>

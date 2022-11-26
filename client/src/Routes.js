@@ -8,7 +8,7 @@ import Shelter from "./pages/Shelter";
 import Report from "./pages/Report";
 import Statistics from "./pages/Statistics";
 import Service from "./pages/Service";
-import MapInfo from "./pages/MapInfo";
+import Guide from "./pages/Guide";
 import NavBar from "./components/Navbar/Navbar";
 import Footer from "./components/Footer/Footer";
 import Notice from "./components/MainPage/sidebar/Notice";
@@ -32,7 +32,7 @@ function Routers() {
                 <Route path="/report" element={<Report />} />
                 <Route path="/statistics" element={<Statistics />} />
                 <Route path="/service" element={<Service />} />
-                <Route path="/service/map" element={<MapInfo />} />
+                <Route path="/service/guide" element={<Guide />} />
             </Routes>
             <Footer />
         </Router>

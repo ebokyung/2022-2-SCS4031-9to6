@@ -15,7 +15,7 @@ const Container = styled.section`
 `
 
 
-function MapInfo () {
+function Guide () {
     return(
     <Wrapper>
         <Container>
@@ -23,4 +23,4 @@ function MapInfo () {
         </Container>
     </Wrapper>)
 }
-export default MapInfo;
+export default Guide;
