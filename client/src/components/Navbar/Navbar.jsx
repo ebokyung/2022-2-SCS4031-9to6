@@ -138,7 +138,7 @@ function Navbar () {
             <Menu>
                 <Item isActive={mainMatch !== null || noticeMatch !== null || chatMatch !== null} 
                     onClick={() => navigate("/")}>침수지도</Item>
-                <Item drop={true}>안전정보
+                <Item drop={true} isActive={safetyMatch !== null || shelterMatch !== null}>안전정보
                     <DropDown>
                             <DropDownItem isActive={safetyMatch !== null} onClick={() => navigate("/safety")}>행동지침</DropDownItem>
                             <DropDownItem isActive={shelterMatch !== null} onClick={() => navigate("/safety/shelter")}>대피소</DropDownItem>
@@ -146,7 +146,7 @@ function Navbar () {
                 </Item>
                 <Item isActive={reportMatch !== null} onClick={() => navigate("/report")}>제보보기</Item>
                 <Item isActive={statisticsMatch !== null} onClick={() => navigate("/statistics")}>데이터분석</Item>
-                <Item drop={true}>서비스소개
+                <Item drop={true} isActive={serviceMatch !== null || mapMatch !== null}>서비스소개
                     <DropDown>
                             <DropDownItem isActive={serviceMatch !== null} onClick={() => navigate("/service")}>서비스 소개</DropDownItem>
                             <DropDownItem isActive={mapMatch !== null} onClick={() => navigate("/service/map")}>지도 이용안내</DropDownItem>
