@@ -3,8 +3,8 @@ import bcrypt, jwt
 from flask import Response, jsonify, make_response, redirect, url_for, session
 from flask_restful import Resource, reqparse
 from sqlalchemy.exc import IntegrityError
-from models import db
-from models.member import Member, MemberSchema
+from model import db
+from model.member import Member, MemberSchema
 
 # DB에서 '/Members/<member_id>'로 URL쳤을때 해당 멤버 정보 가져오는 부분
 class Members(Resource):
@@ -108,6 +108,8 @@ class Login(Resource):
             if data is not None:
                 hashedcode = jwt.encode({'ID': id_temp}, "secret", algorithm="HS256")
                 session['name'] = hashedcode
+                # originalID = jwt.decode(hashedcode, "secret", algorithms="HS256")
+                # print(originalID)
                 resp = make_response({
                     'Authorization': hashedcode
                 }, 200)

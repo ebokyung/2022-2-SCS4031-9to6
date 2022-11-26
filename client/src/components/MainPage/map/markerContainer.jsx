@@ -128,7 +128,7 @@ const ItemStar = styled(FontAwesomeIcon)`
 
 
   // cctv 마커 & 인포윈도우
-  const user = JSON.parse(sessionStorage.getItem("token")).ID;
+  const user = JSON.parse(sessionStorage.getItem("token"));
   export const EventMarkerContainer_cctv = ( props ) => {
     const map = useMap()
     const [isVisible, setIsVisible] = useState(false)
@@ -138,7 +138,7 @@ const ItemStar = styled(FontAwesomeIcon)`
     const onStar = async() => {
       setIsMarked(prev=>!prev)
       const result = {
-        'memberID1': user,
+        'memberID1': user.ID,
         'cctvID1': props.cctvId,
       }
       try {
