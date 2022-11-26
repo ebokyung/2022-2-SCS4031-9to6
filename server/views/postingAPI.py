@@ -1,12 +1,13 @@
 from flask import jsonify, make_response
 from flask_restful import Resource, reqparse
 from sqlalchemy.exc import IntegrityError
-from models import db
-from models.posting import Posting, PostingSchema
+from model import db
+from model.posting import Posting, PostingSchema
 from views import s3
 from datetime import datetime
 import requests, json
 import werkzeug
+from views.utils import s3_put_object, s3_delete_image
 
 class Postings(Resource):
 
@@ -120,6 +121,11 @@ class PostingList(Resource):
         imageFile = args['ImageFile']
         content = args['Content']
 
+        address_token = address.split()
+        region = ""
+        for i in range(3):
+            region += (address_token[i] + " ")
+
         try:
             filename = imageFile.filename.split('.')[0]
             ext = imageFile.filename.split('.')[-1]
@@ -128,7 +134,7 @@ class PostingList(Resource):
             s3_put_object(s3, '9to6bucket', imageFile, img_name)
             image_url = 'https://{bucket_name}.s3.{location}.amazonaws.com/Posting/{s3_path}'.format(bucket_name='9to6bucket', location='ap-northeast-2', s3_path=img_name)
 
-            index = addPosting(memberID, latitude, longitude, address, content, image_url)
+            index = addPosting(memberID, latitude, longitude, address, region, content, image_url)
             query = Posting.query.get(index)
             schema = PostingSchema()
             self.body = jsonify(schema.dump(query))
@@ -153,7 +159,7 @@ class PostingList(Resource):
 
 
 
-def addPosting(memberID, latitude, longitude, address, content, image_url):
+def addPosting(memberID, latitude, longitude, address, region, content, image_url):
 
     date_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     index = db.session.query(Posting).count() + 1
@@ -164,6 +170,7 @@ def addPosting(memberID, latitude, longitude, address, content, image_url):
         Index = index,
         MemberID = memberID,
         Address = address,
+        Region = region,
         Datetime = date_time,
         ImageURL = image_url,
         Content = content,
@@ -176,36 +183,6 @@ def addPosting(memberID, latitude, longitude, address, content, image_url):
     db.session.commit()
 
     return index
-
-
-# s3에 객체 업로드
-def s3_put_object(s3, bucket, file, filename):
-    """
-    s3 bucket에 지정 파일 업로드
-    :param s3: 연결된 s3 객체(boto3 client)
-    :param bucket: 버킷명
-    :param file: 파일
-    :param filename: 저장 파일명
-    :return: 성공 시 True, 실패 시 False 반환
-    """
-    try:
-        s3.put_object(
-            Body=file,
-            Bucket=bucket,
-            Key=f'Posting/{filename}',
-            ContentType=file.content_type,
-            ACL='public-read',
-            # ExtraArgs={"ContentType": "image/jpg", "ACL": "public-read"},
-        )
-        
-    except Exception as e:
-        print(e)
-        return False
-    return True  
-
-def s3_delete_image(imageURL):
-    path = imageURL[51:]
-    s3.delete_object(Bucket='9to6bucket', Key=path)   
 
 
 def get_location(address):

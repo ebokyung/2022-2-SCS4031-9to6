@@ -1,7 +1,7 @@
 from flask import jsonify
 from flask_restful import Resource
-from models import db
-from models.cctv import CCTV, CCTVSchema
+from model import db
+from model.cctv import CCTV, CCTVSchema
 
 class CCTVS(Resource):
 	def get(self, cctv_id):

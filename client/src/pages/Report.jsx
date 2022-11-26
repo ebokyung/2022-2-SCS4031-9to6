@@ -1,5 +1,10 @@
 import styled from 'styled-components';
-import PageHeader from '../components/PageHeader';
+import ReportClusterMap from '../components/ReportPage/ReportClusterMap';
+import ReportList from '../components/ReportPage/ReportList';
+import { useState } from "react";
+import { API } from "../axios";
+import { useEffect } from "react";
+
 
 const Wrapper = styled.body`
     width: 100vw;
@@ -16,10 +21,28 @@ const Container = styled.section`
 
 
 function Report () {
+
+    const [posts, setPosts] = useState([])
+
+    const getInfo = async() => {
+        try{
+            const data = await API.get("/Postings");
+            console.log(data.data)
+            setPosts(data.data.slice(0).reverse())
+        }catch(error){
+            console.log(error)
+        }
+    }
+  
+    useEffect(() => {
+        getInfo();
+    },[])
+
     return(
     <Wrapper>
         <Container>
-            <PageHeader title={'제보 페이지'} />
+            <ReportClusterMap posts={posts}/>
+            <ReportList posts={posts}/>
         </Container>
     </Wrapper>)
 }
