@@ -9,6 +9,21 @@ import requests, json
 import werkzeug
 from views.utils import s3_put_object, s3_delete_image
 
+class MemberPostings(Resource):
+
+    body = ''
+    status_code = 501
+
+    def get(self, member_id):
+        member_postings = db.session.query(Posting).filter(Posting.MemberID == member_id).order_by(Posting.Datetime.desc()).all()
+        posting_schema = PostingSchema(many=True)
+        output = posting_schema.dump(member_postings)
+        self.body = jsonify(output)
+        self.status_code = 200
+        response = (self.body, self.status_code)
+        return make_response(response)
+
+
 class Postings(Resource):
 
     parser = reqparse.RequestParser()
