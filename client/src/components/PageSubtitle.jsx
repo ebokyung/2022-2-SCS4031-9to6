@@ -15,15 +15,15 @@ const Subtitle = styled.p`
     font-weight: 500;
 `
 
-function PageHeader( {subtitle} ) {
+function PageSubtitle( {subtitle, click} ) {
     return(
         <Header>
             <Head>
-                <Subtitle>
+                <Subtitle onClick={click}>
                     {subtitle}
                 </Subtitle>
             </Head>
         </Header>
     )
 }
-export default PageHeader;
+export default PageSubtitle;
