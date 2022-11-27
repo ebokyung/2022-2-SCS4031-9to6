@@ -24,17 +24,16 @@ port = '5000'
 
 class AIModel(Resource):
     def get(self, cctv_id):
-        cctv = db.one_or_404(db.select(CCTV).filter_by(ID=cctv_id))
-        url = cctv.URL
-
         # download
-        call = requests.get('{}:{}/ffmpeg/{}'.format(host, port, url)).json()
+        req_url = '{}:{}/ffmpeg/{}'.format(host, port, cctv_id)
+        call = requests.get(req_url).json()
         task_id = call['task_id']
         time.sleep(1)
         while True:
             # check download finished
             task_state_req = requests.get('{}:{}/ffmpeg_status/{}'.format(host, port, task_id)).json()
             task_state = task_state_req['state']
+            print(task_state)
             if task_state == 'SUCCESS':
                 break
 

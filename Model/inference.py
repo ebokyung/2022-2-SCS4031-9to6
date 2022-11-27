@@ -102,9 +102,6 @@ class Inference:
             return 0
 
     def run(self, file_name):
-        mp4_src = self.base_dir + '/' + file_name + '.mp4'
-        get_one_frame(mp4_src)
-
         img_name = file_name + '.jpg'
         img_src = self.base_dir + '/' + img_name
 
@@ -115,6 +112,7 @@ class Inference:
         if result is False:
             # no detection 일때 binary detection
             result = self.classification_inference(img_src)
+            # result = 9
 
         # image S3 저장
         image_url = ''
@@ -137,7 +135,7 @@ class Inference:
                         print('image upload failed...T,T')
                         break
 
-        os.remove(mp4_src)
+    
         os.remove(img_src)
 
         # 0 : 정상
