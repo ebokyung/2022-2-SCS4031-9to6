@@ -21,7 +21,7 @@ from views.bookmarkAPI import Bookmarks2
 from views.dataAPI import FloodHistoryData, PostingData, CCTVData
 from views.bookmarkAPI import Bookmarks3
 from views.modelAPI import AIModel
-
+from tasks import ffmpeg
 import config
 
 
@@ -53,6 +53,24 @@ CORS(app)
 @app.route('/', methods=['GET'])
 def index():
        return "Flooding24"
+
+
+@app.route('/ffmpeg/<url>')
+def call_ffmpeg_download(url):
+    f = ffmpeg.delay(url)
+    return jsonify({'task_id': f.id})
+
+
+@app.route('/ffmpeg_status/<task_id>')
+def get_ffmpeg_task_file_name(task_id):
+    task = ffmpeg.AsyncResult(task_id)
+    return jsonify({'state': task.state})
+
+
+@app.route('/ffmpeg_result/<task_id>')
+def get_ffmpeg_task_file_name(task_id):
+    result = ffmpeg.AsyncResult(task_id).result
+    return jsonify({'file_name': result})
 
 
 # Users API Route
