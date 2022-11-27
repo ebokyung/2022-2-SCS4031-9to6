@@ -15,13 +15,18 @@ const Subtitle = styled.p`
     font-weight: 500;
 `
 
-function PageSubtitle( {subtitle, click} ) {
+function PageSubtitle( {subtitle, click, cnt} ) {
     return(
         <Header>
             <Head>
+                {cnt ? (
                 <Subtitle onClick={click}>
-                    {subtitle}
+                    {subtitle} ({cnt}개)
+                </Subtitle> ) : (
+                <Subtitle onClick={click}>
+                    {subtitle} 
                 </Subtitle>
+                )}
             </Head>
         </Header>
     )

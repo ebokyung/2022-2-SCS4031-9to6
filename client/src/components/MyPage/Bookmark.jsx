@@ -15,7 +15,7 @@ const Wrapper = styled.div`
 const Container = styled.div`
     /* width: 100%; */
     height: 100%;
-    margin-left: 5%;
+    margin: 0 5%;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -80,7 +80,7 @@ function Bookmark() {
 
     return (
         <Wrapper>
-            <PageSubtitle subtitle={'즐겨찾기'}/>
+            <PageSubtitle subtitle={'즐겨찾기'} cnt={test.length}/>
             <Container>
                 {/* <TotalCnt>전체 {test.length} 건</TotalCnt> */}
                 <BookmarkList posts={currentPosts(test)} loading={loading}/>
