@@ -13,15 +13,12 @@ const Container = styled.section`
     max-width: ${props => props.theme.maxWidth};
     min-height: ${props => props.theme.minHeight};
 `
-const pageheader = {
-    title: '안전정보 페이지',
-}
 
 function Safety () {
     return(
     <Wrapper>
         <Container>
-            <PageHeader props={pageheader} />
+            <PageHeader title={'행동지침'} />
         </Container>
     </Wrapper>)
 }

@@ -2,6 +2,7 @@ import styled from 'styled-components';
 import Bookmark from '../components/MyPage/Bookmark';
 import MyPostings from '../components/MyPage/MyPostings';
 import { useNavigate } from "react-router-dom";
+import PageHeader from '../components/PageHeader';
 
 const Wrapper = styled.body`
     width: 100vw;
@@ -16,7 +17,6 @@ const Container = styled.section`
     min-height: ${props => props.theme.minHeight};
 `
 
-
 function MyPage () {
     const navigate = useNavigate();
 
@@ -29,6 +29,7 @@ function MyPage () {
     return(
     <Wrapper>
         <Container>
+            <PageHeader title={'마이페이지'}/>
             <Bookmark />
             <MyPostings />
             <div>비밀번호 수정</div>

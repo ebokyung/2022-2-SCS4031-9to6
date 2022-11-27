@@ -13,15 +13,12 @@ const Container = styled.section`
     max-width: ${props => props.theme.maxWidth};
     min-height: ${props => props.theme.minHeight};
 `
-const pageheader = {
-    title: '데이터 통계 페이지',
-}
 
 function Statistics () {
     return(
     <Wrapper>
         <Container>
-            <PageHeader props={pageheader} />
+            <PageHeader title={'데이터 분석'} />
         </Container>
     </Wrapper>)
 }

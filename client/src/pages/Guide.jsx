@@ -1,5 +1,6 @@
 import styled from 'styled-components';
 import PageHeader from '../components/PageHeader';
+import PageSubtitle from '../components/PageSubtitle';
 import icons_step from '../imgs/IconsStep.png';
 import icons_other from '../imgs/IconsMap.png';
 
@@ -28,24 +29,16 @@ const Img = styled.img`
     width: 100%;
 `
 
-const pageheader__main = {
-    title : "지도 아이콘 안내",
-    subtitle: "침수 단계별 마커 색상",
-}
-
-const pageheader_main2 = {
-    subtitle: "이 외 마커",
-}
-
 function Guide () {
     return(
     <Wrapper>
         <Container>
+            <PageHeader title={'지도 아이콘 안내'} />
             <div>
-                <PageHeader props={pageheader__main} />
+                <PageSubtitle subtitle={'침수 단계별 마커 색상'} />
                 <ImgDiv> <Img src={icons_step}/></ImgDiv>
                 
-                <PageHeader props={pageheader_main2} />
+                <PageSubtitle subtitle={'이 외 마커'} />
                 <ImgDiv> <Img src={icons_other}/></ImgDiv>
             </div>
         </Container>

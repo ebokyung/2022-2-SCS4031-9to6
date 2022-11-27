@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import ShelterList from '../components/SafetyPage/ShelterList';
 import ShelterSearchbar from '../components/Searchbar';
 import Pagination from '../components/Pagination';
+import PageHeader from '../components/PageHeader';
 
 const Wrapper = styled.body`
     width: 100vw;
@@ -12,12 +13,11 @@ const Wrapper = styled.body`
 `
 
 const Container = styled.section`
-    width : 75%;
+    width : ${props => props.theme.width};
     max-width: ${props => props.theme.maxWidth};
     min-height: ${props => props.theme.minHeight};
     display: flex;
     flex-direction: column;
-    align-items: center;
 `
 
 const ShelterCnt = styled.div`
@@ -176,6 +176,7 @@ function Shelter () {
     return(
     <Wrapper>
         <Container>
+            <PageHeader title={'대피소'}/>
             <ShelterSearchbar ph={'검색창'} width={'40%'} height={'40px'}/>
             <ShelterCnt>전체 {test.length} 건</ShelterCnt>
             <ShelterList posts={currentPosts(test)} loading={loading}/>

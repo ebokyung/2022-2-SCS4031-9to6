@@ -13,15 +13,12 @@ const Container = styled.section`
     max-width: ${props => props.theme.maxWidth};
     min-height: ${props => props.theme.minHeight};
 `
-const pageheader = {
-    title: '서비스 소개 페이지',
-}
 
 function Service () {
     return(
     <Wrapper>
         <Container>
-            <PageHeader props={pageheader} />
+            <PageHeader title={'서비스 소개'} />
         </Container>
     </Wrapper>)
 }

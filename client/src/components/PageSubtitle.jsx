@@ -5,25 +5,24 @@ const Header = styled.header`
 `
 
 const Head = styled.div`
-    margin-top: 6%;
-    margin-bottom: 2%;
+    margin-top: 1.5rem;
+    margin-left: 5%;
     width: fit-content;
 `
 
-const Title = styled.h1`
-    font-size: 25px;
+const Subtitle = styled.p`
+    font-size: 20px;
     font-weight: 500;
-    color: #FFA000;
 `
 
-function PageHeader( {title} ) {
+function PageHeader( {subtitle} ) {
     return(
         <Header>
             <Head>
-                <Title>
-                    {title}
-                </Title>
-            </Head>  
+                <Subtitle>
+                    {subtitle}
+                </Subtitle>
+            </Head>
         </Header>
     )
 }
