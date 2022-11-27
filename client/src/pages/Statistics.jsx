@@ -1,11 +1,14 @@
 import styled from 'styled-components';
 import PageHeader from '../components/PageHeader';
+import FloodHistories from '../components/Statistics/FloodHistories';
+import FloodHistoriesChart from '../components/Statistics/FloodHistoriesChart';
+import ReportTopRegion from '../components/Statistics/ReportTopRegion';
 
 const Wrapper = styled.body`
     width: 100vw;
     display: flex;
     justify-content: center;
-    margin-top: ${props => props.theme.navMarginTop};
+    margin: ${props => props.theme.navMarginTop} 0;
 `
 
 const Container = styled.section`
@@ -19,6 +22,9 @@ function Statistics () {
     <Wrapper>
         <Container>
             <PageHeader title={'데이터 분석'} />
+            <FloodHistories />
+            <FloodHistoriesChart />
+            <ReportTopRegion />
         </Container>
     </Wrapper>)
 }
