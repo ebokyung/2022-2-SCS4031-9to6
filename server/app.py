@@ -15,7 +15,7 @@ from views.cctvAPI import CCTVS, CCTVList
 from views.memberAPI import Members, MemberList, MemberCheck, Login, Logout
 from views.historyAPI import FloodHistoryList
 from views.shelterAPI import Shelters, ShelterList
-from views.postingAPI import Postings, PostingList
+from views.postingAPI import Postings, PostingList, MemberPostings
 from views.bookmarkAPI import Bookmarks
 from views.bookmarkAPI import Bookmarks2
 from views.dataAPI import FloodHistoryData, PostingData, CCTVData
@@ -65,6 +65,7 @@ api.add_resource(FloodHistoryList, '/FloodHistories')
 api.add_resource(Shelters, '/Shelters/<shelter_index>')
 api.add_resource(ShelterList, '/Shelters')
 api.add_resource(Postings, '/Postings/<posting_index>')
+api.add_resource(MemberPostings, '/Postings/Member/<member_id>')
 api.add_resource(PostingList, '/Postings')
 api.add_resource(Login, '/Login')
 api.add_resource(Logout, '/Logout')
