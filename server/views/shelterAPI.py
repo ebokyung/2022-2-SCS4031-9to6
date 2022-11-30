@@ -1,7 +1,7 @@
 from flask import jsonify, make_response
 from flask_restful import Resource
-from models import db
-from models.shelter import Shelter, ShelterSchema
+from model import db
+from model.shelter import Shelter, ShelterSchema
 
 class Shelters(Resource):
     def get(self, shelter_index):

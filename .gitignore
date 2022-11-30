@@ -1,8 +1,9 @@
 .idea/
 Model/data/
 Model/image_classification/wandb/*
-# Model/object_detection/yolov5
-Model/image_classification/__pycache__/
+Model/object_detection/yolov5
+__pycache__/
+*.pyc
 *.pt
 *.h5
 

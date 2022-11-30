@@ -81,16 +81,20 @@ function LogBox () {
             "ID": data.id,
             "Password": data.pw,
         };
-        try{
-            await API.post('/Login', result).then(
-                response => {
-                    console.log(response);
-                }
-            )
-            navigate("/")
-        } catch(error){
-            console.log(error)
-        }
+        sessionStorage.setItem("token", JSON.stringify(result));
+        navigate("/")
+
+
+        // try{
+        //     await API.post('/Login', result).then(
+        //         response => {
+        //             console.log(response);
+        //         }
+        //     )
+        //     navigate("/")
+        // } catch(error){
+        //     console.log(error)
+        // }
     };
     
     return(
