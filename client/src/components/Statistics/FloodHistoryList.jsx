@@ -15,7 +15,7 @@ const GridContainer = styled.div`
 `
 const GridRow = styled.div`
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: 1fr 1fr 1fr 1fr 2fr;
     height: 70px;
     border-bottom: 1px solid #D9D9D9;
 `
@@ -55,11 +55,11 @@ function FloodHistoryList( {posts, loading} ) {
                 ) : (
                 posts.map((item, index) => (
                     <GridRow key={`floodhistory-list-${index}`}>
-                        <GridCol> {item.Datetime} </GridCol>
-                        <GridCol> {item.Datetime} </GridCol>
+                        <GridCol> {item.Datetime.split('T')[0]} </GridCol>
+                        <GridCol> {item.Datetime.split('T')[1]} </GridCol>
                         <GridCol> {item.CCTVName} </GridCol>
                         <GridCol> {item.FloodStage} </GridCol>
-                        <GridCol> {item.Humidity} {item.Precipitation} {item.Temperature} </GridCol>
+                        <GridCol> {`습도: ${item.Humidity} / 1시간 강수량: ${item.Precipitation} / 기온: ${item.Temperature}`} </GridCol>
                     </GridRow>
                 ))
                 )}
