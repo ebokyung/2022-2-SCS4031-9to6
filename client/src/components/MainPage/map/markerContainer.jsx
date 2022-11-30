@@ -140,6 +140,8 @@ const ItemStar = styled(FontAwesomeIcon)`
       const result = {
         'memberID1': user.ID,
         'cctvID1': props.cctvId,
+        'URL1': props.url,
+        'cctvName1': props.name,
       }
       try {
         if(!isMarked){ 

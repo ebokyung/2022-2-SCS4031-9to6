@@ -206,10 +206,12 @@ function MapSection () {
       }
     }
 
+    const userID = JSON.parse(sessionStorage.getItem("token")).ID;
+
     const getBookmarkData = async() => {
       try{
-          const bookmarkData = await LogAPI.get("/Bookmark");
-          // console.log(bookmarkData.data.Bookmark);
+          const bookmarkData = await LogAPI.get(`/Bookmark/${userID}`);
+          console.log(bookmarkData.data.Bookmark);
           setBookmarkList(bookmarkData.data.Bookmark);
         }catch(error){
           console.log(error)
