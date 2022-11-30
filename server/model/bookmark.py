@@ -17,7 +17,7 @@ class Bookmark(db.Model):
     
     cctvName = db.Column(db.String(30), nullable=False)
     
-    URL = db.Column(db.String(500), nullable=False)
+    URL = db.Column(db.Text(500), nullable=False)
 
 
 class BookmarkSchema(ma.SQLAlchemyAutoSchema):
