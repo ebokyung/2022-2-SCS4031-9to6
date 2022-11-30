@@ -1,9 +1,10 @@
 import styled from 'styled-components';
 import { useState, useEffect } from 'react';
 import ShelterList from '../components/SafetyPage/ShelterList';
-import ShelterSearchbar from '../components/Searchbar';
+// import ShelterSearchbar from '../components/Searchbar';
 import Pagination from '../components/Pagination';
 import PageHeader from '../components/PageHeader';
+import { API } from '../axios';
 
 const Wrapper = styled.body`
     width: 100vw;
@@ -30,140 +31,26 @@ const ShelterCnt = styled.div`
 
 
 function Shelter () {
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
 
-    // const [shelters, setShelters] = useState();
+    const [shelters, setShelters] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
-    const [postsPerPage, setPostsPerPage] = useState(8);
+    const [postsPerPage, setPostsPerPage] = useState(15);
 
-    const test = [
-        {
-            Address: '서울특별시 강남구 강남대로 310 (역삼동, 유니온센터오피스텔)',
-            Name: '유니온센터',
-            Type: '공공시설',
-            Area: '12022',
-        },
-        {
-            Address: '서울특별시 강남구 강남대로 548 (논현동, 건우빌딩)',
-            Name: '유니온센터',
-            Type: '공공시설',
-            Area: '12022',
-        },
-        {
-            Address: '서울특별시 강남구 강남대로 310 (역삼동, 유니온센터오피스텔)',
-            Name: '유니온센터',
-            Type: '공공시설',
-            Area: '12022',
-        },
-        {
-            Address: '서울특별시 강남구 강남대로 310 (역삼동, 유니온센터오피스텔)',
-            Name: '유니온센터',
-            Type: '공공시설',
-            Area: '12022',
-        },
-        {
-            Address: '서울특별시 강남구 강남대로 310 (역삼동, 유니온센터오피스텔)',
-            Name: '유니온센터',
-            Type: '공공시설',
-            Area: '12022',
-        },
-        {
-            Address: '서울특별시 강남구 강남대로 310 (역삼동, 유니온센터오피스텔)',
-            Name: '유니온센터',
-            Type: '공공시설',
-            Area: '12022',
-        },
-        {
-            Address: '서울특별시 강남구 강남대로 310 (역삼동, 유니온센터오피스텔)',
-            Name: '유니온센터',
-            Type: '공공시설',
-            Area: '12022',
-        },
-        {
-            Address: '서울특별시 강남구 강남대로 310 (역삼동, 유니온센터오피스텔)',
-            Name: '유니온센터',
-            Type: '공공시설',
-            Area: '12022',
-        },
-        {
-            Address: '서울특별시 강남구 강남대로 310 (역삼동, 유니온센터오피스텔)',
-            Name: '유니온센터',
-            Type: '공공시설',
-            Area: '12022',
-        },
-        {
-            Address: '서울특별시 강남구 강남대로 310 (역삼동, 유니온센터오피스텔)',
-            Name: '유니온센터',
-            Type: '공공시설',
-            Area: '12022',
-        },
-        {
-            Address: '서울특별시 강남구 강남대로 310 (역삼동, 유니온센터오피스텔)',
-            Name: '유니온센터',
-            Type: '공공시설',
-            Area: '12022',
-        },
-        {
-            Address: '서울특별시 강남구 강남대로 310 (역삼동, 유니온센터오피스텔)',
-            Name: '유니온센터',
-            Type: '공공시설',
-            Area: '12022',
-        },
-        {
-            Address: '서울특별시 강남구 강남대로 310 (역삼동, 유니온센터오피스텔)',
-            Name: '유니온센터',
-            Type: '공공시설',
-            Area: '12022',
-        },
-        {
-            Address: '서울특별시 강남구 강남대로 310 (역삼동, 유니온센터오피스텔)',
-            Name: '유니온센터',
-            Type: '공공시설',
-            Area: '12022',
-        },
+    const getdata = async() => {
+        try{
+            const shelterData = await API.get("/Shelters");
+            setShelters(shelterData.data);
+            // console.log(shelterData.data);
+            setLoading(false);
+        }catch(error){
+            console.log(error)
+        }
+    }
 
-        {
-            Address: '서울특별시 강남구 강남대로 310 (역삼동, 유니온센터오피스텔)',
-            Name: '유니온센터',
-            Type: '공공시설',
-            Area: '12022',
-        },
-        {
-            Address: '서울특별시 강남구 강남대로 310 (역삼동, 유니온센터오피스텔)',
-            Name: '유니온센터',
-            Type: '공공시설',
-            Area: '12022',
-        },
-        {
-            Address: '서울특별시 강남구 강남대로 310 (역삼동, 유니온센터오피스텔)',
-            Name: '유니온센터',
-            Type: '공공시설',
-            Area: '12022',
-        },
-
-        {
-            Address: '서울특별시 강남구 강남대로 310 (역삼동, 유니온센터오피스텔)',
-            Name: '유니온센터',
-            Type: '공공시설',
-            Area: '12022',
-        },
-
-    ]
-
-    // const getdata = async() => {
-    //     try{
-    //         const shelterData = await API.get("/Shelters");
-    //         setShelters(shelterData.data);
-    //         // console.log(shelterData.data);
-    //         setLoading(false);
-    //     }catch(error){
-    //         console.log(error)
-    //     }
-    // }
-
-    // useEffect(()=>{
-    //     getdata();
-    // },[])
+    useEffect(()=>{
+        getdata();
+    },[])
 
     const indexOfLast = currentPage * postsPerPage;
     const indexOfFirst = indexOfLast - postsPerPage;
@@ -177,12 +64,12 @@ function Shelter () {
     <Wrapper>
         <Container>
             <PageHeader title={'대피소'}/>
-            <ShelterSearchbar ph={'검색창'} width={'40%'} height={'40px'}/>
-            <ShelterCnt>전체 {test.length} 건</ShelterCnt>
-            <ShelterList posts={currentPosts(test)} loading={loading}/>
+            {/* <ShelterSearchbar ph={'검색창'} width={'40%'} height={'40px'}/> */}
+            <ShelterCnt>전체 {shelters.length} 건</ShelterCnt>
+            <ShelterList posts={currentPosts(shelters)} loading={loading}/>
             <Pagination
                 postsPerPage={postsPerPage}
-                totalPosts={test.length}
+                totalPosts={shelters.length}
                 paginate={setCurrentPage}
             />
         </Container>
