@@ -1,8 +1,8 @@
 from flask import jsonify, make_response, session
 from flask_restful import Resource, reqparse
 from sqlalchemy.exc import IntegrityError
-from models import db
-from models.bookmark import Bookmark, BookmarkSchema
+from model import db
+from model.bookmark import Bookmark, BookmarkSchema
 
 
 
