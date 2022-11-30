@@ -8,6 +8,7 @@ from datetime import timedelta
 from sqlalchemy.exc import IntegrityError
 from model import db
 from model.cctv import CCTV
+from model.chatlog import Chatlog
 
 import sys
 from pathlib import Path
