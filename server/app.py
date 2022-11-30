@@ -7,6 +7,7 @@ from flask_socketio import SocketIO,emit
 from datetime import timedelta
 from sqlalchemy.exc import IntegrityError
 from model import db
+from model.cctv import CCTV
 
 import sys
 from pathlib import Path
@@ -21,8 +22,8 @@ from views.bookmarkAPI import Bookmarks
 from views.bookmarkAPI import Bookmarks2
 from views.dataAPI import FloodHistoryData, PostingData, CCTVData
 from views.bookmarkAPI import Bookmarks3
-#from views.modelAPI import AIModel
-
+# from views.modelAPI import AIModel
+# from tasks import ffmpeg
 import config
 
 
@@ -77,6 +78,26 @@ def disconnected():
 def index():
        return "Flooding24"
  
+
+# @app.route('/ffmpeg/<cctv_id>')
+# def call_ffmpeg_download(cctv_id):
+#     cctv = db.one_or_404(db.select(CCTV).filter_by(ID=cctv_id))
+#     url = cctv.URL
+#     f = ffmpeg.delay(url)
+#     return jsonify({'task_id': f.id})
+
+
+# @app.route('/ffmpeg_status/<task_id>')
+# def ffmpeg_status(task_id):
+#     task = ffmpeg.AsyncResult(task_id)
+#     return jsonify({'state': task.state})
+
+
+# @app.route('/ffmpeg_result/<task_id>')
+# def ffmpeg_result(task_id):
+#     result = ffmpeg.AsyncResult(task_id).result
+#     return jsonify({'file_name': result})
+
 
 # Users API Route
 api.add_resource(CCTVS, '/cctvs/<cctv_id>')
