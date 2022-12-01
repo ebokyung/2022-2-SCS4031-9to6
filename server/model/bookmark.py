@@ -15,6 +15,10 @@ class Bookmark(db.Model):
     cctvID = db.Column(db.String(7), db.ForeignKey('cctv.ID', ondelete='CASCADE'), nullable=False)
     cctv = db.relationship('CCTV', backref=db.backref('cctv_set'))
 
+    cctvName = db.Column(db.String(30), nullable=False)
+
+    URL = db.Column(db.Text, nullable=False)
+
 
 class BookmarkSchema(ma.SQLAlchemyAutoSchema):
     class Meta:

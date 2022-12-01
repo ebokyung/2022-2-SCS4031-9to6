@@ -32,6 +32,7 @@ function Routers() {
                 <Route path="/safety/shelter" element={<Shelter />} />
                 <Route path="/report" element={<Report />} />
                 <Route path="/statistics" element={<Statistics />} />
+                <Route path="/chatdemo" element={<ChatDemo />} />
                 <Route path="/service" element={<Service />} />
                 <Route path="/service/guide" element={<Guide />} />
             </Routes>

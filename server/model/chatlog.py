@@ -7,13 +7,13 @@ from model import db, ma
 class Chatlog(db.Model):
 
     # Index
-    Index = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     # User
-    User = db.Column(db.String(20))
+    user = db.Column(db.String(20))
     # Body
-    Body = db.Column(db.Text)
+    body = db.Column(db.Text)
     # Time
-    Time = db.Column(db.String(20))
+    time = db.Column(db.String(20))
 
 class ChatlogSchema(ma.SQLAlchemyAutoSchema):
     class Meta:

@@ -8,7 +8,7 @@ from datetime import timedelta
 from sqlalchemy.exc import IntegrityError
 from model import db
 from model.cctv import CCTV
-from model.chatlog import Chatlog
+from model.chatlog import Chatlog, ChatlogSchema
 
 import sys
 from pathlib import Path
@@ -57,15 +57,32 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 @socketio.on("connect")
 def connected():
     """event listener when client connects to the server"""
-    print(request.sid)
-    print("client has connected")
-    emit("connect",{"data":f"id: {request.sid} is connected"})
+    # print(request.sid)
+    # print("client has connected")
+    chatlogs = Chatlog.query.all()
+    chatlog_schema = ChatlogSchema(many=True)
+    output = chatlog_schema.dump(chatlogs)
+    print(output)
+    # emit("connect",{"data":f"id: {request.sid} is connected"})
+    emit("connect", output)
 
 @socketio.on('message')
 def handle_message(data):
     """event listener when client types a message"""
     print("data from the front end: ",str(data), "with request sid: ", str(request.sid))
-    emit("message",{'data':data,'id':request.sid},broadcast=True)
+    log = Chatlog(
+        id = data['id'],
+        user = data['user'],
+        body = data['body'],
+        time = data['time']
+    )
+    db.session.add(log)
+    db.session.commit()
+    chatlogs = Chatlog.query.all()
+    chatlog_schema = ChatlogSchema(many=True)
+    output = chatlog_schema.dump(chatlogs)
+    print(output)
+    emit("message",output,broadcast=True)
 
 @socketio.on("disconnect")
 def disconnected():
