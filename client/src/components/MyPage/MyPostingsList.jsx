@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import { LogAPI } from '../../axios';
 
 const Wrapper = styled.div`
     width: 100%;
@@ -15,7 +16,7 @@ const GridContainer = styled.div`
 `
 const GridRow = styled.div`
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1.5fr 2fr 0.5fr;
     height: 70px;
     border-bottom: 1px solid #D9D9D9;
 `
@@ -40,6 +41,14 @@ const GridCol = styled.div`
 
 function MyPostingsList( {posts, loading} ) {
 
+    const handleModify = () => {
+        console.log('수정하고싶어요.');
+    }
+
+    const handleDelete = () => {
+        console.log('삭제하고싶어요.');
+    }
+
     return (
         <Wrapper>
             <GridContainer>
@@ -47,15 +56,17 @@ function MyPostingsList( {posts, loading} ) {
                     <GridCol>제보사진</GridCol>
                     <GridCol>위치</GridCol>
                     <GridCol>제보내용</GridCol>
+                    <GridCol>수정 / 삭제</GridCol>
                 </GridHead>
                 {loading ? (
                 <h1>Loading...</h1>
                 ) : (
-                posts.map((item, index) => (
-                    <GridRow key={`mypostings-list-${index}`}>
-                        <GridCol> {item.img} </GridCol>
-                        <GridCol> {item.address} </GridCol>
-                        <GridCol> {item.content} </GridCol>
+                posts.map((item, idx) => (
+                    <GridRow key={`mypostings-list-${idx}`}>
+                        <GridCol> {item.imgURL} </GridCol>
+                        <GridCol> {item.Address} </GridCol>
+                        <GridCol> {item.Content} </GridCol>
+                        <GridCol> <span onClick={()=>handleModify()}>수정</span> <span onClick={()=>handleDelete()}>삭제</span> </GridCol>
                     </GridRow>
                 ))
                 )}

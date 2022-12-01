@@ -151,7 +151,7 @@ const ItemStar = styled(FontAwesomeIcon)`
           // setBookmarkList(prev => (
           //   prev.filter(i => i.cctvID !== props.cctvId)
           // ))
-          await LogAPI.delete(`/Bookmark/${user}/${props.cctvId}`);
+          await LogAPI.delete(`/Bookmark/${user.ID}/${props.cctvId}`);
         }
       } catch(e) {
         console.log(e)
