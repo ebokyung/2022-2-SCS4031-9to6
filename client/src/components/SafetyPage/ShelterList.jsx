@@ -2,7 +2,7 @@ import styled from 'styled-components';
 
 const Wrapper = styled.div`
     width: 100%;
-    max-height: 880px;
+    max-height: 1500px;
     display: flex;
     flex-direction: column;
     margin-top: 10px;

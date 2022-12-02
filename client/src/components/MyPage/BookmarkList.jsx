@@ -53,9 +53,9 @@ function BookmarkList( {posts, loading} ) {
                 ) : (
                 posts.map((item, index) => (
                     <GridRow key={`bookmark-list-${index}`}>
-                        <GridCol> {item.cctvID} </GridCol>
-                        <GridCol> {item.step} </GridCol>
-                        <GridCol> {item.url} </GridCol>
+                        <GridCol> {item.cctvName} </GridCol>
+                        <GridCol> 단계 </GridCol>
+                        <GridCol> {item.URL} </GridCol>
                     </GridRow>
                 ))
                 )}

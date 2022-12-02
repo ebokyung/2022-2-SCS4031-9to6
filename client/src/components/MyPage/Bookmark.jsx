@@ -3,6 +3,8 @@ import PageSubtitle from '../PageSubtitle';
 import BookmarkList from './BookmarkList';
 import Pagination from '../Pagination';
 import { useState } from 'react';
+import { setBookmark } from '../../atoms';
+import { useRecoilValue, useRecoilState } from 'recoil';
 
 const Wrapper = styled.div`
     width: 100%;
@@ -78,15 +80,30 @@ function Bookmark() {
         return currentPosts;
     };
 
+    // const [bookmarkList, setBookmarkList] = useRecoilState(setBookmark);
+    const bookmarkArray = useRecoilValue(setBookmark);
+    // const getMyBookmarkData = async() => {
+    //     try{
+    //         const bookmarkData = await LogAPI.get(`/Bookmark/${userID}`);
+    //         console.log(bookmarkData.data.Bookmark);
+    //         setBookmarkList(bookmarkData.data.Bookmark);
+    //       }catch(error){
+    //         console.log(error)
+    //     }
+    //   }
+    //   useEffect(()=>{
+    //     getMyBookmarkData(); 
+    //   },[])
+
     return (
         <Wrapper>
             <PageSubtitle subtitle={'즐겨찾기'} cnt={test.length}/>
             <Container>
                 {/* <TotalCnt>전체 {test.length} 건</TotalCnt> */}
-                <BookmarkList posts={currentPosts(test)} loading={loading}/>
+                <BookmarkList posts={currentPosts(bookmarkArray)} loading={loading}/>
                 <Pagination
                     postsPerPage={postsPerPage}
-                    totalPosts={test.length}
+                    totalPosts={bookmarkArray.length}
                     paginate={setCurrentPage}
                 />
             </Container>

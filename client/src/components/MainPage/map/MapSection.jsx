@@ -206,9 +206,11 @@ function MapSection () {
       }
     }
 
+    const user = JSON.parse(sessionStorage.getItem("token"));
+
     const getBookmarkData = async() => {
       try{
-          const bookmarkData = await LogAPI.get("/Bookmark");
+          const bookmarkData = await LogAPI.get(`/Bookmark/${user.ID}`);
           // console.log(bookmarkData.data.Bookmark);
           setBookmarkList(bookmarkData.data.Bookmark);
         }catch(error){
@@ -229,7 +231,7 @@ function MapSection () {
     // 제보 등록 POST & 전체 제보 데이터 GET
     const onValid = async(data) => {
       const result = {
-          // "MemberID": "(회원 아이디, 로그인 안했을 경우 요청X)",
+          "MemberID": logCheck ? user.ID : null,
           "Address": data.Address,
           "Latitude": reportCoord.lat,
           "Longitude": reportCoord.lng,

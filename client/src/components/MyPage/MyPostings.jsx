@@ -2,7 +2,9 @@ import styled from 'styled-components';
 import PageSubtitle from '../PageSubtitle';
 import MyPostingsList from './MyPostingsList';
 import Pagination from '../Pagination';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { LogAPI } from '../../axios';
+
 
 const Wrapper = styled.body`
     width: 100%;
@@ -21,35 +23,13 @@ const Container = styled.div`
     justify-content: flex-start;
 `
 
-const test = [
-    {
-        img: '이미지',
-        address: '강남',
-        content: '제보내용'
-    },{
-        img: '이미지',
-        address: '강남',
-        content: '제보내용'
-    },{
-        img: '이미지',
-        address: '강남',
-        content: '제보내용'
-    },{
-        img: '이미지',
-        address: '강남',
-        content: '제보내용'
-    },{
-        img: '이미지',
-        address: '강남',
-        content: '제보내용'
-    },
-]
 
 function MyPostings() {
+    const user = JSON.parse(sessionStorage.getItem("token"));
 
     const [loading, setLoading] = useState(false);
 
-    // const [myPostings, setMyPostings] = useState();
+    const [myPostings, setMyPostings] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [postsPerPage, setPostsPerPage] = useState(4);
 
@@ -61,14 +41,28 @@ function MyPostings() {
         return currentPosts;
     };
 
+    const getMyPostingData = async() => {
+        try{
+            const data = await LogAPI.get(`/Postings/Member/${user.ID}`);
+            console.log(data.data);
+            setMyPostings(data.data);
+        } catch(error){
+            console.log(error)
+        }
+    }
+    
+    useEffect(()=>{
+        getMyPostingData(); 
+    },[])
+
     return (
         <Wrapper>
-            <PageSubtitle subtitle={'내가 쓴 글'} cnt={test.length}/>
+            <PageSubtitle subtitle={'내가 쓴 글'} cnt={myPostings.length}/>
             <Container>
-                <MyPostingsList posts={currentPosts(test)} loading={loading}/>
+                <MyPostingsList posts={currentPosts(myPostings)} loading={loading}/>
                 <Pagination
                     postsPerPage={postsPerPage}
-                    totalPosts={test.length}
+                    totalPosts={myPostings.length}
                     paginate={setCurrentPage}
                 />
             </Container>

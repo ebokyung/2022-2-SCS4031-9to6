@@ -140,6 +140,8 @@ const ItemStar = styled(FontAwesomeIcon)`
       const result = {
         'memberID1': user.ID,
         'cctvID1': props.cctvId,
+        'URL1': props.url,
+        'cctvName1': props.name,
       }
       try {
         if(!isMarked){ 
@@ -149,7 +151,7 @@ const ItemStar = styled(FontAwesomeIcon)`
           // setBookmarkList(prev => (
           //   prev.filter(i => i.cctvID !== props.cctvId)
           // ))
-          await LogAPI.delete(`/Bookmark/${user}/${props.cctvId}`);
+          await LogAPI.delete(`/Bookmark/${user.ID}/${props.cctvId}`);
         }
       } catch(e) {
         console.log(e)

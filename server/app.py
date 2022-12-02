@@ -90,11 +90,9 @@ def disconnected():
     print("user disconnected")
     emit("disconnect",f"user {request.sid} disconnected",broadcast=True)
 
-# from views.socket import SocketEvent
-
-@app.route('/', methods=['GET'])
-def index():
-       return "Flooding24"
+# @app.route('/', methods=['GET'])
+# def index():
+#        return "Flooding24"
  
 
 # @app.route('/ffmpeg/<cctv_id>')
@@ -131,7 +129,7 @@ api.add_resource(MemberPostings, '/Postings/Member/<member_id>')
 api.add_resource(PostingList, '/Postings')
 api.add_resource(Login, '/Login')
 api.add_resource(Logout, '/Logout')
-#api.add_resource(AIModel, '/inference/<cctv_id>')
+# api.add_resource(AIModel, '/inference/<cctv_id>')
 api.add_resource(Bookmarks, '/Bookmark')
 api.add_resource(Bookmarks2, '/Bookmark/<M_ID>/<C_ID>')
 api.add_resource(FloodHistoryData, '/Data/FloodHistory')
