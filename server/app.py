@@ -21,7 +21,7 @@ from views.bookmarkAPI import Bookmarks
 from views.bookmarkAPI import Bookmarks2
 from views.dataAPI import FloodHistoryData, PostingData, CCTVData
 from views.bookmarkAPI import Bookmarks3
-from views.modelAPI import AIModel
+# from views.modelAPI import AIModel
 from tasks import ffmpeg
 import config
 
@@ -90,7 +90,7 @@ api.add_resource(MemberPostings, '/Postings/Member/<member_id>')
 api.add_resource(PostingList, '/Postings')
 api.add_resource(Login, '/Login')
 api.add_resource(Logout, '/Logout')
-api.add_resource(AIModel, '/inference/<cctv_id>')
+# api.add_resource(AIModel, '/inference/<cctv_id>')
 api.add_resource(Bookmarks, '/Bookmark')
 api.add_resource(Bookmarks2, '/Bookmark/<M_ID>/<C_ID>')
 api.add_resource(FloodHistoryData, '/Data/FloodHistory')
