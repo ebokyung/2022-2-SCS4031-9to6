@@ -27,7 +27,7 @@ function Chat() {
     }, [arrivalChat]);
   
     useEffect(() => {
-        socketRef.current = io.connect("http://localhost:5000", { transports: ["websocket"] } );
+        socketRef.current = io.connect("http://43.201.149.89:5000", { transports: ["websocket"] } );
         socketRef.current.on('connect', (chatObj) => { // 메세지 수신
             console.log(chatObj);
             setArrivalChat(chatObj);
