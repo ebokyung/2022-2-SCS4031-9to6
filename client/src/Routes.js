@@ -13,7 +13,6 @@ import NavBar from "./components/Navbar/Navbar";
 import Footer from "./components/Footer/Footer";
 import Notice from "./components/MainPage/sidebar/Notice";
 import Chat from "./components/MainPage/sidebar/Chat";
-import ChatDemo from "./pages/ChatDemoPage"
 
 function Routers() {
     return(
@@ -32,7 +31,6 @@ function Routers() {
                 <Route path="/safety/shelter" element={<Shelter />} />
                 <Route path="/report" element={<Report />} />
                 <Route path="/statistics" element={<Statistics />} />
-                <Route path="/chatdemo" element={<ChatDemo />} />
                 <Route path="/service" element={<Service />} />
                 <Route path="/service/guide" element={<Guide />} />
             </Routes>

@@ -122,7 +122,7 @@ class Inference:
             while True:
                 s3_uploaded = s3_upload_file(s3, '9to6bucket', img_src, f'Flood/{img_name}')
                 if s3_uploaded:
-                    image_url = 'https://{bucket_name}.s3.{location}.amazonaws.com/Posting/{s3_path}'.format(
+                    image_url = 'https://{bucket_name}.s3.{location}.amazonaws.com/Flood/{s3_path}'.format(
                         bucket_name='9to6bucket',
                         location='ap-northeast-2',
                         s3_path=img_name)

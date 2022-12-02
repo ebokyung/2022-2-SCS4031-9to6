@@ -10,7 +10,6 @@ const Wrapper = styled.body`
 `
 
 function MainPage () {
-    console.log("render page");
     return(
     <Wrapper>
         <ToggleSection />
