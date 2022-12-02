@@ -2,18 +2,18 @@ import styled from 'styled-components';
 
 const Header = styled.header`
     display: flex;
-    font-family: 'Nanum Myeongjo', serif;
 `
 
 const Head = styled.div`
     margin-top: 6%;
-    position: relative;
+    margin-bottom: 2%;
     width: fit-content;
 `
 
 const Title = styled.h1`
-    font-size: 20px;
+    font-size: 25px;
     font-weight: 500;
+    color: #FFA000;
 `
 
 function PageHeader( {title} ) {
@@ -23,7 +23,7 @@ function PageHeader( {title} ) {
                 <Title>
                     {title}
                 </Title>
-            </Head>
+            </Head>  
         </Header>
     )
 }

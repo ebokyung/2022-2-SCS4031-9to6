@@ -14,12 +14,11 @@ const Container = styled.section`
     min-height: ${props => props.theme.minHeight};
 `
 
-
 function Safety () {
     return(
     <Wrapper>
         <Container>
-            <PageHeader title={'안전정보 페이지'} />
+            <PageHeader title={'행동지침'} />
         </Container>
     </Wrapper>)
 }
