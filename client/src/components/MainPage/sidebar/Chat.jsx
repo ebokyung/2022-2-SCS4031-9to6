@@ -3,66 +3,7 @@ import { useForm } from 'react-hook-form';
 import { useEffect, useState, useRef } from "react";
 import { io } from "socket.io-client";
 
-const test = [
-    {
-        id : 1,
-        user: 'admin',
-        body : "침수 경보 발생 시 채팅방이 열립니다.",
-    },
-    {
-        id : 2,
-        user: 'admin',
-        body : "'서울  강남구’ 침수 경보 발생으로 열린 채팅방입니다.",
-    },
-  {
-      id : 3,
-      user: '익명1',
-      body : "지금 비가 너무 많이 와서 강남역 근처에 차들이 못 빠져 나가고 있어요 ㅠㅠㅠ",
-      time : "오전 5 : 05" 
-  },
-  {
-      id : 4,
-      user: '익명2',
-      body : "대방역 너무 심각해요... 이쪽으로 오지 마세요!!",
-      time : "오전 5 : 05" 
-  },
-  {
-      id : 5,
-      user: 'test1234',
-      body : "강남역 하수구 막혀서 역류중이에요.. 조심하세요ㅠㅠ  ",
-  },
-  {
-      id : 6,
-      user: '익명4',
-      body : "다른 동네는 괜찮은가요 ? 비가 많이 오네요 ...",
-      time : "오전 5 : 03" 
-  },
-  {
-      id : 7,
-      user: 'test1234',
-      body : "저번처럼 피해가 크면 안될텐데 ... ",
-      time : "오전 5 : 02" 
-  },
-  {
-      id : 8,
-      user: '익명6',
-      body : "채팅창 테스트 중 입니다.채팅창 테스트 중 입니다.채팅창 테스트 중 입니다.채팅창 테스트 중 입니다.",
-      time : "오전 4 : 58" 
-  },
-  {
-      id : 9,
-      user: '익명7',
-      body : "채팅창 테스트 중 입니다.채팅창 테스트 중 입니다.채팅창 테스트 중 입니다.",
-      time : "오전 4 : 58" 
-  },
-  {
-      id : 10,
-      user: 'admin',
-      body : "침수 경보 발생 시 채팅방이 열립니다.",
-  },
-]
-
-function Notice() {
+function Chat() {
     let me = null;
     const logCheck = localStorage.getItem("token") || sessionStorage.getItem("token");
     if(logCheck) {
@@ -73,35 +14,34 @@ function Notice() {
 
     const { register, handleSubmit, setValue } = useForm()
 
-	const [ chat, setChat ] = useState(test);
-    const [arrivalChat, setArrivalChat] = useState(null);
+	const [ chat, setChat ] = useState([]);
+    const [arrivalChat, setArrivalChat] = useState([]);
 
-	const socketRef = useRef()
-
-    socketRef.current = io.connect("http://54.180.141.7:5000", { transports: ["websocket"] } );
+    // let socket = io.connect("http://localhost:5000", { transports: ["websocket"] } );
+    const socketRef = useRef(null);
 
     useEffect(() => {
-    	arrivalChat && setChat((prev) => [...prev, arrivalChat]) // 채팅 리스트에 추가
+        console.log(arrivalChat)
+    	arrivalChat && setChat(arrivalChat) // 채팅 리스트에 추가
+        // console.log(chat);
     }, [arrivalChat]);
   
     useEffect(() => {
+        socketRef.current = io.connect("http://43.201.149.89:5000", { transports: ["websocket"] } );
         socketRef.current.on('connect', (chatObj) => { // 메세지 수신
-            const { result, errmsg } = chatObj;
-            setArrivalChat(result);
-        });
-    //     return () => socketRef.current.disconnect()
-    }, [socketRef])
-
-	// useEffect(() => {
-    //     socketRef.current = io.connect("http://54.180.141.7:5000")
-    //     socketRef.current.on("message", (message) => {
-    //         setChat([ ...chat, { message } ])
-    //     })
-    //     return () => socketRef.current.disconnect()
-    // },[ chat ])
+            console.log(chatObj);
+            setArrivalChat(chatObj);
+            arrivalChat = chatObj;
+        })
+        socketRef.current.on("message", (chatObj) => { // 메세지 수신
+            setArrivalChat(chatObj);
+            arrivalChat = chatObj;
+        })
+        return () => socketRef.current.disconnect();
+    }, [socketRef]);
    
     // 채팅 전송
-    const onValid = (data) => {
+    const onValid = async (data) => {
         let now = new Date();
         const result = {
           id : chat.length+1,
@@ -109,22 +49,41 @@ function Notice() {
           body : data.msg,
           time : `${now.getHours()} : ${now.getMinutes()}`,
         }
-        // console.log(result);
-        setChat(prev=>[...prev, result])
-		socketRef.current.emit("message", result)
+        console.log(result);
+        // setChat(prev=>[…prev, result])
+		socketRef.current.emit("message", result);
 		// e.preventDefault()
         setValue("msg", "")
     }
+    const test = [{
+                id : 1,
+                user: 'admin',
+                body : "침수 경보 발생 시 채팅방이 열립니다.",
+            },
+            {
+                id : 2,
+                user: 'admin',
+                body : "'서울  강남구’ 침수 경보 발생으로 열린 채팅방입니다.",
+            },
+          {
+              id : 3,
+              user: '익명1',
+              body : "지금 비가 너무 많이 와서 강남역 근처에 차들이 못 빠져 나가고 있어요 ㅠㅠㅠ",
+              time : "오전 5 : 05" 
+          }]
 
 
 	const renderChat = () => {
-		return chat.map((i, index) => (
+        // console.log(chat)
+		return (
+            chat.map((i, index) => (
+                /* 관리자 채팅 */
                 i.user === 'admin' ? (
-                <ChatInfo>
+                <ChatInfo key={index}>
                     <span>{i.body}</span>
                 </ChatInfo> ) : ( 
-                i.user === me ? 
                 /* 내 채팅 */
+                i.user === me ? 
                 <ChatItem key={index}>
                     <ChatUser>
                         <span  style={{float: 'right'}}>{i.user}</span>
@@ -150,10 +109,10 @@ function Notice() {
                     </ChatItemDiv>
                 </ChatItem>
             )
-        ))
+        )))
 	}
 
-    /*스크롤 ...
+    /*스크롤 …
     const scrollRef = useRef();
 
     const scrollToBottom = () => {
@@ -171,21 +130,21 @@ function Notice() {
         <Container>
 
           {/* 채팅내용 */}
-          <Chat>
+          <ChatSection>
               <ChatWrapper>
-                {renderChat()}
+                {chat !== undefined && renderChat()}
               </ChatWrapper>
-          </Chat>
+          </ChatSection>
 
           {/* 채팅 입력창 */}
           <ChatInputSection>
               <ChatInputForm onSubmit={handleSubmit(onValid)}>
-                  <ChatInputInput {...register("msg", {required : true})} placeholder="전송할 메세지를 입력해주세요"/>
+                  <ChatInputInput {...register("msg", {required: true})} placeholder="전송할 메세지를 입력해주세요"/>
                   <ChatInputBtn>
                       전송
                   </ChatInputBtn>
               </ChatInputForm>
-          </ChatInputSection> 
+          </ChatInputSection>
           
           {/* <div ref={scrollRef} /> */}
 
@@ -194,7 +153,7 @@ function Notice() {
     )
   }
   
-  export default Notice;
+  export default Chat;
 
 
 const Wrapper = styled.body`
@@ -214,7 +173,7 @@ justify-content: center;
 flex-direction:column;
 `
 
-const Chat = styled.section`
+const ChatSection = styled.section`
 width: 97%;
 height: 86vh;
 display: flex;
