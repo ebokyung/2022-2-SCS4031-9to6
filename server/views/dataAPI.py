@@ -2,10 +2,10 @@ from flask import jsonify, make_response
 from flask_restful import Resource, reqparse
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import func
-from models import db
-from models.cctv import CCTV, CCTVStatus
-from models.history import FloodHistory, FloodHistorySchema
-from models.posting import Posting
+from model import db
+from model.cctv import CCTV, CCTVStatus
+from model.history import FloodHistory, FloodHistorySchema
+from model.posting import Posting
 import requests
 import json
 

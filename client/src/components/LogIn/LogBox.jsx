@@ -16,6 +16,7 @@ const Container = styled.section`
 const Title = styled.h2`
     font-size: 2rem;
     color: ${props => props.theme.logColor};
+    margin-top: 100px;
 `
 
 const Form = styled.form`

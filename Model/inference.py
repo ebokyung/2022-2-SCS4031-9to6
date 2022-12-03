@@ -28,50 +28,6 @@ from server.views.utils import s3_upload_file
 dummy_url = 'http://210.179.218.52:1935/live/157.stream/playlist.m3u8'
 
 
-def raise_sigint():
-    """
-    Raising the SIGINT signal in the current process and all sub-processes.
-
-    os.kill() only issues a signal in the current process (without subprocesses).
-    CTRL+C on the console sends the signal to the process group (which we need).
-    """
-    if hasattr(signal, 'CTRL_C_EVENT'):
-        # windows. Need CTRL_C_EVENT to raise the signal in the whole process group
-        os.kill(os.getpid(), signal.CTRL_C_EVENT)
-    else:
-        # unix.
-        pgid = os.getpgid(os.getpid())
-        if pgid == 1:
-            os.kill(os.getpid(), signal.SIGINT)
-        else:
-            os.killpg(os.getpgid(os.getpid()), signal.SIGINT)
-
-
-def ffmpeg(m3u8_url, save_dir):
-    file_name = str(time.time()).replace('.', '')
-
-    print(f"#######save to {save_dir}/{file_name}.mp4###########\n")
-    try:
-        subprocess.run(['ffmpeg', '-i', m3u8_url, '-bsf:a', 'aac_adtstoasc', '-vcodec', 'copy',
-                        '-c', 'copy', '-crf', '50', save_dir + '/' + file_name + '.mp4'])
-
-    except KeyboardInterrupt:
-        print('ffmpeg done')
-    except:
-        print('Exception raised')
-
-
-def download_mp4(m3u8_url, save_dir='.', sec=3):
-    if __name__ == '__main__':
-        process = Process(target=ffmpeg, args=(m3u8_url, save_dir))
-        process.start()
-        time.sleep(sec)
-        try:
-            raise_sigint()
-        except:
-            print('process done')
-
-
 def read_image_from_dir(img_dir, input_size=299):
     try:
         image = cv2.imread(img_dir)
@@ -145,44 +101,18 @@ class Inference:
         else:  # normal
             return 0
 
-    def get_recent_mp4(self):
-        mp4_list = glob.glob(self.base_dir + '/*.mp4')
-        mp4_list = list(map(lambda x: x.split('/')[-1].split('.')[0], mp4_list))
-        return max(mp4_list)
-
-    def run(self, url):
-        result = -1
-        try_time = 0
-        sec = 2
-        done = False
-        while True:
-            download_mp4(url, self.base_dir, sec=sec)
-            try:
-                file_name = self.get_recent_mp4()
-                mp4_src = os.path.join(self.base_dir, file_name + '.mp4')
-                print('##### path:', mp4_src)
-                get_one_frame(mp4_src, self.base_dir)
-                done = True
-            except Exception as e:
-                # print(e)
-                print('fail to download video')
-                try_time += 1
-                sec += 2
-
-            if done:
-                break
-            if try_time >= 3:
-                print('fail three times to download video')
-                return -1, 'fail'
-
+    def run(self, file_name):
         img_name = file_name + '.jpg'
         img_src = self.base_dir + '/' + img_name
 
         # execute inference
+        # torch model
         result = self.detection_inference(img_src)
+
         if result is False:
             # no detection 일때 binary detection
             result = self.classification_inference(img_src)
+            # result = 9
 
         # image S3 저장
         image_url = ''
@@ -192,7 +122,7 @@ class Inference:
             while True:
                 s3_uploaded = s3_upload_file(s3, '9to6bucket', img_src, f'Flood/{img_name}')
                 if s3_uploaded:
-                    image_url = 'https://{bucket_name}.s3.{location}.amazonaws.com/Posting/{s3_path}'.format(
+                    image_url = 'https://{bucket_name}.s3.{location}.amazonaws.com/Flood/{s3_path}'.format(
                         bucket_name='9to6bucket',
                         location='ap-northeast-2',
                         s3_path=img_name)
@@ -205,7 +135,7 @@ class Inference:
                         print('image upload failed...T,T')
                         break
 
-        os.remove(mp4_src)
+    
         os.remove(img_src)
 
         # 0 : 정상

@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import PageHeader from '../components/PageHeader';
 import ReportClusterMap from '../components/ReportPage/ReportClusterMap';
 import ReportList from '../components/ReportPage/ReportList';
 import { useState } from "react";
@@ -41,6 +42,7 @@ function Report () {
     return(
     <Wrapper>
         <Container>
+            <PageHeader title={'제보보기'} />
             <ReportClusterMap posts={posts}/>
             <ReportList posts={posts}/>
         </Container>
