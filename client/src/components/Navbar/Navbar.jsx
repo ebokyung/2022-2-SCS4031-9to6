@@ -113,10 +113,10 @@ function Navbar () {
     const reportMatch = useMatch("/report");
     const safetyMatch = useMatch("/safety/*");
     // const cocMatch = useMatch("/safety/coc");
-    // const shelterMatch = useMatch("/safety/shelter");
+    const shelterMatch = useMatch("/safety/shelter");
     const statisticsMatch = useMatch("/statistics");
     const serviceMatch = useMatch("/service/*");
-    const mapMatch = useMatch("/service/map");
+    const guideMatch = useMatch("/service/guide");
     // 로그인 했는지 안했는지
     const logCheck = localStorage.getItem("token") || sessionStorage.getItem("token")
 
@@ -138,18 +138,18 @@ function Navbar () {
             <Menu>
                 <Item isActive={mainMatch !== null || noticeMatch !== null || chatMatch !== null} 
                     onClick={() => navigate("/")}>침수지도</Item>
-                <Item drop={true} isActive={safetyMatch !== null} onClick={() => navigate("/safety")}>안전정보
+                <Item drop={true} isActive={safetyMatch !== null || shelterMatch !== null}>안전정보
                     <DropDown>
                             <DropDownItem isActive={safetyMatch !== null} onClick={() => navigate("/safety")}>행동지침</DropDownItem>
-                            <DropDownItem isActive={safetyMatch !== null} onClick={() => navigate("/safety")}>대피소</DropDownItem>
+                            <DropDownItem isActive={shelterMatch !== null} onClick={() => navigate("/safety/shelter")}>대피소</DropDownItem>
                     </DropDown>
                 </Item>
                 <Item isActive={reportMatch !== null} onClick={() => navigate("/report")}>제보보기</Item>
                 <Item isActive={statisticsMatch !== null} onClick={() => navigate("/statistics")}>데이터분석</Item>
-                <Item drop={true} isActive={serviceMatch !== null}>서비스소개
+                <Item drop={true} isActive={serviceMatch !== null || guideMatch !== null}>서비스소개
                     <DropDown>
                             <DropDownItem isActive={serviceMatch !== null} onClick={() => navigate("/service")}>서비스 소개</DropDownItem>
-                            <DropDownItem isActive={mapMatch !== null} onClick={() => navigate("/service/map")}>지도 이용안내</DropDownItem>
+                            <DropDownItem isActive={guideMatch !== null} onClick={() => navigate("/service/guide")}>지도 이용안내</DropDownItem>
                     </DropDown>
                 </Item>
             </Menu>

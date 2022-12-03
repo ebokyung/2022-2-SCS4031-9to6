@@ -141,17 +141,3 @@ const ItemAddr = styled(ItemBody)`
     font-size: 11px;
     margin-bottom: 10px;
 `
-
-
-const ItemFooter = styled.div`
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-    font-weight: 600;
-    color : ${props => props.theme.itemFooterColor};
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 15px;
-    span{
-        font-size: 13px;
-    }
-`

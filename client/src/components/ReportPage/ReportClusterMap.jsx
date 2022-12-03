@@ -6,7 +6,7 @@ const Wrapper = styled.body`
     height: 500px;
     display: flex;
     justify-content: center;
-    margin-top: ${props => props.theme.navMarginTop};
+    /* margin-top: ${props => props.theme.navMarginTop}; */
 `
 
 function ReportClusterMap({posts}) {

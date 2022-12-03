@@ -1,7 +1,7 @@
 export const mainTheme ={
 
     // 데스크탑 화면 비율 (메인페이지 외)
-    width : "84%",
+    width : "80%",
     maxWidth:"1600px", 
     minHeight:"100vh",
 
