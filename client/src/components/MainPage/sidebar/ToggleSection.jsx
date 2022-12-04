@@ -1,9 +1,68 @@
 import styled from 'styled-components';
 import { useRecoilState } from 'recoil';
 import { showSideBar } from '../../../atoms';
-import { Routes, Route, Link, useMatch } from 'react-router-dom';
+import { Routes, Route, Link, useMatch, useLocation } from 'react-router-dom';
 import Notice from './Notice';
 import Chat from './Chat';
+import { io } from "socket.io-client";
+import { useState, useEffect } from 'react';
+
+function ToggleSection () {
+    const mainMatch = useMatch('/');
+    const noticeMatch = useMatch("/notice");
+    const chatMatch = useMatch("/chat");
+    const { pathname } = useLocation();
+    
+    const [visibility, setVisibility] = useRecoilState(showSideBar);
+
+    const handleToggle = () => {
+        setVisibility(prev => !prev);
+    }
+
+    const [socketInstance, setSocketInstance] = useState("");
+    // const socket = useRef();
+    // console.log(socket);
+
+    useEffect(() => {
+        if(pathname === '/chat' ) {
+            const socket = io("http://localhost:5000", { transports: ["websocket"] } );
+            socket.on('connect', (data) => { // 메세지 수신
+                console.log(data);
+                setSocketInstance(socket);
+            })
+            socket.on("disconnect", (data) => {
+                console.log(data);
+            });
+            return () => socket.disconnect();
+        }
+    },[pathname]);
+
+    return(
+        <Wrapper className={visibility ? '' : 'hide'}>
+            <VisibilityToggle onClick={handleToggle} show={visibility}/>
+            <Container>    
+                <Tabs>
+                    <Tab isActive={noticeMatch !== null || mainMatch !== null}>
+                        <Link to={`notice`}>알림</Link>
+                    </Tab>
+                    <Tab isActive={chatMatch !== null}>
+                        <Link to={`chat`}>채팅</Link>
+                    </Tab>
+                </Tabs>
+
+                <Routes>
+                    <Route index element={<Notice />} />
+                    <Route path="notice" element={<Notice />} />
+                    {/* <Route path="chat" element={<Chat />} /> */}
+                    <Route path="chat" element={<Chat socket={socketInstance !== "" ? socketInstance : null} />} />
+                </Routes>
+            </Container>
+        </Wrapper>
+        
+    )
+}
+export default ToggleSection;
+
 
 const Wrapper = styled.section`
     width: 460px;
@@ -57,39 +116,3 @@ const Tab = styled.span`
     display: block;
   }
 `;
-
-function ToggleSection () {
-    const mainMatch = useMatch('/');
-    const noticeMatch = useMatch("/notice");
-    const chatMatch = useMatch("/chat");
-    
-    const [visibility, setVisibility] = useRecoilState(showSideBar);
-
-    const handleToggle = () => {
-        setVisibility(prev => !prev);
-    }
-
-    return(
-        <Wrapper className={visibility ? '' : 'hide'}>
-            <VisibilityToggle onClick={handleToggle} show={visibility}/>
-            <Container>    
-                <Tabs>
-                    <Tab isActive={noticeMatch !== null || mainMatch !== null}>
-                        <Link to={`notice`}>알림</Link>
-                    </Tab>
-                    <Tab isActive={chatMatch !== null}>
-                        <Link to={`chat`}>채팅</Link>
-                    </Tab>
-                </Tabs>
-
-                <Routes>
-                    <Route index element={<Notice />} />
-                    <Route path="notice" element={<Notice />} />
-                    <Route path="chat" element={<Chat />} />
-                </Routes>
-            </Container>
-        </Wrapper>
-        
-    )
-}
-export default ToggleSection;
