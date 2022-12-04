@@ -1,10 +1,9 @@
 import styled from 'styled-components';
 import { useForm } from 'react-hook-form';
-import { useEffect, useState, useRef } from "react";
-import { io } from "socket.io-client";
+import { useEffect, useState, useRef, useContext } from "react";
+import {SocketContext} from '../../../socketio';
 
-
-function Chat({socket}) {
+function Chat() {
     let me = null;
     const logCheck = localStorage.getItem("token") || sessionStorage.getItem("token");
     if(logCheck) {
@@ -13,25 +12,24 @@ function Chat({socket}) {
         me = '익명n';
     }
 
-   const [ chat, setChat ] = useState([]);
+    const socket = useContext(SocketContext);
+    const [ chat, setChat ] = useState([]);
 
     const { register, handleSubmit, setValue } = useForm()
 
-    console.log(socket);
     useEffect(()=>{
-        if(socket !== null){
-            console.log(`enter socket: ${socket.id}`);
-            socket.emit("join");
-            socket.on("join", (data) => {
-            // console.log(`첫 렌더링에 받아온 데이터: ${data}`);
-                setChat(data);
-            });
-            // console.log(`첫 렌더링 시 chat: ${chat}`);
-        }
+        // console.log(`enter socket: ${socket.id}`);
+        socket.emit("join");
+        socket.on("join", (data) => {
+            setChat(data);
+        });
+        // return () => {
+        //     socket.off("join", handleInviteAccepted);
+        //  };
     },[socket]);
 
     useEffect(()=>{
-        socket !== null && chat &&
+        chat &&
         socket.on('message', (data)=>{
             // console.log(`message 렌더링: ${socket.id} ,받은data: ${data.length}, 기존data:${chat.length}`);
             // setChat([...chat, data]);
