@@ -2,9 +2,10 @@ import styled from 'styled-components';
 import PageSubtitle from '../PageSubtitle';
 import BookmarkList from './BookmarkList';
 import Pagination from '../Pagination';
-import { useState } from 'react';
-import { setBookmark } from '../../atoms';
-import { useRecoilValue, useRecoilState } from 'recoil';
+import { useState, useEffect } from 'react';
+// import { setBookmark } from '../../atoms';
+// import { useRecoilValue, useRecoilState } from 'recoil';
+import { LogAPI } from '../../axios';
 
 const Wrapper = styled.div`
     width: 100%;
@@ -31,44 +32,12 @@ const Container = styled.div`
 //     font-size: 20px;
 // `
 
-const test = [
-    {
-        cctvID: '강남구청',
-        step: 0,
-        url: 'url',
-    },
-    {
-        cctvID: '강남구청',
-        step: 0,
-        url: 'url',
-    },
-    {
-        cctvID: '강남구청',
-        step: 0,
-        url: 'url',
-    },
-    {
-        cctvID: '강남구청',
-        step: 0,
-        url: 'url',
-    },
-    {
-        cctvID: '강남구청',
-        step: 0,
-        url: 'url',
-    },
-    {
-        cctvID: '강남구청',
-        step: 0,
-        url: 'url',
-    },
-]
-
 function Bookmark() {
 
+    const user = JSON.parse(sessionStorage.getItem("token"));
     const [loading, setLoading] = useState(false);
 
-    // const [bookmark, setBookmark] = useState();
+    const [bookmark, setBookmark] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [postsPerPage, setPostsPerPage] = useState(4);
 
@@ -81,29 +50,29 @@ function Bookmark() {
     };
 
     // const [bookmarkList, setBookmarkList] = useRecoilState(setBookmark);
-    const bookmarkArray = useRecoilValue(setBookmark);
-    // const getMyBookmarkData = async() => {
-    //     try{
-    //         const bookmarkData = await LogAPI.get(`/Bookmark/${userID}`);
-    //         console.log(bookmarkData.data.Bookmark);
-    //         setBookmarkList(bookmarkData.data.Bookmark);
-    //       }catch(error){
-    //         console.log(error)
-    //     }
-    //   }
-    //   useEffect(()=>{
-    //     getMyBookmarkData(); 
-    //   },[])
+    // const bookmarkArray = useRecoilValue(setBookmark);
+    const getMyBookmarkData = async() => {
+        try{
+            const bookmarkData = await LogAPI.get(`/Bookmark/${user.ID}`);
+            // console.log(bookmarkData.data.Bookmark);
+            setBookmark(bookmarkData.data.Bookmark);
+          }catch(error){
+            console.log(error)
+        }
+      }
+    useEffect(()=>{
+        getMyBookmarkData(); 
+    },[])
 
     return (
         <Wrapper>
-            <PageSubtitle subtitle={'즐겨찾기'} cnt={test.length}/>
+            <PageSubtitle subtitle={'즐겨찾기'} cnt={bookmark.length}/>
             <Container>
                 {/* <TotalCnt>전체 {test.length} 건</TotalCnt> */}
-                <BookmarkList posts={currentPosts(bookmarkArray)} loading={loading}/>
+                <BookmarkList posts={currentPosts(bookmark)} loading={loading}/>
                 <Pagination
                     postsPerPage={postsPerPage}
-                    totalPosts={bookmarkArray.length}
+                    totalPosts={bookmark.length}
                     paginate={setCurrentPage}
                 />
             </Container>
