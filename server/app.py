@@ -7,14 +7,14 @@ from flask_socketio import SocketIO,emit
 from datetime import timedelta
 from sqlalchemy.exc import IntegrityError
 from model import db
-from model.cctv import CCTV
+from model.cctv import CCTV, CCTVStatus
 from model.chatlog import Chatlog, ChatlogSchema
 
 import sys
 from pathlib import Path
 from views import s3
 
-from views.cctvAPI import CCTVS, CCTVList
+from views.cctvAPI import CCTVS, CCTVList, CCTVSStatus
 from views.memberAPI import Members, MemberList, MemberCheck, Login, Logout
 from views.historyAPI import FloodHistoryList
 from views.shelterAPI import Shelters, ShelterList
@@ -23,9 +23,12 @@ from views.bookmarkAPI import Bookmarks
 from views.bookmarkAPI import Bookmarks2
 from views.dataAPI import FloodHistoryData, PostingData, CCTVData
 from views.bookmarkAPI import Bookmarks3
-from views.modelAPI import AIModel
-from tasks import ffmpeg
+from views.weatherAPI import getWeather, mapToGrid, getBase
+#from views.modelAPI import AIModel
+#from tasks import ffmpeg
 import config
+import requests
+import json
 
 
 app = Flask(__name__)
@@ -52,19 +55,47 @@ CORS(app)
 # 특정 주소, 도메인, 포트 등만 사용 가능하도록 설정
 # CORS(app, resources={r'*': {'origins': 'https://webisfree.com:3000'}})
 app.config['SECRET_KEY'] = 'secret!'
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
+import eventlet
+eventlet.monkey_patch()
+
+# @socketio.on("connect")
+# def connected():
+#     """event listener when client connects to the server"""
+#     # print(request.sid)
+#     # print("client has connected")
+#     chatlogs = Chatlog.query.all()
+#     chatlog_schema = ChatlogSchema(many=True)
+#     output = chatlog_schema.dump(chatlogs)
+#     print(output)
+#     # emit("connect",{"data":f"id: {request.sid} is connected"})
+#     emit("connect", output)
 
 @socketio.on("connect")
 def connected():
+    """event listener when client connects to the server"""
+    # print(request.sid)
+    print("client has connected")
+    # chatlogs = Chatlog.query.all()
+    # chatlog_schema = ChatlogSchema(many=True)
+    # output = chatlog_schema.dump(chatlogs)
+    # print(output)
+    emit("connect",f"id: {request.sid} is connected")
+    # emit("connect", output)
+
+@socketio.on("enter")
+def handle_enter():
     """event listener when client connects to the server"""
     # print(request.sid)
     # print("client has connected")
     chatlogs = Chatlog.query.all()
     chatlog_schema = ChatlogSchema(many=True)
     output = chatlog_schema.dump(chatlogs)
-    print(output)
+    print("entered")
+    # print(output)
     # emit("connect",{"data":f"id: {request.sid} is connected"})
-    emit("connect", output)
+    emit("enter", output)
+    
 
 @socketio.on('message')
 def handle_message(data):
@@ -95,29 +126,30 @@ def index():
        return "Flooding24"
  
 
-@app.route('/ffmpeg/<cctv_id>')
-def call_ffmpeg_download(cctv_id):
-    cctv = db.one_or_404(db.select(CCTV).filter_by(ID=cctv_id))
-    url = cctv.URL
-    f = ffmpeg.delay(url)
-    return jsonify({'task_id': f.id})
+# @app.route('/ffmpeg/<cctv_id>')
+# def call_ffmpeg_download(cctv_id):
+#     cctv = db.one_or_404(db.select(CCTV).filter_by(ID=cctv_id))
+#     url = cctv.URL
+#     f = ffmpeg.delay(url)
+#     return jsonify({'task_id': f.id})
 
 
-@app.route('/ffmpeg_status/<task_id>')
-def ffmpeg_status(task_id):
-    task = ffmpeg.AsyncResult(task_id)
-    return jsonify({'state': task.state})
+# @app.route('/ffmpeg_status/<task_id>')
+# def ffmpeg_status(task_id):
+#     task = ffmpeg.AsyncResult(task_id)
+#     return jsonify({'state': task.state})
 
 
-@app.route('/ffmpeg_result/<task_id>')
-def ffmpeg_result(task_id):
-    result = ffmpeg.AsyncResult(task_id).result
-    return jsonify({'file_name': result})
+# @app.route('/ffmpeg_result/<task_id>')
+# def ffmpeg_result(task_id):
+#     result = ffmpeg.AsyncResult(task_id).result
+#     return jsonify({'file_name': result})
 
 
 # Users API Route
 api.add_resource(CCTVS, '/cctvs/<cctv_id>')
 api.add_resource(CCTVList, '/cctvs')
+api.add_resource(CCTVSStatus, '/cctvs/status/<cctv_id>')
 api.add_resource(Members, '/Members/<member_id>')
 api.add_resource(MemberList, '/Members')
 api.add_resource(MemberCheck, '/MembersCheck/<member_id>')
@@ -129,7 +161,7 @@ api.add_resource(MemberPostings, '/Postings/Member/<member_id>')
 api.add_resource(PostingList, '/Postings')
 api.add_resource(Login, '/Login')
 api.add_resource(Logout, '/Logout')
-api.add_resource(AIModel, '/inference/<cctv_id>')
+#api.add_resource(AIModel, '/inference/<cctv_id>')
 api.add_resource(Bookmarks, '/Bookmark')
 api.add_resource(Bookmarks2, '/Bookmark/<M_ID>/<C_ID>')
 api.add_resource(FloodHistoryData, '/Data/FloodHistory')
@@ -137,7 +169,104 @@ api.add_resource(PostingData, '/Data/Posting')
 api.add_resource(CCTVData, '/Data/CCTV')
 api.add_resource(Bookmarks3, '/Bookmark/<m_id>')
 
+import time
+import atexit
+
+def is_raining(cctv_id):
+    temperature, humidity, precipitation = getWeather(cctv_id)
+    if float(precipitation) > 0:
+        return True
+    return False
+
+def get_stage(cctv_id):
+    response = requests.get("http://15.164.163.248:5000/inference/{}".format(cctv_id))
+    info = response.json()
+    return info['stage']
+
+def get_change(cctv_id):
+    cctv = CCTVStatus.query.get(cctv_id)
+    original_stage = cctv.FloodingStage
+    detected_stage = get_stage(cctv_id)
+    if original_stage < detected_stage:
+        return 1, detected_stage
+    if original_stage == detected_stage:
+        return 0, detected_stage
+    if original_stage > detected_stage:
+        return -1, detected_stage
+
+
+def detect_flooding():
+    print("in detect_flooding")
+    # cctvs = CCTV.query.all()
+    cctvs = requests.get("http://43.201.149.89:5000/cctvs").json()
+    cnt = 0
+    for cctv in cctvs["cctv"]:
+        cnt += 1
+        socketio.sleep(10)
+        print(cnt,cctv["ID"],"##검사중##")
+        print(cnt)
+        change, stage = get_change(cctv["ID"])
+        information =  {
+            'id': cctv["ID"],
+            'stage': stage,
+            'change': change
+        }
+        output = json.dumps(information)
+        print(output)
+        socketio.emit("inference",output)
+
+        # if is_raining(cctv["ID"]):
+        #     socketio.emit("notification",{
+        #             'id': 'TEST VER {}'.format(cnt),
+        #             'stage': 0,
+        #             'change': 0
+        #         })
+        #     print(cctv["ID"],"!!비옴!!")
+        #     change, stage = get_change(cctv["ID"])
+        #     if change != 0:
+        #         # 침수 단계 up 또는 down
+        #         information =  {
+        #             'id': cctv["ID"],
+        #             'stage': stage,
+        #             'change': change
+        #         }
+        #         output = json.dumps(information)
+        #         print(output)
+        #         socketio.emit("notification",output,broadcast=True)
+        # else:
+        #     socketio.emit("notification",{
+        #             'id': 'TEST VER {}'.format(cnt),
+        #             'stage': 1,
+        #             'change': 0
+        #         })
+        #     print(cctv["ID"],"--비안옴--")
+
+
+def test():
+    information =  {
+                    'id': 123445,
+                    'stage': 12312,
+                    'change': 123
+                }
+    output = json.dumps(information)
+    socketio.emit('test', output)
+    print('test on')
+
+def print_date_time():
+    print(time.strftime("%A, %d. %B %Y %I:%M:%S %p"))
+
+def forever_thread():
+    # This thread should run forever in the background and be able to
+    # send messages to all clients every one second
+    while True:
+        # test()
+        socketio.sleep(20)
+        detect_flooding()
+        
 
 if __name__ == "__main__":
     # app.run(host="0.0.0.0", debug=True, port=5000)
+    socketio.start_background_task(forever_thread)
     socketio.run(app, host="0.0.0.0", debug=True, port=5000)
+    
+
