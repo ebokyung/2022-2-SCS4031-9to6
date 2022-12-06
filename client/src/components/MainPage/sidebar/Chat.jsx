@@ -14,18 +14,19 @@ function Chat() {
 
     const socket = useContext(SocketContext);
     const [ chat, setChat ] = useState([]);
-    // const [ newChat, setNewChat ] = useState(false);
+    const [ newChat, setNewChat ] = useState(false);
     const [ inputDisable, IsInputDisable ] = useState(true);
+    // const inputActiveRef = useRef(false);
 
     const { register, handleSubmit, setValue } = useForm()
 
     useEffect(()=>{
         // console.log(`enter socket: ${socket.id}`);
-        socket.emit("enter");
-        socket.on("enter", (data) => {
-            // console.log(data);
-            setChat(data);
-        });
+        // socket.emit("enter");
+        // socket.on("enter", (data) => {
+        //     // console.log(data);
+        //     setChat(data);
+        // });
         socket.on('chatting', (data)=> {
             console.log(data);
             if(data.chatting === 'on'){
@@ -37,10 +38,7 @@ function Chat() {
                 IsInputDisable(true);
                 // reload();
             }
-            socket.on("enter", (data) => {
-                console.log(`다시: ${data.length}`);
-                setChat(data);
-            });
+            setNewChat(prev=>!prev);
         });
     },[]);
 
@@ -50,16 +48,16 @@ function Chat() {
             setChat(data);
         });
         scrollToBottom()
-    },[chat]);
+    },[socket, chat]);
 
-    // const reload = () => {
-    //     socket.on('enter', (data)=>{
-    //         console.log(data.length);
-    //         setChat(data);
-    //     });
-    //     scrollToBottom()
-    // }
-
+    useEffect(()=>{
+        socket.emit("enter");
+        socket.on('enter', (data)=>{
+            console.log(`다시: ${data.length}`);
+            setChat(data);
+        });
+        scrollToBottom()
+    },[socket, newChat]);
 
     // 채팅 전송
     const onValid = (data) => {
