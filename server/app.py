@@ -89,6 +89,18 @@ def handle_enter():
     """event listener when client connects to the server"""
     # print(request.sid)
     # print("client has connected")
+    # chatlogs = Chatlog.query.all()
+    # chatlog_schema = ChatlogSchema(many=True)
+    # output = chatlog_schema.dump(chatlogs)
+    # print(output)
+    emit("connect",f"id: {request.sid} is connected")
+    # emit("connect", output)
+
+@socketio.on("enter")
+def handle_join_chat():
+    """event listener when client connects to the server"""
+    # print(request.sid)
+    # print("client has connected")
     chatlogs = Chatlog.query.all()
     chatlog_schema = ChatlogSchema(many=True)
     output = chatlog_schema.dump(chatlogs)
@@ -96,7 +108,53 @@ def handle_enter():
     # print(output)
     # emit("connect",{"data":f"id: {request.sid} is connected"})
     emit("enter", output)
-    
+
+#     # print(output)
+#     # emit("connect",{"data":f"id: {request.sid} is connected"})
+#     emit("join", output)
+
+# @socketio.on("join-notice")
+# def handle_join_notice():
+#     """event listener when client connects to the server"""
+#     # logs = [
+#     #     {
+#     #         id: 0,
+#     #         state: 'down',
+#     #         step: 0,
+#     #         time: '18:30',
+#     #         addr: '서울시 강남구 1085-1'
+#     #     },
+#     #     {
+#     #         id: 1,
+#     #         state: 'down',
+#     #         step: 0,
+#     #         time: '18:31',
+#     #         addr: '서울시 강남구 1085-1'
+#     #     },
+#     #     {
+#     #         id: 2,
+#     #         state: 'up',
+#     #         step: 3,
+#     #         time: '18:32',
+#     #         addr: '서울시 강남구 1085-1'
+#     #     },
+#     # ]
+#     # print(logs)
+#     emit("join-notice", f"server sends logs to client")
+
+# @socketio.on("notification")
+# def handle_join_notice():
+#     """event listener when client connects to the server"""
+#     # output = {
+#     #     {
+#     #         id: 2,
+#     #         state: 'up',
+#     #         step: 3,
+#     #         time: '18:32',
+#     #         addr: '서울시 강남구 1085-1'
+#     #     },
+#     # }
+#     emit("notification",f"server sends 'new' logs to client", broadcast=True)
 
 @socketio.on('message')
 def handle_message(data):
@@ -113,7 +171,8 @@ def handle_message(data):
     chatlogs = Chatlog.query.all()
     chatlog_schema = ChatlogSchema(many=True)
     output = chatlog_schema.dump(chatlogs)
-    print(output)
+    # output = chatlog_schema.dump(log)
+    # print(output)
     emit("message",output,broadcast=True)
 
 @socketio.on("disconnect")
@@ -162,7 +221,7 @@ api.add_resource(MemberPostings, '/Postings/Member/<member_id>')
 api.add_resource(PostingList, '/Postings')
 api.add_resource(Login, '/Login')
 api.add_resource(Logout, '/Logout')
-#api.add_resource(AIModel, '/inference/<cctv_id>')
+# api.add_resource(AIModel, '/inference/<cctv_id>')
 api.add_resource(Bookmarks, '/Bookmark')
 api.add_resource(Bookmarks2, '/Bookmark/<M_ID>/<C_ID>')
 api.add_resource(FloodHistoryData, '/Data/FloodHistory')
@@ -312,7 +371,7 @@ def forever_thread():
     # send messages to all clients every one second
     while True:
         # test()
-        socketio.sleep(20)
+        socketio.sleep(40)
         detect_flooding()
         
 

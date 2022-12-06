@@ -1,4 +1,6 @@
+import { useEffect, useState } from 'react';
 import styled from 'styled-components';
+import { StageAPI } from '../../axios';
 
 const Wrapper = styled.div`
     width: 100%;
@@ -38,6 +40,34 @@ const GridCol = styled.div`
     line-height: 1.5rem;
 `
 
+function BookmarkItem ({item, idx}) {
+    const [stageData, setStageData] = useState(0);
+
+    const getStage = async () => {
+        try{
+            const data = await StageAPI.get(`/inference/${item.cctvID}`);
+            // console.log(data.data.stage);
+            setStageData(data.data.stage);
+        } catch(e) {
+            console.log(e)
+        }
+    }
+
+    useEffect(()=>{
+        getStage();
+    },[])
+    
+    return (
+        <GridRow>
+            <GridCol> {item.cctvName} </GridCol>
+            <GridCol> {stageData}단계 </GridCol>
+            <GridCol> {item.URL} </GridCol>
+        </GridRow>
+    )
+
+}
+// export default BookmarkItem;
+
 function BookmarkList( {posts, loading} ) {
 
     return (
@@ -52,11 +82,8 @@ function BookmarkList( {posts, loading} ) {
                 <h1>Loading...</h1>
                 ) : (
                 posts.map((item, index) => (
-                    <GridRow key={`bookmark-list-${index}`}>
-                        <GridCol> {item.cctvName} </GridCol>
-                        <GridCol> 단계 </GridCol>
-                        <GridCol> {item.URL} </GridCol>
-                    </GridRow>
+                    // console.log(item)
+                    <BookmarkItem key={`bookmark-list-${index}`} item={item} idx={index} />
                 ))
                 )}
             </GridContainer>

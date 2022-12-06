@@ -166,7 +166,7 @@ function MapSection () {
 
     // 마커 이미지(sprite)
     const spriteSize = { width: 392, height: 64 }
-    const cctvOrigin = { x: 110, y: 0 }
+    // const cctvOrigin = { x: 110, y: 0 }
     const shelterOrigin = { x: 60, y: 0 }
     const reportOrigin = { x: 10, y: 10 }
 
@@ -445,14 +445,14 @@ function MapSection () {
               cctvId={position.ID}
               center={position.Center}
               url={position.URL}
-              markerImage={{
-                src: markerImage,
-                size: {width: 64, height: 64},
-                options: {
-                  spriteSize: spriteSize,
-                  spriteOrigin: cctvOrigin,
-                },
-              }}
+              // markerImage={{
+              //   src: markerImage,
+              //   size: {width: 64, height: 64},
+              //   options: {
+              //     spriteSize: spriteSize,
+              //     spriteOrigin: cctvOrigin,
+              //   },
+              // }}
               index={index}
               onClick={()=>setSeleteMarkerCctv(index)}
               isClicked={selectedMarkerCctv === index}

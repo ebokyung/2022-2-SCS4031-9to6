@@ -2,7 +2,7 @@ import styled from 'styled-components';
 import { useState, useEffect } from 'react';
 import ShelterList from '../components/SafetyPage/ShelterList';
 // import ShelterSearchbar from '../components/Searchbar';
-import Pagination from '../components/Pagination';
+import Pagination2 from '../components/Pagination2';
 import PageHeader from '../components/PageHeader';
 import { API } from '../axios';
 
@@ -67,7 +67,7 @@ function Shelter () {
             {/* <ShelterSearchbar ph={'검색창'} width={'40%'} height={'40px'}/> */}
             <ShelterCnt>전체 {shelters.length} 건</ShelterCnt>
             <ShelterList posts={currentPosts(shelters)} loading={loading}/>
-            <Pagination
+            <Pagination2
                 postsPerPage={postsPerPage}
                 totalPosts={shelters.length}
                 paginate={setCurrentPage}

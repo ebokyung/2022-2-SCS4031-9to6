@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import { useForm } from 'react-hook-form';
-import { useEffect, useState, useRef } from "react";
-import { io } from "socket.io-client";
+import { useEffect, useState, useRef, useContext } from "react";
+import {SocketContext} from '../../../socketio';
 
 function Chat() {
     let me = null;
@@ -12,70 +12,62 @@ function Chat() {
         me = '익명n';
     }
 
+    const socket = useContext(SocketContext);
+    const [ chat, setChat ] = useState([]);
+
     const { register, handleSubmit, setValue } = useForm()
 
-	const [ chat, setChat ] = useState([]);
-    const [arrivalChat, setArrivalChat] = useState([]);
+    useEffect(()=>{
+        // console.log(`enter socket: ${socket.id}`);
+        socket.emit("enter");
+        socket.on("enter", (data) => {
+            setChat(data);
+        });
+        socket.emit('chatting', (data)=> {
+            console.log(data);
+        });
+        // return () => {
+        //     socket.off("join", handleInviteAccepted);
+        //  };
+    },[socket]);
 
-    // let socket = io.connect("http://localhost:5000", { transports: ["websocket"] } );
-    const socketRef = useRef(null);
+    useEffect(()=>{
+        chat &&
+        socket.on('message', (data)=>{
+            // console.log(`message 렌더링: ${socket.id} ,받은data: ${data.length}, 기존data:${chat.length}`);
+            // setChat([...chat, data]);
+            setChat(data);
+            // console.log(data);
+        });
+        scrollToBottom()
+    },[socket, chat]);
 
-    useEffect(() => {
-        console.log(arrivalChat)
-    	arrivalChat && setChat(arrivalChat) // 채팅 리스트에 추가
-        // console.log(chat);
-    }, [arrivalChat]);
-  
-    useEffect(() => {
-        socketRef.current = io.connect("http://43.201.149.89:5000", { transports: ["websocket"] } );
-        socketRef.current.on('connect', (chatObj) => { // 메세지 수신
-            console.log(chatObj);
-            setArrivalChat(chatObj);
-            arrivalChat = chatObj;
-        })
-        socketRef.current.on("message", (chatObj) => { // 메세지 수신
-            setArrivalChat(chatObj);
-            arrivalChat = chatObj;
-        })
-        return () => socketRef.current.disconnect();
-    }, [socketRef]);
-   
     // 채팅 전송
-    const onValid = async (data) => {
-        let now = new Date();
+    const onValid = (data) => {
+        const now = new Date();
         const result = {
-          id : chat.length+1,
+          id : `${socket.id}-${now}`,
           user: me,
           body : data.msg,
-          time : `${now.getHours()} : ${now.getMinutes()}`,
+          time : now,
         }
-        console.log(result);
-        // setChat(prev=>[…prev, result])
-		socketRef.current.emit("message", result);
-		// e.preventDefault()
-        setValue("msg", "")
+        socket.emit("message", result);
+        setValue('msg','');
     }
-    const test = [{
-                id : 1,
-                user: 'admin',
-                body : "침수 경보 발생 시 채팅방이 열립니다.",
-            },
-            {
-                id : 2,
-                user: 'admin',
-                body : "'서울  강남구’ 침수 경보 발생으로 열린 채팅방입니다.",
-            },
-          {
-              id : 3,
-              user: '익명1',
-              body : "지금 비가 너무 많이 와서 강남역 근처에 차들이 못 빠져 나가고 있어요 ㅠㅠㅠ",
-              time : "오전 5 : 05" 
-          }]
 
+    const dateTime = (time) => {
+        console.log(time);
+        const chatTime = new Date(time).toLocaleTimeString('en-Us', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true,
+        });
+        return chatTime;
+    }
 
-	const renderChat = () => {
-        // console.log(chat)
-		return (
+   const renderChat = () => {
+        console.log(`${socket.id}님의 채팅 렌더링 중`);
+      return (
             chat.map((i, index) => (
                 /* 관리자 채팅 */
                 i.user === 'admin' ? (
@@ -89,7 +81,8 @@ function Chat() {
                         <span  style={{float: 'right'}}>{i.user}</span>
                     </ChatUser>
                     <ChatItemDiv style={{justifyContent:"flex-end"}}>
-                    <ChatTime>{i.time}</ChatTime>
+                    <ChatTime>{dateTime(`${i.time}`)}</ChatTime>
+                    {/* <ChatTime>{i.time}</ChatTime> */}
                     <ChatBodyM>
                         {i.body}
                     </ChatBodyM>
@@ -106,24 +99,19 @@ function Chat() {
                         {i.body}
                     </ChatBodyY>
                     <ChatTime>{i.time}</ChatTime>
+                    <ChatTime>{dateTime(`${i.time}`)}</ChatTime>
                     </ChatItemDiv>
                 </ChatItem>
             )
         )))
-	}
+   }
 
-    /*스크롤 …
+    //스크롤 …
     const scrollRef = useRef();
 
     const scrollToBottom = () => {
-      scrollRef.current.scrollIntoView({ behavior: 'smooth', block: 'end', inline: 'nearest' });
+      scrollRef.current.scrollIntoView({ behavior: 'smooth', block: 'end'});
     }
-
-    useEffect(()=>{
-      scrollToBottom()
-      console.log(chatlist);
-    },[chat])
-    */
 
     return (
       <Wrapper>
@@ -132,7 +120,8 @@ function Chat() {
           {/* 채팅내용 */}
           <ChatSection>
               <ChatWrapper>
-                {chat !== undefined && renderChat()}
+                {chat.length > 0 && renderChat()}
+                <div ref={scrollRef} />
               </ChatWrapper>
           </ChatSection>
 
@@ -145,8 +134,6 @@ function Chat() {
                   </ChatInputBtn>
               </ChatInputForm>
           </ChatInputSection>
-          
-          {/* <div ref={scrollRef} /> */}
 
         </Container>
       </Wrapper>
