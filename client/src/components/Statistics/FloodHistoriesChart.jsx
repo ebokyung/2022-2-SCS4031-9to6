@@ -18,53 +18,6 @@ const Container = styled.div`
     justify-content: flex-start;
 `
 
-const test = [
-    {
-        "CCTVName": "",
-        "FloodStageData" : {
-            "1" : 1,
-            "2" : 1,
-        }
-    },
-    {
-        "CCTVName": "",
-        "FloodStageData" : {
-            "1" : 1,
-            "2" : 1,
-        }
-    },{
-        "CCTVName": "",
-        "FloodStageData" : {
-            "1" : 1,
-            "2" : 1,
-        }
-    },{
-        "CCTVName": "",
-        "FloodStageData" : {
-            "1" : 1,
-            "2" : 1,
-        }
-    },{
-        "CCTVName": "",
-        "FloodStageData" : {
-            "1" : 1,
-            "2" : 1,
-        }
-    },{
-        "CCTVName": "",
-        "FloodStageData" : {
-            "1" : 1,
-            "2" : 1,
-        }
-    },{
-        "CCTVName": "",
-        "FloodStageData" : {
-            "1" : 1,
-            "2" : 1,
-        }
-    },
-]
-
 function FloodHistoriesChart() {
 
   // const [loading, setLoading] = useState(true);
@@ -74,16 +27,11 @@ function FloodHistoriesChart() {
   const [step2Data, setStep2Data] = useState([])
   const [step3Data, setStep3Data] = useState([])
   const [step0Data, setStep0Data] = useState([])
-  // let step1Data =[0,0,0,0,0];
-  // let step2Data =[0,0,0,0,0];
-  // let step3Data =[0,0,0,0,0];
-  // let step0Data =[0,0,0,0,0];
-  const [loading, setLoading] = useState(false);
 
   const getInfo = async( ) => {
       try{
           const data = await API.get(`/Data/CCTV`);
-          console.log(data.data.slice(0,5));
+          // console.log(data.data.slice(0,5));
           setFloodData(data.data.slice(0,5));
           // setLoading(false);
       }catch(error){
@@ -97,7 +45,7 @@ function FloodHistoriesChart() {
 
   useEffect(()=>{
     floodData && 
-      floodData.map((i, idx)=>{
+      floodData.map((i)=>{
         setXCategories(prev => [...prev, i.CCTVName]);
         // console.log(i.FloodStageData);
         for(let step of Object.keys(i.FloodStageData)){
@@ -105,12 +53,12 @@ function FloodHistoriesChart() {
           if (step === '1') {
             setStep1Data(prev=> [...prev, i.FloodStageData[step]])
             setStep2Data(prev=> [...prev, 0])
-            setStep3Data(prev=> [...prev,0])
+            setStep3Data(prev=> [...prev, 0])
           } 
            else if (step === '2'){
             setStep1Data(prev=> [...prev, 0]); 
             setStep2Data(prev => [...prev, i.FloodStageData[step]]);
-            setStep3Data(prev=> [...prev,0]);
+            setStep3Data(prev=> [...prev, 0]);
            }
           else if( step === '3' ){
             setStep1Data(prev=> [...prev, 0]); 
@@ -120,7 +68,7 @@ function FloodHistoriesChart() {
             setStep0Data(prev=> [...prev, i.FloodStageData[step]]) 
           }
         }
-      }) && setLoading(true);
+      }) 
     // console.log(step1Data);
   },[floodData]);
 
