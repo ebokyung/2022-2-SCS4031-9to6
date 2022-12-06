@@ -164,7 +164,7 @@ const ItemStar = styled(FontAwesomeIcon)`
       try{
         const data = await API.get(`/cctvs/status/${props.cctvId}`);
         // console.log(data.data);
-        setNowStage(data.data.stage);
+        setNowStage(data.data.FloodingStage);
       } catch(e) {
         console.log(e)
       }

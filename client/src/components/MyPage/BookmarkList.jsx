@@ -47,7 +47,7 @@ function BookmarkItem ({item, idx}) {
         try{
             const data = await LogAPI.get(`/cctvs/status/${item.cctvID}`);
             // console.log(data.data.stage);
-            setStageData(data.data.stage);
+            setStageData(data.data.FloodingStage);
         } catch(e) {
             console.log(e)
         }

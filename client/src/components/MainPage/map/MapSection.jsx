@@ -2,7 +2,7 @@
 import styled from 'styled-components';
 import { useRecoilValue, useRecoilState } from 'recoil';
 import { showSideBar, setBookmark } from '../../../atoms';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useContext } from 'react';
 import { useForm } from "react-hook-form";
 import markerImage from '../../../imgs/markerSprites.png';
 import reportBtn from '../../../imgs/reportBtn.png';
@@ -14,6 +14,7 @@ import { motion } from "framer-motion";
 import { faXmark, faLocationDot, faUpload } from "@fortawesome/free-solid-svg-icons";
 import { API, LogAPI } from '../../../axios';
 import { EventMarkerContainer_cctv, EventMarkerContainer_shelter, EventMarkerContainer_report } from './markerContainer';
+import {SocketContext} from '../../../socketio';
 
 const Container = styled.section`
     width: 100%;
@@ -158,6 +159,8 @@ const AlertP = styled.p`
 
 function MapSection () {
     const visibility = useRecoilValue(showSideBar);
+    const socket = useContext(SocketContext);
+
     const logCheck = localStorage.getItem("token") || sessionStorage.getItem("token");
     const [bookmarkList, setBookmarkList] = useRecoilState(setBookmark);
     const bookmarkArray = useRecoilValue(setBookmark);
@@ -192,17 +195,24 @@ function MapSection () {
     // 마커 데이터 GET
     const getdata = async() => {
       try{
-          const cctvData = await API.get("/cctvs");
           const shelterData = await API.get("/Shelters");
           const reportData = await API.get("/Postings");
-          setCctvPositions(cctvData.data.cctv);
           setShelterPositions(shelterData.data);
           setReportPositions(reportData.data);
-          // console.log(cctvData.data.cctv)
           // console.log(shelterData.data)
           // console.log(reportData.data)
       }catch(error){
           console.log(error)
+      }
+    }
+
+    const getCctvData = async() => {
+      try {
+          const cctvData = await API.get("/cctvs");
+          setCctvPositions(cctvData.data.cctv);
+          // console.log(cctvData.data.cctv)
+      } catch(e) {
+        console.log(e)
       }
     }
 
@@ -222,6 +232,12 @@ function MapSection () {
           getBookmarkData(); 
         }
         getdata();
+        getCctvData();
+        socket.on("notification", (data) => {
+          console.log(data);
+          //cctv get요청 다시
+          getCctvData();
+        });
     },[])
 
     // useEffect(()=>{
@@ -230,14 +246,20 @@ function MapSection () {
 
     // 제보 등록 POST & 전체 제보 데이터 GET
     const onValid = async(data) => {
-      const result = {
-          "MemberID": logCheck ? user.ID : null,
+      const result = logCheck ? {
+          "MemberID": user.ID,
           "Address": data.Address,
           "Latitude": reportCoord.lat,
           "Longitude": reportCoord.lng,
           "ImageFile": data.ImageFile,
           "Content": data.Content,
-      }
+      } : {
+        "Address": data.Address,
+        "Latitude": reportCoord.lat,
+        "Longitude": reportCoord.lng,
+        "ImageFile": data.ImageFile,
+        "Content": data.Content,
+    }
       console.log(result);
       try{
           await API.post("/Postings", result, {

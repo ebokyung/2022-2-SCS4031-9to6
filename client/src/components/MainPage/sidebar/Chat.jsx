@@ -14,6 +14,7 @@ function Chat() {
 
     const socket = useContext(SocketContext);
     const [ chat, setChat ] = useState([]);
+    const [ newChat, setNewChat ] = useState(false);
 
     const { register, handleSubmit, setValue } = useForm()
 
@@ -21,14 +22,18 @@ function Chat() {
         // console.log(`enter socket: ${socket.id}`);
         socket.emit("enter");
         socket.on("enter", (data) => {
+            console.log(data);
             setChat(data);
         });
-        socket.emit('chatting', (data)=> {
+        socket.on('chatting', (data)=> {
             console.log(data);
+            if(data.chatting === 'on'){
+                console.log('버튼 활성화')
+            } else {
+                console.log('버튼 비활성화')
+            }
+            // setNewChat(true);
         });
-        // return () => {
-        //     socket.off("join", handleInviteAccepted);
-        //  };
     },[socket]);
 
     useEffect(()=>{
@@ -42,9 +47,18 @@ function Chat() {
         scrollToBottom()
     },[socket, chat]);
 
+    // useEffect(()=>{
+    //     newChat && 
+    //     socket.on("enter", (data) => {
+    //         console.log(data);
+    //         setChat(data);
+    //         setNewChat(false);
+    //     });
+    // },[newChat, chat])
+
     // 채팅 전송
     const onValid = (data) => {
-        const now = new Date();
+        const now = `${new Date()}`;
         const result = {
           id : `${socket.id}-${now}`,
           user: me,

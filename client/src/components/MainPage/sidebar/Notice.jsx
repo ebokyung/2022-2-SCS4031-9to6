@@ -1,64 +1,57 @@
 import styled from 'styled-components';
 import {SocketContext} from '../../../socketio';
 import { useEffect, useState, useContext } from "react";
-
-const test = [
-  {
-    id: 0,
-    state: 'down',
-    step: 0,
-    time: '18:30',
-    addr: '서울시 강남구 1085-1'
-  },
-  {
-    id: 1,
-    state: 'down',
-    step: 0,
-    time: '18:31',
-    addr: '서울시 강남구 1085-1'
-  },
-  {
-    id: 2,
-    state: 'up',
-    step: 3,
-    time: '18:32',
-    addr: '서울시 강남구 1085-1'
-  },
-]
+import {API} from '../../../axios';
 
 function Notice() {
 
     const socket = useContext(SocketContext);
     const [ log, setLog ] = useState([]);
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = ("0" + (1 + today.getMonth())).slice(-2);
+    const date = ("0" + today.getDate()).slice(-2);
+    const todayFull = `${year}-${month}-${date}`;
+    // console.log(todayFull);
+
+
+    const getData = async () => {
+      //침수이력 get요청
+      try{
+        const data = await API.get(`/FloodHistories`);
+        // console.log(data.data);
+        const filterData = data.data.filter((i)=> ( i.Datetime.split('T')[0] === todayFull) );
+        console.log(filterData);
+        setLog(filterData.slice(0).reverse());
+      } catch(e) {
+        console.log(e)
+      }
+    }
 
   useEffect(()=>{
-      socket.emit("join-notice");
-      socket.on("join-notice", (data) => {
-          console.log(data)
-          setLog(test);
-      });
+      getData();
       socket.on("notification", (data) => {
         console.log(data);
+        //침수이력 get요청 다시
+        getData();
       });
-      // return () => {
-      //     socket.off("join-notice", handleInviteAccepted);
-      //  };
   },[]);
 
     return (
       <Wrapper>
         <Container>
-            {log.map( (item) => (
-              <Box key={item.id} state={item.state}>
+            {log && log.map( (item) => (
+              <Box key={`notice-${item.id}`} state={item.StageChange}>
                 <Items>
                   <ItemTitle>
                     <div>
-                      <span>{item.state === 'down' ? '침수 경보 해제' : '침수 경보'}</span>
-                      <span>  ({item.step}단계)</span>
+                      <span>{item.StageChange}</span>
+                      <span>  {`(${item.FloodStage}단계)`}</span>
                     </div>
-                    <div>{item.time}</div>
+                    <div>{item.Datetime.split('T')[1]}</div>
                   </ItemTitle>
-                  <ItemAddr>{item.addr}</ItemAddr>
+                  {/* <ItemAddr>{item.addr}</ItemAddr> */}
+                  <ItemAddr>{item.CCTVName}</ItemAddr>
                 </Items>
                 
               </Box>
@@ -98,7 +91,7 @@ const Box = styled.div`
 width: 98%;
 height: 100px;
 border-radius: 5px;
-background-color: ${props => props.state === 'down' ? '#FFD95B' : '#FFA000' };
+background-color: ${props => props.state === '침수 해제' || props.state === '단계 하향'? '#FFD95B' : '#FFA000' };
 margin-bottom: 4%;
 `
 const Items = styled.div`
