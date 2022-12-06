@@ -72,7 +72,12 @@ class CCTVData(Resource):
             
             stage_dict = {}
             for history in history_per_cctv:
+                # print(history)
                 stage_dict[history[1]] = history[2]
+
+            for stage in range(4):
+                if stage not in stage_dict:
+                    stage_dict[stage] = 0
 
             data_dict["CCTVName"] = name[0]
             data_dict["FloodStageData"] = stage_dict
