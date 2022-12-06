@@ -81,7 +81,7 @@ def mapToGrid(lat, lon, code = 0 ):
 # 초단기실황 api를 호출해 온도, 습도, 1시간 강수량을 리턴하는 함수
 def getWeather(cctvID):
     base_date, base_time = getBase()
-    res = requests.get("http://43.201.149.89:5000/cctvs/{}".format(cctvID)).json()
+    res = requests.get("http://3.38.178.241:5000/cctvs/{}".format(cctvID)).json()
     cctv = res["cctv"]
     # cctv = CCTV.query.get(cctvID)
     lat = cctv["Latitude"]
