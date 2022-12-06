@@ -10,6 +10,24 @@ const Wrapper = styled.body`
 `
 
 function MainPage () {
+
+    // const { pathname } = useLocation();
+
+    // useEffect(() => {
+    //     if(pathname === '/chat' ) {
+    //         console.log(socketValue);
+    //         const socket =  io("http://localhost:5000", { transports: ["websocket"] } );
+    //         socketValue.on('connect', (data) => { // 메세지 수신
+    //             console.log(data);
+    //             // setSocketInstance(socket);
+    //         })
+    //         socketValue.on("disconnect", (data) => {
+    //             console.log(data);
+    //         });
+    //         return () => socketValue.disconnect();
+    //     }
+    // },[pathname]);
+
     return(
     <Wrapper>
         <ToggleSection />

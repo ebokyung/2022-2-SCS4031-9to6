@@ -7,7 +7,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar } from "@fortawesome/free-solid-svg-icons";
 // import { useRecoilState } from 'recoil';
 // import { setBookmark } from '../../../atoms';
-import { LogAPI } from '../../../axios';
+import { LogAPI, StageAPI } from '../../../axios';
+import markerImage from '../../../imgs/markerSprites.png';
 
 const ShelterInfowindowBody =styled.div`
   width: 90%;
@@ -134,6 +135,7 @@ const ItemStar = styled(FontAwesomeIcon)`
     const [isVisible, setIsVisible] = useState(false)
     const [isMarked, setIsMarked] = useState(props.isMarked);
     // const [bookmarkList, setBookmarkList] = useRecoilState(setBookmark);
+    const [nowStage, setNowStage] = useState(0);
 
     const onStar = async() => {
       setIsMarked(prev=>!prev)
@@ -158,6 +160,25 @@ const ItemStar = styled(FontAwesomeIcon)`
       }
     }
 
+    const getStage = async() => {
+      try{
+        const data = await StageAPI.get(`/inference/${props.cctvId}`);
+        // console.log(data.data);
+        setNowStage(data.data.stage);
+      } catch(e) {
+        console.log(e)
+      }
+    }
+
+    useEffect(()=>{
+      getStage()
+    },[])
+
+    let cctvOrigin = nowStage === 0 ? { x: 110, y: 0 } 
+                        : nowStage === 1 ? { x: 184, y: 0 }
+                        : nowStage === 2 ? { x: 248, y: 0 }
+                        : nowStage === 3 ? { x: 318, y: 0 } : { x: 110, y: 0 }
+
 
     return (
       <>
@@ -168,7 +189,14 @@ const ItemStar = styled(FontAwesomeIcon)`
           setIsVisible(true)
           props.onClick() // 클릭된 마커의 index 설정
         }}
-        image={props.markerImage}
+        image={{
+            src: markerImage,
+            size: {width: 64, height: 64},
+            options: {
+              spriteSize: { width: 392, height: 64 },
+              spriteOrigin: cctvOrigin,
+            },
+          }}
       />
         {isVisible && props.isClicked &&
         <CustomOverlayMap 
@@ -186,7 +214,7 @@ const ItemStar = styled(FontAwesomeIcon)`
                   }
                 </span>
                 <span>{props.name}</span>
-                <span className={style.class}>( 침수 0단계 )</span>
+                <span className={style.class}>( 침수 {nowStage}단계 )</span>
                 <div
                   className={style.close}
                   onClick={() => setIsVisible(false)}

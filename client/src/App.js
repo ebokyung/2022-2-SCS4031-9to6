@@ -3,45 +3,30 @@ import { RecoilRoot } from 'recoil';
 import Routes from './Routes';
 import { ReactQueryDevtools } from 'react-query/devtools'
 import { GlobalStyle } from './styles/GlobalStyle';
+import {SocketContext, socket} from './socketio';
+import { useEffect } from 'react';
 
 function App() {
 
-  // const [data, setData] = useState([{}])
-
-  // useEffect(() => {
-  //   fetch("/users").then(
-  //     // res 객체의 json()을 이용하여 json 데이터를 객체로 변화
-  //     res => res.json()
-  //   ).then(
-  //     data => {
-  //       // 받아온 데이터를 data 변수에
-  //       setData(data)
-  //       console.log(data)
-  //     }
-  //   )
-
-  // }, [])
-
+  useEffect(()=>{
+        socket.on('connect', (data) => { // 메세지 수신
+            console.log(data);
+        })
+        socket.on("disconnect", (data) => {
+            console.log(data);
+        });
+        return () => socket.disconnect();
+  },[])
 
   return (
-    <RecoilRoot>
-      <GlobalStyle />
-      <Routes />
-      <ReactQueryDevtools initialIsOpen={false} />
-      {/* <div>
-
-          {(typeof data.users === 'undefined') ? (
-              // fetch가 완료되지 않았을 경우
-              <p>Loading...</p>
-          ) : (
-              data.users.map((u) => (
-                <p>{u.name}</p>
-              ))
-
-          )}
-
-        </div> */}
-    </RecoilRoot>
+    <SocketContext.Provider value={socket}>
+      <RecoilRoot>
+        <GlobalStyle />
+        <Routes />
+        {/* <ReactQueryDevtools initialIsOpen={false} /> */}
+      </RecoilRoot>
+    </SocketContext.Provider>
+    
   );
 }
 

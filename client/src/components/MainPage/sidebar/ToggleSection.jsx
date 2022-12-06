@@ -1,9 +1,47 @@
 import styled from 'styled-components';
 import { useRecoilState } from 'recoil';
 import { showSideBar } from '../../../atoms';
-import { Routes, Route, Link, useMatch } from 'react-router-dom';
+import { Routes, Route, Link, useMatch, useLocation } from 'react-router-dom';
 import Notice from './Notice';
 import Chat from './Chat';
+
+function ToggleSection () {
+    const mainMatch = useMatch('/');
+    const noticeMatch = useMatch("/notice");
+    const chatMatch = useMatch("/chat");
+    
+    const [visibility, setVisibility] = useRecoilState(showSideBar);
+
+    const handleToggle = () => {
+        setVisibility(prev => !prev);
+    }
+
+    return(
+        <Wrapper className={visibility ? '' : 'hide'}>
+            <VisibilityToggle onClick={handleToggle} show={visibility}/>
+            <Container>    
+                <Tabs>
+                    <Tab isActive={noticeMatch !== null || mainMatch !== null}>
+                        <Link to={`notice`}>알림</Link>
+                    </Tab>
+                    <Tab isActive={chatMatch !== null}>
+                        <Link to={`chat`}>채팅</Link>
+                    </Tab>
+                </Tabs>
+
+                <Routes>
+                    <Route index element={<Notice />} />
+                    <Route path="notice" element={<Notice />} />
+                    {/* <Route path="chat" element={<Chat />} /> */}
+                    <Route path="chat" element={<Chat />} />
+                </Routes>
+            </Container>
+        </Wrapper>
+        
+    )
+}
+export default ToggleSection;
+
 
 const Wrapper = styled.section`
     width: 460px;
@@ -57,39 +95,3 @@ const Tab = styled.span`
     display: block;
   }
 `;
-
-function ToggleSection () {
-    const mainMatch = useMatch('/');
-    const noticeMatch = useMatch("/notice");
-    const chatMatch = useMatch("/chat");
-    
-    const [visibility, setVisibility] = useRecoilState(showSideBar);
-
-    const handleToggle = () => {
-        setVisibility(prev => !prev);
-    }
-
-    return(
-        <Wrapper className={visibility ? '' : 'hide'}>
-            <VisibilityToggle onClick={handleToggle} show={visibility}/>
-            <Container>    
-                <Tabs>
-                    <Tab isActive={noticeMatch !== null || mainMatch !== null}>
-                        <Link to={`notice`}>알림</Link>
-                    </Tab>
-                    <Tab isActive={chatMatch !== null}>
-                        <Link to={`chat`}>채팅</Link>
-                    </Tab>
-                </Tabs>
-
-                <Routes>
-                    <Route index element={<Notice />} />
-                    <Route path="notice" element={<Notice />} />
-                    <Route path="chat" element={<Chat />} />
-                </Routes>
-            </Container>
-        </Wrapper>
-        
-    )
-}
-export default ToggleSection;
