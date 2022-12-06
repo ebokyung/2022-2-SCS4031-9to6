@@ -16,6 +16,7 @@ class FloodHistoryList(Resource):
     parser = reqparse.RequestParser()
     parser.add_argument('ID', required=True, type=str, help="CCTV ID", location='form')
     parser.add_argument('STAGE', required=True, type=int, help="Detected Flooding Stage", location='form')
+    parser.add_argument('CHANGE', required=True, type=str, help="Flooding Stage Change", location='form')
     parser.add_argument('URL', type=str, help="Flooding Image URL", location='form')
 
     body = ''
@@ -34,6 +35,7 @@ class FloodHistoryList(Resource):
         args = self.parser.parse_args()
         cctvID = args['ID']
         stage = args['STAGE']
+        change = args['CHANGE']
         url = args['URL']
 
         try:
@@ -66,41 +68,32 @@ class FloodHistoryList(Resource):
 
 # 침수 이력 저장 함수
 # addFloodHistory('E910054', 1, 'https://9to6bucket.s3.ap-northeast-2.amazonaws.com/s3.png') 
-def addFloodHistory(cctvID, stage, imageURL):
+def addFloodHistory(cctvID, stage, change, imageURL):
     cctv = CCTVStatus.query.get(cctvID)
-    original_stage = cctv.FloodingStage
-    detected_stage = stage
+    cctv.FloodingStage = stage
 
-    # 테이블에 기록된 침수 단계와 모델이 판별한 침수 단계가 다를 경우
-    if original_stage != detected_stage:
-        # 테이블에 기록된 침수 단계 업데이트
-        cctv.FloodingStage = stage
+    # 기상청 초단기실황 api에서 온도, 습도, 1시간 강수량 가져오기
+    temperature, humidity, precipitation = getWeather(cctvID)
 
-        # 기상청 초단기실황 api에서 온도, 습도, 1시간 강수량 가져오기
-        temperature, humidity, precipitation = getWeather(cctvID)
+    date_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-        date_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    cctvName = CCTV.query.get(cctvID).Name
 
-        cctvName = CCTV.query.get(cctvID).Name
+    # 침수 이력 객체 생성
+    flood_history = FloodHistory(
+        Datetime = date_time,
+        CCTVID = cctvID,
+        CCTVName = cctvName,
+        FloodStage = stage,
+        StageChange = change,
+        ImageURL = imageURL,
+        Temperature = temperature,
+        Humidity = humidity,
+        Precipitation = precipitation
+    )
 
-        # 침수 이력 객체 생성
-        flood_history = FloodHistory(
-            Datetime = date_time,
-            CCTVID = cctvID,
-            CCTVName = cctvName,
-            FloodStage = detected_stage,
-            ImageURL = imageURL,
-            Temperature = temperature,
-            Humidity = humidity,
-            Precipitation = precipitation
-        )
+    # 테이블에 객체 저장
+    db.session.add(flood_history)
+    db.session.commit()
 
-        # 테이블에 객체 저장
-        db.session.add(flood_history)
-        db.session.commit()
-
-        return date_time
-
-    # 침수 단계 변화가 없는 경우 False 리턴
-    else:
-        return False
+    return date_time

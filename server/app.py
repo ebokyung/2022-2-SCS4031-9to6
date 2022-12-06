@@ -24,6 +24,7 @@ from views.bookmarkAPI import Bookmarks2
 from views.dataAPI import FloodHistoryData, PostingData, CCTVData
 from views.bookmarkAPI import Bookmarks3
 from views.weatherAPI import getWeather, mapToGrid, getBase
+from views.chatlogAPI import ChatlogList
 #from views.modelAPI import AIModel
 #from tasks import ffmpeg
 import config
@@ -168,6 +169,7 @@ api.add_resource(FloodHistoryData, '/Data/FloodHistory')
 api.add_resource(PostingData, '/Data/Posting')
 api.add_resource(CCTVData, '/Data/CCTV')
 api.add_resource(Bookmarks3, '/Bookmark/<m_id>')
+api.add_resource(ChatlogList, '/Chatlog')
 
 import time
 import atexit
@@ -178,25 +180,51 @@ def is_raining(cctv_id):
         return True
     return False
 
-def get_stage(cctv_id):
+def get_inference(cctv_id):
     response = requests.get("http://15.164.163.248:5000/inference/{}".format(cctv_id))
     info = response.json()
     if info['stage'] == -1:
-        return
-    return info['stage']
+        print(cctv_id, "에서 -1단계 리턴됨")
+        return get_original_stage(cctv_id), ""
+    return info['stage'], info['imageURL']
 
-def get_change(cctv_id):
-    response = requests.get("http://43.201.149.89:5000/cctvs/status/{}".format(cctv_id)).json()
-    # cctv = CCTVStatus.query.get(cctv_id)
-    
-    original_stage = response["FloodingStage"]
-    detected_stage = get_stage(cctv_id)
+def get_original_stage(cctv_id):
+    response = requests.get("http://43.201.149.89:5000/cctvs/status/{}".format(cctv_id))
+    info = response.json()
+    return info['FloodingStage']
+
+def get_change(original_stage, detected_stage):
+
+    if original_stage == 0 and detected_stage > 0:
+        return "침수 발생"
+
+    if original_stage > 0 and detected_stage == 0:
+        return "침수 해제"
+
     if original_stage < detected_stage:
-        return 1, detected_stage
+        return "단계 상향"
+
     if original_stage == detected_stage:
-        return 0, detected_stage
+        return None
+
     if original_stage > detected_stage:
-        return -1, detected_stage
+        return "단계 하향"
+
+def need_chatting():
+    cctvs = requests.get("http://43.201.149.89:5000/cctvs").json()
+    for cctv in cctvs["cctv"]:
+        cctv_id = cctv["ID"]
+        if get_original_stage(cctv_id) != 0:
+            return True
+    return False
+
+def is_chatting_open():
+    chatlogs = Chatlog.query.all()
+    chatlog_schema = ChatlogSchema(many=True)
+    output = chatlog_schema.dump(chatlogs)
+    if len(output) > 1:
+        return True
+    return False
 
 
 def detect_flooding():
@@ -206,7 +234,7 @@ def detect_flooding():
     cnt = 0
     for cctv in cctvs["cctv"]:
         cnt += 1
-        socketio.sleep(10)
+        socketio.sleep(5)
         print(cnt,cctv["ID"],"##검사중##")
         # change, stage = get_change(cctv["ID"])
         # information =  {
@@ -217,34 +245,49 @@ def detect_flooding():
         # output = json.dumps(information)
         # print(output)
         # socketio.emit("inference",output)
+        cctv_id = cctv["ID"]
 
-        if is_raining(cctv["ID"]):
-            socketio.emit("notification",{
-                    'id': 'TEST VER {}'.format(cnt),
-                    'stage': 0,
-                    'change': 0
-                })
-            print(cctv["ID"],"!!비옴!!")
-            change, stage = get_change(cctv["ID"])
-            if change != 0:
-                
+        if not is_raining(cctv_id):
+            original_stage = get_original_stage(cctv_id)
+            detected_stage, image_url = get_inference(cctv_id)
+            change = get_change(original_stage, detected_stage)
 
+            print(detected_stage, change)
 
-                # 침수 단계 up 또는 down - cctv status 저장, flood history 추가
-                information =  {
-                    'id': cctv["ID"],
-                    'stage': stage,
-                    'change': change
-                }
-                output = json.dumps(information)
-                print(output)
-                socketio.emit("notification",output,broadcast=True)
+            if change != None:
+            # addFloodHistory(cctvID, stage, change, imageURL):
+                data = {'ID': cctv_id, 'STAGE': detected_stage, 'CHANGE': change, 'URL': image_url}
+                res = requests.post("http://43.201.149.89:5000/FloodHistories", data=data)
+                # addFloodHistory(cctv_id, detected_stage, change, image_url)
+                socketio.emit("notification", {'change' : '{}'.format(change)})
+
+                if need_chatting():
+                    print("채팅 on")
+                    log = Chatlog(
+                        id = str(datetime.now()),
+                        user = 'admin',
+                        body = 'CCTV {} 침수 경보 발생으로 열린 채팅방입니다.'.format(cctv_id),
+                        time = datetime.now()
+                    )
+                    db.session.add(log)
+                    db.session.commit()
+                    socketio.emit("chatting_on", {'chatting' : 'on'})
+
+                elif not need_chatting() and is_chatting_open():
+                    print("채팅 off")
+                    db.session.query(Chatlog).delete()
+                    db.session.commit()
+                    log = Chatlog(
+                        id = str(datetime.now()),
+                        user = 'admin',
+                        body = '침수 경보 발생 시 채팅방이 열립니다.',
+                        time = datetime.now()
+                    )
+                    db.session.add(log)
+                    db.session.commit()
+                    socketio.emit("chatting_off", {'chatting' : 'off'})
+
         else:
-            socketio.emit("notification",{
-                    'id': 'TEST VER {}'.format(cnt),
-                    'stage': 1,
-                    'change': 0
-                })
             print(cctv["ID"],"--비안옴--")
 
 
@@ -275,4 +318,3 @@ if __name__ == "__main__":
     socketio.start_background_task(forever_thread)
     socketio.run(app, host="0.0.0.0", debug=True, port=5000)
     
-
