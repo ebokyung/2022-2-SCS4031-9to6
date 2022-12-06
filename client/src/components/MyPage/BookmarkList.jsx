@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import styled from 'styled-components';
-import { LogAPI } from '../../axios';
+import { API } from '../../axios';
+import {SocketContext} from '../../../socketio';
 
 const Wrapper = styled.div`
     width: 100%;
@@ -17,7 +18,7 @@ const GridContainer = styled.div`
 `
 const GridRow = styled.div`
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 2fr;
     height: 70px;
     border-bottom: 1px solid #D9D9D9;
 `
@@ -40,12 +41,14 @@ const GridCol = styled.div`
     line-height: 1.5rem;
 `
 
-function BookmarkItem ({item, idx}) {
+function BookmarkItem ({item}) {
     const [stageData, setStageData] = useState(0);
+    const socket = useContext(SocketContext);
+
 
     const getStage = async () => {
         try{
-            const data = await LogAPI.get(`/cctvs/status/${item.cctvID}`);
+            const data = await API.get(`/cctvs/status/${item.cctvId}`);
             // console.log(data.data.stage);
             setStageData(data.data.FloodingStage);
         } catch(e) {
@@ -54,7 +57,11 @@ function BookmarkItem ({item, idx}) {
     }
 
     useEffect(()=>{
-        getStage();
+      getStage()
+      socket.on("notification", (data) => {
+          //cctv get요청 다시
+          getStage();
+      });
     },[])
     
     return (
