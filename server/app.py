@@ -4,7 +4,7 @@ from flask_migrate import Migrate
 from flask_marshmallow import Marshmallow
 from flask_cors import CORS, cross_origin
 from flask_socketio import SocketIO,emit
-from datetime import timedelta
+from datetime import timedelta, datetime
 from sqlalchemy.exc import IntegrityError
 from model import db
 from model.cctv import CCTV, CCTVStatus
@@ -76,7 +76,7 @@ eventlet.monkey_patch()
 def connected():
     """event listener when client connects to the server"""
     # print(request.sid)
-    print("client has connected")
+    print(request.sid, "client has connected")
     # chatlogs = Chatlog.query.all()
     # chatlog_schema = ChatlogSchema(many=True)
     # output = chatlog_schema.dump(chatlogs)
@@ -219,16 +219,15 @@ def need_chatting():
     return False
 
 def is_chatting_open():
-    chatlogs = Chatlog.query.all()
-    chatlog_schema = ChatlogSchema(many=True)
-    output = chatlog_schema.dump(chatlogs)
-    if len(output) > 1:
+    chats = requests.get("http://43.201.149.89:5000/Chatlog").json()
+    if len(chats) > 1:
         return True
     return False
 
 
 def detect_flooding():
     print("in detect_flooding")
+    socketio.emit('test', {'test' : 'on detect_flooding'})
     # cctvs = CCTV.query.all()
     cctvs = requests.get("http://43.201.149.89:5000/cctvs").json()
     cnt = 0
@@ -236,6 +235,7 @@ def detect_flooding():
         cnt += 1
         socketio.sleep(5)
         print(cnt,cctv["ID"],"##검사중##")
+        # socketio.emit('test', {'test' : 'on {}'.format(cctv["ID"])})
         # change, stage = get_change(cctv["ID"])
         # information =  {
         #     'id': cctv["ID"],
@@ -253,39 +253,42 @@ def detect_flooding():
             change = get_change(original_stage, detected_stage)
 
             print(detected_stage, change)
+            # socketio.emit("test", {'test' : '{} / {} / {}'.format(original_stage, detected_stage, change)})
 
             if change != None:
             # addFloodHistory(cctvID, stage, change, imageURL):
                 data = {'ID': cctv_id, 'STAGE': detected_stage, 'CHANGE': change, 'URL': image_url}
                 res = requests.post("http://43.201.149.89:5000/FloodHistories", data=data)
                 # addFloodHistory(cctv_id, detected_stage, change, image_url)
-                socketio.emit("notification", {'change' : '{}'.format(change)})
-
-                if need_chatting():
+                try:
+                    socketio.emit("notification", {'change' : '{}'.format(change)})
+                except:
+                    print("notification emit error")
+                
+                # if need_chatting():
+                if change == "침수 발생":
                     print("채팅 on")
-                    log = Chatlog(
-                        id = str(datetime.now()),
-                        user = 'admin',
-                        body = 'CCTV {} 침수 경보 발생으로 열린 채팅방입니다.'.format(cctv_id),
-                        time = datetime.now()
-                    )
-                    db.session.add(log)
-                    db.session.commit()
-                    socketio.emit("chatting_on", {'chatting' : 'on'})
 
-                elif not need_chatting() and is_chatting_open():
+                    data = {'id': str(datetime.now()), 'user': 'admin', 'body': 'CCTV {} 침수 경보 발생으로 열린 채팅방입니다.'.format(cctv_id), 'time': str(datetime.now())}
+                    res = requests.post("http://43.201.149.89:5000/Chatlog", data=data)
+                    try:
+                        socketio.emit("chatting", {'chatting' : 'on'})
+                    except:
+                        print("chatting_on emit error")
+                    
+
+                elif not need_chatting():
                     print("채팅 off")
-                    db.session.query(Chatlog).delete()
-                    db.session.commit()
-                    log = Chatlog(
-                        id = str(datetime.now()),
-                        user = 'admin',
-                        body = '침수 경보 발생 시 채팅방이 열립니다.',
-                        time = datetime.now()
-                    )
-                    db.session.add(log)
-                    db.session.commit()
-                    socketio.emit("chatting_off", {'chatting' : 'off'})
+                    requests.delete("http://43.201.149.89:5000/Chatlog")
+
+                    data = {'id': str(datetime.now()), 'user': 'admin', 'body': '침수 경보 발생 시 채팅방이 열립니다.', 'time': str(datetime.now())}
+                    res = requests.post("http://43.201.149.89:5000/Chatlog", data=data)
+                    try:
+                        socketio.emit("chatting", {'chatting' : 'off'})
+                    except:
+                        print("chatting_off emit error")
+
+                    
 
         else:
             print(cctv["ID"],"--비안옴--")

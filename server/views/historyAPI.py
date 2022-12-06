@@ -39,11 +39,12 @@ class FloodHistoryList(Resource):
         url = args['URL']
 
         try:
-            date_time = addFloodHistory(cctvID, stage, url)
+            date_time = addFloodHistory(cctvID, stage, change, url)
             query = FloodHistory.query.get((date_time, cctvID))
             schema = FloodHistorySchema()
             self.body = jsonify(schema.dump(query))
             self.status_code = 201
+            print("history added")
 
         except IntegrityError as error:
             db.session.rollback()
