@@ -19,9 +19,12 @@ function Chat() {
 
     useEffect(()=>{
         // console.log(`enter socket: ${socket.id}`);
-        socket.emit("join");
-        socket.on("join", (data) => {
+        socket.emit("enter");
+        socket.on("enter", (data) => {
             setChat(data);
+        });
+        socket.emit('chatting', (data)=> {
+            console.log(data);
         });
         // return () => {
         //     socket.off("join", handleInviteAccepted);
@@ -43,24 +46,26 @@ function Chat() {
     const onValid = (data) => {
         // let now = new Date();
         const result = {
+        //   id : `${socket.id}-${now}`,
           id : chat.length+2,
           user: me,
           body : data.msg,
+        //   time : now,
           time : new Date(),
         }
         socket.emit("message", result);
         setValue('msg','');
     }
-/*
-    const dateTime = (date) => {
-        const nowTime = new Date(date).toLocaleTimeString('en-Us', {
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true,
-        });
-        return nowTime;
-    }
-*/
+
+    // const dateTime = (time) => {
+    //     console.log(time);
+    //     const chatTime = new Date(time).toLocaleTimeString('en-Us', {
+    //         hour: '2-digit',
+    //         minute: '2-digit',
+    //         hour12: true,
+    //     });
+    //     return chatTime;
+    // }
 
    const renderChat = () => {
         console.log(`${socket.id}님의 채팅 렌더링 중`);
@@ -78,6 +83,7 @@ function Chat() {
                         <span  style={{float: 'right'}}>{i.user}</span>
                     </ChatUser>
                     <ChatItemDiv style={{justifyContent:"flex-end"}}>
+                    {/* <ChatTime>{dateTime(`${i.time}`)}</ChatTime> */}
                     <ChatTime>{i.time}</ChatTime>
                     <ChatBodyM>
                         {i.body}
@@ -105,7 +111,7 @@ function Chat() {
     const scrollRef = useRef();
 
     const scrollToBottom = () => {
-      scrollRef.current.scrollIntoView({ behavior: 'smooth', block: 'start'});
+      scrollRef.current.scrollIntoView({ behavior: 'smooth', block: 'end'});
     }
 
     return (
@@ -129,16 +135,6 @@ function Chat() {
                   </ChatInputBtn>
               </ChatInputForm>
           </ChatInputSection>
-          {/* <ChatInputSection>
-              <ChatInputForm>
-                  <ChatInputInput value={message} onChange={handleText} placeholder="전송할 메세지를 입력해주세요"/>
-                  <ChatInputBtn onClick={handleSubmit}>
-                      전송
-                  </ChatInputBtn>
-              </ChatInputForm>
-          </ChatInputSection> */}
-          
-          {/* <div ref={scrollRef} /> */}
 
         </Container>
       </Wrapper>
