@@ -59,7 +59,7 @@ function MyPostings() {
         <Wrapper>
             <PageSubtitle subtitle={'내가 쓴 글'} cnt={myPostings.length}/>
             <Container>
-                <MyPostingsList posts={currentPosts(myPostings)} loading={loading}/>
+                <MyPostingsList posts={currentPosts(myPostings)} loading={loading} onClick={()=>getMyPostingData()}/>
                 <Pagination
                     postsPerPage={postsPerPage}
                     totalPosts={myPostings.length}
