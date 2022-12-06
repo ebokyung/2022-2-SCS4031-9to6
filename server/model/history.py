@@ -21,6 +21,9 @@ class FloodHistory(db.Model):
     # Flood Stage - 침수 단계
     FloodStage = db.Column(db.Integer, nullable=False)
 
+    # Stage Change - 단계 변경 사항
+    StageChange = db.Column(db.String(10), nullable=False)
+
     # Image URL - S3에 저장된 이미지 URL
     ImageURL = db.Column(db.Text)
     

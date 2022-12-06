@@ -181,11 +181,15 @@ def is_raining(cctv_id):
 def get_stage(cctv_id):
     response = requests.get("http://15.164.163.248:5000/inference/{}".format(cctv_id))
     info = response.json()
+    if info['stage'] == -1:
+        return
     return info['stage']
 
 def get_change(cctv_id):
-    cctv = CCTVStatus.query.get(cctv_id)
-    original_stage = cctv.FloodingStage
+    response = requests.get("http://43.201.149.89:5000/cctvs/status/{}".format(cctv_id)).json()
+    # cctv = CCTVStatus.query.get(cctv_id)
+    
+    original_stage = response["FloodingStage"]
     detected_stage = get_stage(cctv_id)
     if original_stage < detected_stage:
         return 1, detected_stage
@@ -204,42 +208,44 @@ def detect_flooding():
         cnt += 1
         socketio.sleep(10)
         print(cnt,cctv["ID"],"##검사중##")
-        print(cnt)
-        change, stage = get_change(cctv["ID"])
-        information =  {
-            'id': cctv["ID"],
-            'stage': stage,
-            'change': change
-        }
-        output = json.dumps(information)
-        print(output)
-        socketio.emit("inference",output)
+        # change, stage = get_change(cctv["ID"])
+        # information =  {
+        #     'id': cctv["ID"],
+        #     'stage': stage,
+        #     'change': change
+        # }
+        # output = json.dumps(information)
+        # print(output)
+        # socketio.emit("inference",output)
 
-        # if is_raining(cctv["ID"]):
-        #     socketio.emit("notification",{
-        #             'id': 'TEST VER {}'.format(cnt),
-        #             'stage': 0,
-        #             'change': 0
-        #         })
-        #     print(cctv["ID"],"!!비옴!!")
-        #     change, stage = get_change(cctv["ID"])
-        #     if change != 0:
-        #         # 침수 단계 up 또는 down
-        #         information =  {
-        #             'id': cctv["ID"],
-        #             'stage': stage,
-        #             'change': change
-        #         }
-        #         output = json.dumps(information)
-        #         print(output)
-        #         socketio.emit("notification",output,broadcast=True)
-        # else:
-        #     socketio.emit("notification",{
-        #             'id': 'TEST VER {}'.format(cnt),
-        #             'stage': 1,
-        #             'change': 0
-        #         })
-        #     print(cctv["ID"],"--비안옴--")
+        if is_raining(cctv["ID"]):
+            socketio.emit("notification",{
+                    'id': 'TEST VER {}'.format(cnt),
+                    'stage': 0,
+                    'change': 0
+                })
+            print(cctv["ID"],"!!비옴!!")
+            change, stage = get_change(cctv["ID"])
+            if change != 0:
+                
+
+
+                # 침수 단계 up 또는 down - cctv status 저장, flood history 추가
+                information =  {
+                    'id': cctv["ID"],
+                    'stage': stage,
+                    'change': change
+                }
+                output = json.dumps(information)
+                print(output)
+                socketio.emit("notification",output,broadcast=True)
+        else:
+            socketio.emit("notification",{
+                    'id': 'TEST VER {}'.format(cnt),
+                    'stage': 1,
+                    'change': 0
+                })
+            print(cctv["ID"],"--비안옴--")
 
 
 def test():
