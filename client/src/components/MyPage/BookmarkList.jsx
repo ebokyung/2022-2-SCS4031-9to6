@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { StageAPI } from '../../axios';
+import { LogAPI } from '../../axios';
 
 const Wrapper = styled.div`
     width: 100%;
@@ -45,7 +45,7 @@ function BookmarkItem ({item, idx}) {
 
     const getStage = async () => {
         try{
-            const data = await StageAPI.get(`/inference/${item.cctvID}`);
+            const data = await LogAPI.get(`/cctvs/status/${item.cctvID}`);
             // console.log(data.data.stage);
             setStageData(data.data.stage);
         } catch(e) {

@@ -162,7 +162,7 @@ const ItemStar = styled(FontAwesomeIcon)`
 
     const getStage = async() => {
       try{
-        const data = await StageAPI.get(`/inference/${props.cctvId}`);
+        const data = await API.get(`/cctvs/status/${props.cctvId}`);
         // console.log(data.data);
         setNowStage(data.data.stage);
       } catch(e) {
