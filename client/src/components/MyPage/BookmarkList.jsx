@@ -1,7 +1,7 @@
 import { useEffect, useState, useContext } from 'react';
 import styled from 'styled-components';
 import { API } from '../../axios';
-import {SocketContext} from '../../../socketio';
+import {SocketContext} from '../../socketio';
 
 const Wrapper = styled.div`
     width: 100%;
