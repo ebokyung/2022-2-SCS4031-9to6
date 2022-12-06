@@ -21,7 +21,7 @@ function Notice() {
         const data = await API.get(`/FloodHistories`);
         // console.log(data.data);
         const filterData = data.data.filter((i)=> ( i.Datetime.split('T')[0] === todayFull) );
-        console.log(filterData);
+        // console.log(filterData);
         setLog(filterData.slice(0).reverse());
       } catch(e) {
         console.log(e)
@@ -40,8 +40,8 @@ function Notice() {
     return (
       <Wrapper>
         <Container>
-            {log && log.map( (item) => (
-              <Box key={`notice-${item.id}`} state={item.StageChange}>
+            {log && log.map( (item, index) => (
+              <Box key={`notice-${index}`} state={item.StageChange}>
                 <Items>
                   <ItemTitle>
                     <div>

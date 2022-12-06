@@ -2,7 +2,7 @@
 import styled from 'styled-components';
 import { useRecoilValue, useRecoilState } from 'recoil';
 import { showSideBar, setBookmark } from '../../../atoms';
-import { useEffect, useState, useRef, useContext } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useForm } from "react-hook-form";
 import markerImage from '../../../imgs/markerSprites.png';
 import reportBtn from '../../../imgs/reportBtn.png';
@@ -14,7 +14,6 @@ import { motion } from "framer-motion";
 import { faXmark, faLocationDot, faUpload } from "@fortawesome/free-solid-svg-icons";
 import { API, LogAPI } from '../../../axios';
 import { EventMarkerContainer_cctv, EventMarkerContainer_shelter, EventMarkerContainer_report } from './markerContainer';
-import {SocketContext} from '../../../socketio';
 
 const Container = styled.section`
     width: 100%;
@@ -159,7 +158,6 @@ const AlertP = styled.p`
 
 function MapSection () {
     const visibility = useRecoilValue(showSideBar);
-    const socket = useContext(SocketContext);
 
     const logCheck = localStorage.getItem("token") || sessionStorage.getItem("token");
     const [bookmarkList, setBookmarkList] = useRecoilState(setBookmark);
@@ -233,11 +231,6 @@ function MapSection () {
         }
         getdata();
         getCctvData();
-        socket.on("notification", (data) => {
-          console.log(data);
-          //cctv get요청 다시
-          getCctvData();
-        });
     },[])
 
     // useEffect(()=>{

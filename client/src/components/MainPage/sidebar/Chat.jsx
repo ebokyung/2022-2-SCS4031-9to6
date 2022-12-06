@@ -14,7 +14,8 @@ function Chat() {
 
     const socket = useContext(SocketContext);
     const [ chat, setChat ] = useState([]);
-    const [ newChat, setNewChat ] = useState(false);
+    // const [ newChat, setNewChat ] = useState(false);
+    const [ inputDisable, IsInputDisable ] = useState(true);
 
     const { register, handleSubmit, setValue } = useForm()
 
@@ -22,55 +23,59 @@ function Chat() {
         // console.log(`enter socket: ${socket.id}`);
         socket.emit("enter");
         socket.on("enter", (data) => {
-            console.log(data);
+            // console.log(data);
             setChat(data);
         });
         socket.on('chatting', (data)=> {
             console.log(data);
             if(data.chatting === 'on'){
                 console.log('버튼 활성화')
+                IsInputDisable(false);
+                // reload();
             } else {
                 console.log('버튼 비활성화')
+                IsInputDisable(true);
+                // reload();
             }
-            // setNewChat(true);
+            socket.on("enter", (data) => {
+                console.log(`다시: ${data.length}`);
+                setChat(data);
+            });
         });
-    },[socket]);
+    },[]);
 
     useEffect(()=>{
-        chat &&
+        chat && 
         socket.on('message', (data)=>{
-            // console.log(`message 렌더링: ${socket.id} ,받은data: ${data.length}, 기존data:${chat.length}`);
-            // setChat([...chat, data]);
             setChat(data);
-            // console.log(data);
         });
         scrollToBottom()
-    },[socket, chat]);
+    },[chat]);
 
-    // useEffect(()=>{
-    //     newChat && 
-    //     socket.on("enter", (data) => {
-    //         console.log(data);
+    // const reload = () => {
+    //     socket.on('enter', (data)=>{
+    //         console.log(data.length);
     //         setChat(data);
-    //         setNewChat(false);
     //     });
-    // },[newChat, chat])
+    //     scrollToBottom()
+    // }
+
 
     // 채팅 전송
     const onValid = (data) => {
-        const now = `${new Date()}`;
         const result = {
-          id : `${socket.id}-${now}`,
+          id : `${socket.id}-${new Date()}`,
           user: me,
           body : data.msg,
-          time : now,
+        //   time : new Date(),
         }
+        console.log(result);
         socket.emit("message", result);
         setValue('msg','');
     }
 
     const dateTime = (time) => {
-        console.log(time);
+        // console.log(time);
         const chatTime = new Date(time).toLocaleTimeString('en-Us', {
             hour: '2-digit',
             minute: '2-digit',
@@ -81,6 +86,7 @@ function Chat() {
 
    const renderChat = () => {
         console.log(`${socket.id}님의 채팅 렌더링 중`);
+        // console.log(chat.length);
       return (
             chat.map((i, index) => (
                 /* 관리자 채팅 */
@@ -95,8 +101,8 @@ function Chat() {
                         <span  style={{float: 'right'}}>{i.user}</span>
                     </ChatUser>
                     <ChatItemDiv style={{justifyContent:"flex-end"}}>
-                    <ChatTime>{dateTime(`${i.time}`)}</ChatTime>
-                    {/* <ChatTime>{i.time}</ChatTime> */}
+                    <ChatTime>{dateTime(i.time)}</ChatTime>
+                    {/* {console.log(`파라미터: ${i.time}`)} */}
                     <ChatBodyM>
                         {i.body}
                     </ChatBodyM>
@@ -113,7 +119,7 @@ function Chat() {
                         {i.body}
                     </ChatBodyY>
                     <ChatTime>{i.time}</ChatTime>
-                    <ChatTime>{dateTime(`${i.time}`)}</ChatTime>
+                    <ChatTime>{dateTime(i.time)}</ChatTime>
                     </ChatItemDiv>
                 </ChatItem>
             )
@@ -142,7 +148,7 @@ function Chat() {
           {/* 채팅 입력창 */}
           <ChatInputSection>
               <ChatInputForm onSubmit={handleSubmit(onValid)}>
-                  <ChatInputInput {...register("msg", {required: true})} placeholder="전송할 메세지를 입력해주세요"/>
+                  <ChatInputInput {...register("msg", {required: true})} placeholder="전송할 메세지를 입력해주세요" disabled={inputDisable}/>
                   <ChatInputBtn>
                       전송
                   </ChatInputBtn>

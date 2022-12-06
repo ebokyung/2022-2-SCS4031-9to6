@@ -1,14 +1,15 @@
 import styled from 'styled-components';
 import style from './map.module.css';
-import { useEffect, useState} from 'react';
+import { useEffect, useState, useContext} from 'react';
 import {MapMarker, CustomOverlayMap, useMap} from 'react-kakao-maps-sdk';
 import ReactPlayer from 'react-player';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar } from "@fortawesome/free-solid-svg-icons";
 // import { useRecoilState } from 'recoil';
 // import { setBookmark } from '../../../atoms';
-import { LogAPI, StageAPI } from '../../../axios';
+import { LogAPI, API } from '../../../axios';
 import markerImage from '../../../imgs/markerSprites.png';
+import {SocketContext} from '../../../socketio';
 
 const ShelterInfowindowBody =styled.div`
   width: 90%;
@@ -130,7 +131,10 @@ const ItemStar = styled(FontAwesomeIcon)`
 
   // cctv 마커 & 인포윈도우
   const user = JSON.parse(sessionStorage.getItem("token"));
+
   export const EventMarkerContainer_cctv = ( props ) => {
+  const socket = useContext(SocketContext);
+
     const map = useMap()
     const [isVisible, setIsVisible] = useState(false)
     const [isMarked, setIsMarked] = useState(props.isMarked);
@@ -172,7 +176,14 @@ const ItemStar = styled(FontAwesomeIcon)`
 
     useEffect(()=>{
       getStage()
+      socket.on("notification", (data) => {
+          console.log(`cctv marker get요청할것 : ${data}`);
+          //cctv get요청 다시
+          getStage();
+      });
     },[])
+
+            
 
     let cctvOrigin = nowStage === 0 ? { x: 110, y: 0 } 
                         : nowStage === 1 ? { x: 184, y: 0 }
