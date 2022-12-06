@@ -44,28 +44,26 @@ function Chat() {
 
     // 채팅 전송
     const onValid = (data) => {
-        // let now = new Date();
+        const now = new Date();
         const result = {
-        //   id : `${socket.id}-${now}`,
-          id : chat.length+2,
+          id : `${socket.id}-${now}`,
           user: me,
           body : data.msg,
-        //   time : now,
-          time : new Date(),
+          time : now,
         }
         socket.emit("message", result);
         setValue('msg','');
     }
 
-    // const dateTime = (time) => {
-    //     console.log(time);
-    //     const chatTime = new Date(time).toLocaleTimeString('en-Us', {
-    //         hour: '2-digit',
-    //         minute: '2-digit',
-    //         hour12: true,
-    //     });
-    //     return chatTime;
-    // }
+    const dateTime = (time) => {
+        console.log(time);
+        const chatTime = new Date(time).toLocaleTimeString('en-Us', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true,
+        });
+        return chatTime;
+    }
 
    const renderChat = () => {
         console.log(`${socket.id}님의 채팅 렌더링 중`);
@@ -83,8 +81,8 @@ function Chat() {
                         <span  style={{float: 'right'}}>{i.user}</span>
                     </ChatUser>
                     <ChatItemDiv style={{justifyContent:"flex-end"}}>
-                    {/* <ChatTime>{dateTime(`${i.time}`)}</ChatTime> */}
-                    <ChatTime>{i.time}</ChatTime>
+                    <ChatTime>{dateTime(`${i.time}`)}</ChatTime>
+                    {/* <ChatTime>{i.time}</ChatTime> */}
                     <ChatBodyM>
                         {i.body}
                     </ChatBodyM>
@@ -101,6 +99,7 @@ function Chat() {
                         {i.body}
                     </ChatBodyY>
                     <ChatTime>{i.time}</ChatTime>
+                    <ChatTime>{dateTime(`${i.time}`)}</ChatTime>
                     </ChatItemDiv>
                 </ChatItem>
             )
