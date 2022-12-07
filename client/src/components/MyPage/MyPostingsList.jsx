@@ -39,14 +39,21 @@ const GridCol = styled.div`
     line-height: 1.5rem;
 `
 
-function MyPostingsList( {posts, loading} ) {
+function MyPostingsList( {posts, loading, onClick} ) {
 
-    const handleModify = () => {
-        console.log('수정하고싶어요.');
-    }
+    // const handleModify = () => {
+    //     console.log('수정하고싶어요.');
+    // }
 
-    const handleDelete = () => {
-        console.log('삭제하고싶어요.');
+    const handleDelete = async (idx) => {
+        // console.log('삭제하고싶어요.');
+        try{
+            await LogAPI.delete(`/Postings/${idx}`);
+            alert('제보를 삭제했습니다.');
+            onClick()
+        } catch(e) {
+            console.log(e)
+        }
     }
 
     return (
@@ -56,7 +63,7 @@ function MyPostingsList( {posts, loading} ) {
                     <GridCol>제보사진</GridCol>
                     <GridCol>위치</GridCol>
                     <GridCol>제보내용</GridCol>
-                    <GridCol>수정 / 삭제</GridCol>
+                    <GridCol>삭제</GridCol>
                 </GridHead>
                 {loading ? (
                 <h1>Loading...</h1>
@@ -66,7 +73,10 @@ function MyPostingsList( {posts, loading} ) {
                         <GridCol> {item.imgURL} </GridCol>
                         <GridCol> {item.Address} </GridCol>
                         <GridCol> {item.Content} </GridCol>
-                        <GridCol> <span onClick={()=>handleModify()}>수정</span> <span onClick={()=>handleDelete()}>삭제</span> </GridCol>
+                        <GridCol> 
+                            {/* <span onClick={()=>handleModify()}>수정</span>  */}
+                            <span onClick={()=>handleDelete(item.Index)}>삭제</span> 
+                        </GridCol>
                     </GridRow>
                 ))
                 )}

@@ -158,6 +158,7 @@ const AlertP = styled.p`
 
 function MapSection () {
     const visibility = useRecoilValue(showSideBar);
+
     const logCheck = localStorage.getItem("token") || sessionStorage.getItem("token");
     const [bookmarkList, setBookmarkList] = useRecoilState(setBookmark);
     const bookmarkArray = useRecoilValue(setBookmark);
@@ -192,17 +193,24 @@ function MapSection () {
     // 마커 데이터 GET
     const getdata = async() => {
       try{
-          const cctvData = await API.get("/cctvs");
           const shelterData = await API.get("/Shelters");
           const reportData = await API.get("/Postings");
-          setCctvPositions(cctvData.data.cctv);
           setShelterPositions(shelterData.data);
           setReportPositions(reportData.data);
-          // console.log(cctvData.data.cctv)
           // console.log(shelterData.data)
           // console.log(reportData.data)
       }catch(error){
           console.log(error)
+      }
+    }
+
+    const getCctvData = async() => {
+      try {
+          const cctvData = await API.get("/cctvs");
+          setCctvPositions(cctvData.data.cctv);
+          // console.log(cctvData.data.cctv)
+      } catch(e) {
+        console.log(e)
       }
     }
 
@@ -222,6 +230,7 @@ function MapSection () {
           getBookmarkData(); 
         }
         getdata();
+        getCctvData();
     },[])
 
     // useEffect(()=>{
@@ -230,14 +239,20 @@ function MapSection () {
 
     // 제보 등록 POST & 전체 제보 데이터 GET
     const onValid = async(data) => {
-      const result = {
-          "MemberID": logCheck ? user.ID : null,
+      const result = logCheck ? {
+          "MemberID": user.ID,
           "Address": data.Address,
           "Latitude": reportCoord.lat,
           "Longitude": reportCoord.lng,
           "ImageFile": data.ImageFile,
           "Content": data.Content,
-      }
+      } : {
+        "Address": data.Address,
+        "Latitude": reportCoord.lat,
+        "Longitude": reportCoord.lng,
+        "ImageFile": data.ImageFile,
+        "Content": data.Content,
+    }
       console.log(result);
       try{
           await API.post("/Postings", result, {

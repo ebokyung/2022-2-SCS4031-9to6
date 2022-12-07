@@ -77,18 +77,7 @@ def connected():
     """event listener when client connects to the server"""
     # print(request.sid)
     print(request.sid, "client has connected")
-    # chatlogs = Chatlog.query.all()
-    # chatlog_schema = ChatlogSchema(many=True)
-    # output = chatlog_schema.dump(chatlogs)
-    # print(output)
-    emit("connect",f"id: {request.sid} is connected")
-    # emit("connect", output)
-
-@socketio.on("enter")
-def handle_enter():
-    """event listener when client connects to the server"""
-    # print(request.sid)
-    # print("client has connected")
+    # detect_flooding()
     # chatlogs = Chatlog.query.all()
     # chatlog_schema = ChatlogSchema(many=True)
     # output = chatlog_schema.dump(chatlogs)
@@ -101,60 +90,13 @@ def handle_join_chat():
     """event listener when client connects to the server"""
     # print(request.sid)
     # print("client has connected")
-    chatlogs = Chatlog.query.all()
+    chatlogs = Chatlog.query.order_by(Chatlog.time).all()
     chatlog_schema = ChatlogSchema(many=True)
     output = chatlog_schema.dump(chatlogs)
     print("entered")
     # print(output)
     # emit("connect",{"data":f"id: {request.sid} is connected"})
     emit("enter", output)
-
-#     # print(output)
-#     # emit("connect",{"data":f"id: {request.sid} is connected"})
-#     emit("join", output)
-
-# @socketio.on("join-notice")
-# def handle_join_notice():
-#     """event listener when client connects to the server"""
-#     # logs = [
-#     #     {
-#     #         id: 0,
-#     #         state: 'down',
-#     #         step: 0,
-#     #         time: '18:30',
-#     #         addr: '서울시 강남구 1085-1'
-#     #     },
-#     #     {
-#     #         id: 1,
-#     #         state: 'down',
-#     #         step: 0,
-#     #         time: '18:31',
-#     #         addr: '서울시 강남구 1085-1'
-#     #     },
-#     #     {
-#     #         id: 2,
-#     #         state: 'up',
-#     #         step: 3,
-#     #         time: '18:32',
-#     #         addr: '서울시 강남구 1085-1'
-#     #     },
-#     # ]
-#     # print(logs)
-#     emit("join-notice", f"server sends logs to client")
-
-# @socketio.on("notification")
-# def handle_join_notice():
-#     """event listener when client connects to the server"""
-#     # output = {
-#     #     {
-#     #         id: 2,
-#     #         state: 'up',
-#     #         step: 3,
-#     #         time: '18:32',
-#     #         addr: '서울시 강남구 1085-1'
-#     #     },
-#     # }
-#     emit("notification",f"server sends 'new' logs to client", broadcast=True)
 
 @socketio.on('message')
 def handle_message(data):
@@ -168,7 +110,7 @@ def handle_message(data):
     )
     db.session.add(log)
     db.session.commit()
-    chatlogs = Chatlog.query.all()
+    chatlogs = Chatlog.query.order_by(Chatlog.time).all()
     chatlog_schema = ChatlogSchema(many=True)
     output = chatlog_schema.dump(chatlogs)
     # output = chatlog_schema.dump(log)
@@ -248,7 +190,7 @@ def get_inference(cctv_id):
     return info['stage'], info['imageURL']
 
 def get_original_stage(cctv_id):
-    response = requests.get("http://43.201.149.89:5000/cctvs/status/{}".format(cctv_id))
+    response = requests.get("http://3.38.178.241:5000/cctvs/status/{}".format(cctv_id))
     info = response.json()
     return info['FloodingStage']
 
@@ -270,7 +212,7 @@ def get_change(original_stage, detected_stage):
         return "단계 하향"
 
 def need_chatting():
-    cctvs = requests.get("http://43.201.149.89:5000/cctvs").json()
+    cctvs = requests.get("http://3.38.178.241:5000/cctvs").json()
     for cctv in cctvs["cctv"]:
         cctv_id = cctv["ID"]
         if get_original_stage(cctv_id) != 0:
@@ -278,7 +220,7 @@ def need_chatting():
     return False
 
 def is_chatting_open():
-    chats = requests.get("http://43.201.149.89:5000/Chatlog").json()
+    chats = requests.get("http://3.38.178.241:5000/Chatlog").json()
     if len(chats) > 1:
         return True
     return False
@@ -288,7 +230,7 @@ def detect_flooding():
     print("in detect_flooding")
     socketio.emit('test', {'test' : 'on detect_flooding'})
     # cctvs = CCTV.query.all()
-    cctvs = requests.get("http://43.201.149.89:5000/cctvs").json()
+    cctvs = requests.get("http://3.38.178.241:5000/cctvs").json()
     cnt = 0
     for cctv in cctvs["cctv"]:
         cnt += 1
@@ -317,7 +259,7 @@ def detect_flooding():
             if change != None:
             # addFloodHistory(cctvID, stage, change, imageURL):
                 data = {'ID': cctv_id, 'STAGE': detected_stage, 'CHANGE': change, 'URL': image_url}
-                res = requests.post("http://43.201.149.89:5000/FloodHistories", data=data)
+                res = requests.post("http://3.38.178.241:5000/FloodHistories", data=data)
                 # addFloodHistory(cctv_id, detected_stage, change, image_url)
                 try:
                     socketio.emit("notification", {'change' : '{}'.format(change)})
@@ -329,7 +271,7 @@ def detect_flooding():
                     print("채팅 on")
 
                     data = {'id': str(datetime.now()), 'user': 'admin', 'body': 'CCTV {} 침수 경보 발생으로 열린 채팅방입니다.'.format(cctv_id), 'time': str(datetime.now())}
-                    res = requests.post("http://43.201.149.89:5000/Chatlog", data=data)
+                    res = requests.post("http://3.38.178.241:5000/Chatlog", data=data)
                     try:
                         socketio.emit("chatting", {'chatting' : 'on'})
                     except:
@@ -338,10 +280,10 @@ def detect_flooding():
 
                 elif not need_chatting():
                     print("채팅 off")
-                    requests.delete("http://43.201.149.89:5000/Chatlog")
+                    requests.delete("http://3.38.178.241:5000/Chatlog")
 
                     data = {'id': str(datetime.now()), 'user': 'admin', 'body': '침수 경보 발생 시 채팅방이 열립니다.', 'time': str(datetime.now())}
-                    res = requests.post("http://43.201.149.89:5000/Chatlog", data=data)
+                    res = requests.post("http://3.38.178.241:5000/Chatlog", data=data)
                     try:
                         socketio.emit("chatting", {'chatting' : 'off'})
                     except:
