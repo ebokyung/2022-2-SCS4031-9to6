@@ -70,7 +70,7 @@ function MyPostingsList( {posts, loading, onClick} ) {
                 ) : (
                 posts.map((item, idx) => (
                     <GridRow key={`mypostings-list-${idx}`}>
-                        <GridCol> {item.imgURL} </GridCol>
+                        <GridCol> <img width= '60px' height= '40px' src={item.ImageURL} /> </GridCol>
                         <GridCol> {item.Address} </GridCol>
                         <GridCol> {item.Content} </GridCol>
                         <GridCol> 

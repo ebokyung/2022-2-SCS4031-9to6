@@ -17,7 +17,6 @@ import { EventMarkerContainer_cctv, EventMarkerContainer_shelter, EventMarkerCon
 
 const Container = styled.section`
     width: 100%;
-    max-width: ${props => props.theme.maxWidth};
     min-height: ${props => props.theme.minHeight};
     padding-left: 460px;
     transition: all .5s;

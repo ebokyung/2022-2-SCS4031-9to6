@@ -93,10 +93,10 @@ def handle_join_chat():
     chatlogs = Chatlog.query.order_by(Chatlog.time).all()
     chatlog_schema = ChatlogSchema(many=True)
     output = chatlog_schema.dump(chatlogs)
+    chatting = 'on' if need_chatting() else 'off'
     print("entered")
-    # print(output)
-    # emit("connect",{"data":f"id: {request.sid} is connected"})
-    emit("enter", output)
+    enter_info = {'output' : output, 'chatting' : chatting}
+    emit("enter", enter_info)
 
 @socketio.on('message')
 def handle_message(data):
@@ -106,7 +106,7 @@ def handle_message(data):
         id = data['id'],
         user = data['user'],
         body = data['body'],
-        time = data['time']
+        time = str(datetime.now())
     )
     db.session.add(log)
     db.session.commit()
@@ -183,7 +183,10 @@ def is_raining(cctv_id):
 
 def get_inference(cctv_id):
     response = requests.get("http://15.164.163.248:5000/inference/{}".format(cctv_id))
-    info = response.json()
+    try: ## 예외처리
+        info = response.json()
+    except:
+        info = {'stage' : -1}
     if info['stage'] == -1:
         print(cctv_id, "에서 -1단계 리턴됨")
         return get_original_stage(cctv_id), ""
@@ -247,6 +250,7 @@ def detect_flooding():
         # print(output)
         # socketio.emit("inference",output)
         cctv_id = cctv["ID"]
+        cctv_name = cctv["Name"]
 
         if not is_raining(cctv_id):
             original_stage = get_original_stage(cctv_id)
@@ -270,7 +274,7 @@ def detect_flooding():
                 if change == "침수 발생":
                     print("채팅 on")
 
-                    data = {'id': str(datetime.now()), 'user': 'admin', 'body': 'CCTV {} 침수 경보 발생으로 열린 채팅방입니다.'.format(cctv_id), 'time': str(datetime.now())}
+                    data = {'id': str(datetime.now()), 'user': 'admin', 'body': '{} CCTV({}) 침수 경보가 발생하였습니다.'.format(cctv_name, cctv_id), 'time': str(datetime.now())}
                     res = requests.post("http://3.38.178.241:5000/Chatlog", data=data)
                     try:
                         socketio.emit("chatting", {'chatting' : 'on'})
@@ -289,8 +293,7 @@ def detect_flooding():
                     except:
                         print("chatting_off emit error")
 
-                    
-
+    
         else:
             print(cctv["ID"],"--비안옴--")
 
@@ -313,7 +316,7 @@ def forever_thread():
     # send messages to all clients every one second
     while True:
         # test()
-        socketio.sleep(40)
+        socketio.sleep(20)
         detect_flooding()
         
 

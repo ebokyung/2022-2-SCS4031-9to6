@@ -53,8 +53,9 @@ function Chat() {
     useEffect(()=>{
         socket.emit("enter");
         socket.on('enter', (data)=>{
-            console.log(`다시: ${data.length}`);
-            setChat(data);
+            // console.log(`다시: ${data.length}`);
+            data.chatting === 'on'? IsInputDisable(false) : IsInputDisable(true)
+            setChat(data.output);
         });
         scrollToBottom()
     },[socket, newChat]);
@@ -100,7 +101,6 @@ function Chat() {
                     </ChatUser>
                     <ChatItemDiv style={{justifyContent:"flex-end"}}>
                     <ChatTime>{dateTime(i.time)}</ChatTime>
-                    {/* {console.log(`파라미터: ${i.time}`)} */}
                     <ChatBodyM>
                         {i.body}
                     </ChatBodyM>
@@ -116,7 +116,6 @@ function Chat() {
                     <ChatBodyY>
                         {i.body}
                     </ChatBodyY>
-                    <ChatTime>{i.time}</ChatTime>
                     <ChatTime>{dateTime(i.time)}</ChatTime>
                     </ChatItemDiv>
                 </ChatItem>

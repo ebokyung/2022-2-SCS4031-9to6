@@ -246,7 +246,7 @@ const ItemStar = styled(FontAwesomeIcon)`
                 <div className={style.desc}>
                   <span>
                     <a
-                      href="https://www.kakaocorp.com/main"
+                      href="https://www.safekorea.go.kr/idsiSFK/neo/sfk/cs/contents/prevent/prevent21.html?menuSeq=126"
                       target="_blank"
                       className={style.link}
                       rel="noreferrer"
