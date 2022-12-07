@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { API } from '../../axios';
 import PageSubtitle from '../PageSubtitle';
-import Pagination from '../Pagination';
+import Pagination2 from '../Pagination2';
 import FloodHistoryList from './FloodHistoryList';
 
 const Wrapper = styled.div`
@@ -96,7 +96,7 @@ function FloodHistories() {
                 ))}
                 </Search>
                 <FloodHistoryList posts={currentPosts(histories)} loading={loading}/>
-                <Pagination
+                <Pagination2
                     postsPerPage={postsPerPage}
                     totalPosts={histories.length}
                     paginate={setCurrentPage}

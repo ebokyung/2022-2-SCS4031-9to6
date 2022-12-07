@@ -140,7 +140,7 @@ function Navbar () {
                     onClick={() => navigate("/")}>침수지도</Item>
                 <Item drop={true} isActive={safetyMatch !== null || shelterMatch !== null}>안전정보
                     <DropDown>
-                            <DropDownItem isActive={safetyMatch !== null} onClick={() => navigate("/safety")}>행동지침</DropDownItem>
+                            <DropDownItem isActive={safetyMatch !== null} onClick={() => window.open('https://www.safekorea.go.kr/idsiSFK/neo/sfk/cs/contents/prevent/prevent21.html?menuSeq=126', '_blank')}>행동지침</DropDownItem>
                             <DropDownItem isActive={shelterMatch !== null} onClick={() => navigate("/safety/shelter")}>대피소</DropDownItem>
                     </DropDown>
                 </Item>

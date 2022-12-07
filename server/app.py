@@ -77,24 +77,13 @@ def connected():
     """event listener when client connects to the server"""
     # print(request.sid)
     print(request.sid, "client has connected")
+    # detect_flooding()
     # chatlogs = Chatlog.query.all()
     # chatlog_schema = ChatlogSchema(many=True)
     # output = chatlog_schema.dump(chatlogs)
     # print(output)
     emit("connect",f"id: {request.sid} is connected")
     # emit("connect", output)
-
-# @socketio.on("enter")
-# def handle_enter():
-#     """event listener when client connects to the server"""
-#     # print(request.sid)
-#     # print("client has connected")
-#     # chatlogs = Chatlog.query.all()
-#     # chatlog_schema = ChatlogSchema(many=True)
-#     # output = chatlog_schema.dump(chatlogs)
-#     # print(output)
-#     emit("connect",f"id: {request.sid} is connected")
-#     # emit("connect", output)
 
 @socketio.on("enter")
 def handle_join_chat():
@@ -104,57 +93,10 @@ def handle_join_chat():
     chatlogs = Chatlog.query.order_by(Chatlog.time).all()
     chatlog_schema = ChatlogSchema(many=True)
     output = chatlog_schema.dump(chatlogs)
+    chatting = 'on' if need_chatting() else 'off'
     print("entered")
-    # print(output)
-    # emit("connect",{"data":f"id: {request.sid} is connected"})
-    emit("enter", output)
-
-#     # print(output)
-#     # emit("connect",{"data":f"id: {request.sid} is connected"})
-#     emit("join", output)
-
-# @socketio.on("join-notice")
-# def handle_join_notice():
-#     """event listener when client connects to the server"""
-#     # logs = [
-#     #     {
-#     #         id: 0,
-#     #         state: 'down',
-#     #         step: 0,
-#     #         time: '18:30',
-#     #         addr: '서울시 강남구 1085-1'
-#     #     },
-#     #     {
-#     #         id: 1,
-#     #         state: 'down',
-#     #         step: 0,
-#     #         time: '18:31',
-#     #         addr: '서울시 강남구 1085-1'
-#     #     },
-#     #     {
-#     #         id: 2,
-#     #         state: 'up',
-#     #         step: 3,
-#     #         time: '18:32',
-#     #         addr: '서울시 강남구 1085-1'
-#     #     },
-#     # ]
-#     # print(logs)
-#     emit("join-notice", f"server sends logs to client")
-
-# @socketio.on("notification")
-# def handle_join_notice():
-#     """event listener when client connects to the server"""
-#     # output = {
-#     #     {
-#     #         id: 2,
-#     #         state: 'up',
-#     #         step: 3,
-#     #         time: '18:32',
-#     #         addr: '서울시 강남구 1085-1'
-#     #     },
-#     # }
-#     emit("notification",f"server sends 'new' logs to client", broadcast=True)
+    enter_info = {'output' : output, 'chatting' : chatting}
+    emit("enter", enter_info)
 
 @socketio.on('message')
 def handle_message(data):
@@ -164,7 +106,7 @@ def handle_message(data):
         id = data['id'],
         user = data['user'],
         body = data['body'],
-        time = data['time']
+        time = str(datetime.now())
     )
     db.session.add(log)
     db.session.commit()
@@ -241,7 +183,10 @@ def is_raining(cctv_id):
 
 def get_inference(cctv_id):
     response = requests.get("http://15.164.163.248:5000/inference/{}".format(cctv_id))
-    info = response.json()
+    try: ## 예외처리
+        info = response.json()
+    except:
+        info = {'stage' : -1}
     if info['stage'] == -1:
         print(cctv_id, "에서 -1단계 리턴됨")
         return get_original_stage(cctv_id), ""
@@ -329,7 +274,7 @@ def detect_flooding():
                 if change == "침수 발생":
                     print("채팅 on")
 
-                    data = {'id': str(datetime.now()), 'user': 'admin', 'body': '{} CCTV({}) 침수 경보가 발생하였습니다.'.format(cctv_id, cctv_name), 'time': str(datetime.now())}
+                    data = {'id': str(datetime.now()), 'user': 'admin', 'body': '{} CCTV({}) 침수 경보가 발생하였습니다.'.format(cctv_name, cctv_id), 'time': str(datetime.now())}
                     res = requests.post("http://3.38.178.241:5000/Chatlog", data=data)
                     try:
                         socketio.emit("chatting", {'chatting' : 'on'})
@@ -348,8 +293,7 @@ def detect_flooding():
                     except:
                         print("chatting_off emit error")
 
-                    
-
+    
         else:
             print(cctv["ID"],"--비안옴--")
 
