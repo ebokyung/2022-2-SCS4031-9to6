@@ -65,7 +65,7 @@ function ReportTopRegion() {
 
     return (
         <Wrapper>
-            <PageSubtitle subtitle={'침수가 많은 CCTV장소'}/>
+            <PageSubtitle subtitle={'제보가 많은 CCTV장소'}/>
             <Container>
                 {topRegion.map((i, index)=> (
                     <Box key={`rank-${index}`}>

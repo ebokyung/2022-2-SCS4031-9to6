@@ -36,7 +36,7 @@ function MyPage () {
             <PageHeader title={'마이페이지'}/>
             <Bookmark />
             <MyPostings />
-            <PageSubtitle subtitle={'비밀번호 수정'} />
+            {/* <PageSubtitle subtitle={'비밀번호 수정'} /> */}
             <PageSubtitle subtitle={'로그아웃'} click={logOut} />
         </Container>
     </Wrapper>)
