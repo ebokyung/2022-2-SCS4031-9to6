@@ -46,7 +46,7 @@ function Notice() {
                   <ItemTitle>
                     <div>
                       <span>{item.StageChange}</span>
-                      <span>  {`(${item.FloodStage}단계)`}</span>
+                      <span>  {item.FloodStage === 9 ? '( - 단계 )' : `( ${item.FloodStage} 단계 )`}</span>
                     </div>
                     <div>{item.Datetime.split('T')[1]}</div>
                   </ItemTitle>

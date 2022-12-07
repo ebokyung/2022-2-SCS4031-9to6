@@ -186,7 +186,7 @@ const ItemStar = styled(FontAwesomeIcon)`
             
 
     let cctvOrigin = nowStage === 0 ? { x: 110, y: 0 } 
-                        : nowStage === 1 ? { x: 184, y: 0 }
+                        : nowStage === 1 || nowStage === 9 ? { x: 184, y: 0 }
                         : nowStage === 2 ? { x: 248, y: 0 }
                         : nowStage === 3 ? { x: 318, y: 0 } : { x: 110, y: 0 }
 
@@ -225,7 +225,7 @@ const ItemStar = styled(FontAwesomeIcon)`
                   }
                 </span>
                 <span>{props.name}</span>
-                <span className={style.class}>( 침수 {nowStage}단계 )</span>
+                <span className={style.class}>{nowStage === 9 ? '( 침수 감지 )' : `( 침수 ${nowStage} 단계 )`}</span>
                 <div
                   className={style.close}
                   onClick={() => setIsVisible(false)}
