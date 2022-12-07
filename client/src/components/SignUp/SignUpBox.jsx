@@ -113,7 +113,7 @@ function SignUpBox () {
     const onChangeId = async (e) => {
         setInputId(e.target.value);
         try{
-            await API.get('/MembersCheck/${inputId}', inputId).then(
+            await API.get(`/MembersCheck/${inputId}`, inputId).then(
                 response => {
                     console.log(response);
                 }
