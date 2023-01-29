@@ -86,16 +86,16 @@ function LogBox () {
         navigate("/")
 
 
-        // try{
-        //     await API.post('/Login', result).then(
-        //         response => {
-        //             console.log(response);
-        //         }
-        //     )
-        //     navigate("/")
-        // } catch(error){
-        //     console.log(error)
-        // }
+    //     try{
+    //         await API.post('/Login', result).then(
+    //             response => {
+    //                 console.log(response);
+    //             }
+    //         )
+    //         navigate("/")
+    //     } catch(error){
+    //         console.log(error)
+    //     }
     };
     
     return(

@@ -14,6 +14,9 @@ import { motion } from "framer-motion";
 import { faXmark, faLocationDot, faUpload } from "@fortawesome/free-solid-svg-icons";
 import { API, LogAPI } from '../../../axios';
 import { EventMarkerContainer_cctv, EventMarkerContainer_shelter, EventMarkerContainer_report } from './markerContainer';
+import dummy_1 from '../../../dummyData/dummy_1.mp4';
+import dummy_2 from '../../../dummyData/dummy_2.mp4';
+import dummy_3 from '../../../dummyData/dummy_3.mp4';
 
 const Container = styled.section`
     width: 100%;
@@ -458,7 +461,9 @@ function MapSection () {
               name={position.Name}
               cctvId={position.ID}
               center={position.Center}
-              url={position.URL}
+              url={ position.Name === '논현역' ? dummy_1 : (
+                    position.Name === '압구정R' ? dummy_2 : (
+                    position.Name === '한남대교남단2' ? dummy_3 : position.URL) ) }
               // markerImage={{
               //   src: markerImage,
               //   size: {width: 64, height: 64},
